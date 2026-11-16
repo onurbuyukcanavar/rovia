@@ -106,7 +106,7 @@ export function toRoute(trip: VTrip): ComputedRoute {
       if (isFerry) ferry = true;
       if (m.toll && !isFerry) roadToll = true;
       // Ara durağa varış/çıkış manevraları tekrar etmesin (yalnızca ilk çıkış ve son varış)
-      const kind = stepKind(m.type);
+      const kind = isFerry ? "ferry" : stepKind(m.type);
       if ((kind === "depart" && li > 0) || (kind === "arrive" && li < legs.length - 1)) continue;
       if (steps.length >= MAX_STEPS) continue;
       const at = pts[Math.min(Math.max(0, m.begin_shape_index), pts.length - 1)];
