@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { isGoogleAuthEnabled } from "@/lib/auth-providers";
 import { createClient } from "@/lib/supabase/server";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { getSiteUrl } from "@/lib/site-url";
@@ -62,6 +63,9 @@ export async function signInWithGoogle(fd: FormData): Promise<void> {
   const supabase = await createClient();
   const siteUrl = await getSiteUrl();
   const next = safeNextPath(str(fd, "next"));
+  if ((await isGoogleAuthEnabled()) === false) {
+    redirect(`/giris?error=google_disabled${next !== "/panel" ? `&next=${encodeURIComponent(next)}` : ""}`);
+  }
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isGoogleAuthEnabled } from "@/lib/auth-providers";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/dal";
 import { getSiteUrl } from "@/lib/site-url";
@@ -33,6 +34,7 @@ export async function updateProfile(_prev: FormState, fd: FormData): Promise<For
 /** Oturumdaki hesaba Google kimliği bağlar (Supabase'de "Manual linking" açık olmalı). */
 export async function linkGoogle(): Promise<void> {
   await requireUser();
+  if ((await isGoogleAuthEnabled()) === false) redirect("/ayarlar?error=google_disabled");
   const supabase = await createClient();
   const siteUrl = await getSiteUrl();
   const { data, error } = await supabase.auth.linkIdentity({

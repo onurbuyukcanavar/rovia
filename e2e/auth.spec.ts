@@ -33,6 +33,25 @@ test.describe("kimlik doğrulama (oturumsuz)", () => {
 test.describe("kimlik doğrulama (gerçek Supabase)", () => {
   test.skip(!hasCredentials, "E2E_* secret'ları tanımlı değil");
 
+  test("Google ile devam et: sağlayıcı kapalıysa anlaşılır mesaj, açıksa Google'a yönlendirme", async ({ page, request }) => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const settings = await request.get(`${url}/auth/v1/settings`, { headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY! } });
+    const googleEnabled = (await settings.json()).external?.google === true;
+
+    for (const path of ["/giris", "/kayit"]) {
+      await page.goto(path);
+      if (googleEnabled) {
+        const nav = page.waitForURL(/accounts\.google\.com/, { waitUntil: "commit" });
+        await page.getByRole("button", { name: "Google ile devam et" }).click();
+        await nav;
+      } else {
+        await page.getByRole("button", { name: "Google ile devam et" }).click();
+        await expect(page).toHaveURL(/\/giris\?error=google_disabled/);
+        await expect(page.getByRole("alert").filter({ hasText: "Google ile giriş şu anda kullanılamıyor" })).toBeVisible();
+      }
+    }
+  });
+
   test("hatalı şifre anlaşılır Türkçe hata verir", async ({ page }) => {
     await page.goto("/giris");
     await page.getByLabel("E-posta").fill(users.alice.email);

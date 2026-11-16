@@ -37,7 +37,9 @@ async function LoginBody({ searchParams }: Props) {
   const next = rawNext ? safeNextPath(rawNext) : undefined;
   return (
     <>
-      {error && <Alert tone="error" className="mb-5">{t.auth.callbackError}</Alert>}
+      {error && (
+        <Alert tone="error" className="mb-5">{error === "google_disabled" ? t.auth.googleDisabled : t.auth.callbackError}</Alert>
+      )}
       <GoogleButton next={next} />
       <OrDivider />
       <LoginForm next={next} />

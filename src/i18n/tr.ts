@@ -82,6 +82,7 @@ export const tr = {
     emailUnavailable: "Şu anda bu adrese doğrulama e-postası gönderilemiyor. Lütfen daha sonra tekrar dene veya Google ile devam et.",
     rateLimited: "Çok fazla deneme yapıldı. Lütfen biraz bekleyip tekrar dene.",
     callbackError: "Giriş tamamlanamadı. Bağlantının süresi dolmuş olabilir; lütfen tekrar dene.",
+    googleDisabled: "Google ile giriş şu anda kullanılamıyor. E-posta ve şifreyle giriş yapabilir ya da hesap oluşturabilirsin.",
     legal: "Devam ederek Kullanım Şartları'nı ve Gizlilik Politikası'nı kabul etmiş olursun.",
     locationNote: "ROVIA konumunu yalnızca sen kayıt başlattığında ve açıkça izin verdiğinde kullanır.",
   },

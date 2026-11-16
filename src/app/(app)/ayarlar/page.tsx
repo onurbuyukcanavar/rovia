@@ -21,6 +21,7 @@ type Props = { searchParams: Promise<Record<string, string | undefined>> };
 const MESSAGES: Record<string, { tone: "error" | "success"; text: string }> = {
   "linked:google": { tone: "success", text: "Google hesabın bağlandı." },
   "unlinked:google": { tone: "success", text: "Google bağlantısı kaldırıldı." },
+  "error:google_disabled": { tone: "error", text: t.auth.googleDisabled },
   "error:link": { tone: "error", text: "Google hesabı bağlanamadı. Bu Google hesabı başka bir ROVIA hesabına bağlı olabilir." },
   "error:unlink": { tone: "error", text: "Google bağlantısı kaldırılamadı. Lütfen tekrar dene." },
   "error:last_identity": { tone: "error", text: t.settings.lastMethodWarning },
