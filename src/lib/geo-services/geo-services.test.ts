@@ -359,3 +359,12 @@ describe("rota önerilerinin dağıtılması", () => {
     expect([suggestionRadius(20_000), suggestionRadius(120_000), suggestionRadius(800_000)]).toEqual([1_500, 3_000, 5_000]);
   });
 });
+
+describe("çok uzun rota", () => {
+  it("yüz binlerce noktalı rota yığını taşırmadan birleştirilir", async () => {
+    const { toRoute } = await import("./valhalla");
+    const pts = Array.from({ length: 300_000 }, (_, i) => ({ lat: 40 + i * 1e-5, lng: 27 + i * 1e-5 }));
+    const r = toRoute({ legs: [{ shape: encodePolyline(pts, 6), summary: { length: 15718, time: 871680 }, maneuvers: [] }], summary: { length: 15718, time: 871680 } });
+    expect(r.distanceMeters).toBe(15_718_000);
+  });
+});

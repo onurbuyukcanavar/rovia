@@ -122,7 +122,8 @@ export function assembleRoute(userLegs: VLeg[][]): ComputedRoute {
     // Parçalar uç uca eklenir; ortak noktayı tekrar ekleme
     const prev = path[path.length - 1];
     const same = prev && pts[0] && Math.abs(prev.lat - pts[0].lat) < 1e-6 && Math.abs(prev.lng - pts[0].lng) < 1e-6;
-    path.push(...pts.slice(same ? 1 : 0));
+    // Döngüyle ekle: çok uzun rotalarda (yüz binlerce nokta) push(...dizi) yığını taşırır
+    for (let i = same ? 1 : 0; i < pts.length; i++) path.push(pts[i]);
 
     for (const m of leg.maneuvers ?? []) {
       const isFerry = Boolean(m.ferry) || m.type === 28;
@@ -289,7 +290,7 @@ export async function viaBridges(req: Requester, points: LatLng[], options: Rout
       const prevPts = decodePolyline(prevLegs[prevLegs.length - 1].shape, 6);
       const nextPts = decodePolyline(strictLegs[k][0].shape, 6);
       const [bridgeTrip] = await req([prevPts[prevPts.length - 1], nextPts[0]], false, options, "relaxed");
-      userLegs[crossingLegs[k - 1]].push(...(bridgeTrip.legs ?? []));
+      for (const l of bridgeTrip.legs ?? []) userLegs[crossingLegs[k - 1]].push(l);
     }
     strictLegs[k].forEach((leg, j) => userLegs[strictPieces[k].legOf[j]].push(leg));
   }
