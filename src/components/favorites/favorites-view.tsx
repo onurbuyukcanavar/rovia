@@ -53,7 +53,7 @@ export function FavoritesView({ styleUrl, places }: { styleUrl: string; places: 
   }
 
   return (
-    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[28rem_1fr]">
+    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[28rem_1fr] relative lg:overflow-hidden">
       <MapFrame expanded={mapView.expanded} onExpand={mapView.expand} onCollapse={mapView.collapse}
         className="order-1 h-[45%] shrink-0 lg:order-2 lg:h-full">
         <FavoritesMap styleUrl={styleUrl} places={filtered} selectedId={selectedId}

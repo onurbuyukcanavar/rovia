@@ -117,6 +117,12 @@ test.describe("Rota seçenekleri, feribot ve öneriler", () => {
 
     // Ücretli yollardan kaçın → feribotlu rota seçili, rozet ve yol tarifinde feribot
     await page.getByTestId("route-options").getByText("Ücretli yollardan kaçın").click();
+    // Seçeneğe tıklamak sayfayı kaydırmamalı ve altında boşluk bırakmamalı (masaüstünde sayfa ekrana tam oturur)
+    for (const label of ["Otoyollardan kaçın", "Feribotlardan kaçın", "Otoyollardan kaçın", "Feribotlardan kaçın"]) {
+      await page.getByTestId("route-options").getByText(label).click();
+      const m = await page.evaluate(() => ({ y: window.scrollY, extra: document.documentElement.scrollHeight - window.innerHeight }));
+      expect(m, label).toEqual({ y: 0, extra: 0 });
+    }
     await expect(page.getByTestId("route-summary")).toBeVisible();
     await expect(page.getByText("Feribot içerir")).toBeVisible({ timeout: 30_000 });
     const directions = page.getByTestId("route-directions");

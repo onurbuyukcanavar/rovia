@@ -166,7 +166,7 @@ export function ListTypeToggle({ value, onChange }: { value: ListType; onChange:
       <div className="grid grid-cols-2 gap-2">
         {(["favorite", "want_to_go"] as const).map((v) => (
           <label key={v} className={cn(
-            "flex h-11 cursor-pointer items-center justify-center rounded-xl border px-3 text-center text-sm font-semibold has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-amber-400/25",
+            "relative flex h-11 cursor-pointer items-center justify-center rounded-xl border px-3 text-center text-sm font-semibold has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-amber-400/25",
             value === v ? "border-ink-900 bg-ink-900 text-paper" : "border-sand-300 bg-white text-ink-900",
           )}>
             <input type="radio" className="sr-only" name={name} value={v} checked={value === v} onChange={() => onChange(v)} />

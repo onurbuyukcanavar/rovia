@@ -285,7 +285,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
   }, [selectedRoute, state]);
 
   return (
-    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
+    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr] relative lg:overflow-hidden">
       <MapFrame expanded={mapView.expanded} onExpand={mapView.expand} onCollapse={mapView.collapse}
         className="order-1 h-[45%] shrink-0 lg:order-2 lg:h-full" testId="map">
         <MapView

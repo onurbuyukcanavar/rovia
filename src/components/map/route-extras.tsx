@@ -27,7 +27,7 @@ export function RouteOptionsBar({ options, onChange }: { options: RouteOptions; 
           const on = options[k];
           return (
             <label key={k} className={cn(
-              "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition select-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-amber-400/25",
+              "relative inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition select-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-amber-400/25",
               on ? "border-ink-900 bg-ink-900 text-paper" : "border-sand-300 bg-paper-50 text-ink-900 hover:border-stone-500",
             )}>
               <input type="checkbox" className="sr-only" checked={on} onChange={(e) => onChange({ [k]: e.target.checked })} />

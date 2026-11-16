@@ -94,3 +94,10 @@ body {
     font-size: 16px;
   }
 }
+
+/* Görsel olarak gizli (sr-only) form alanları etiketlerinin içinde kalsın. Konumlandırılmış bir üst öğe yoksa
+ * mutlak konumlu gizli alan sayfaya göre yerleşir, sayfayı uzatır ve odaklanınca tarayıcı tüm sayfayı kaydırır
+ * (rota seçeneklerine tıklayınca planlayıcının yukarı kayıp altında boşluk kalması). */
+label:has(> input.sr-only) {
+  position: relative;
+}

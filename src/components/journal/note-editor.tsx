@@ -88,7 +88,7 @@ export function NoteEditor({ userId, tripId: fixedTrip, trips, media, note = nul
           <legend className="sr-only">{t.journal.kinds.note}</legend>
           {NOTE_KINDS.map((k) => (
             <label key={k} className={cn(
-              "cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-amber-400/25",
+              "relative cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-amber-400/25",
               kind === k ? "border-ink-900 bg-ink-900 text-paper" : "border-sand-300 bg-paper-50 text-ink-900",
             )}>
               <input type="radio" name={`kind-${note?.id ?? "new"}`} value={k} checked={kind === k} onChange={() => setKind(k)} className="sr-only" />
