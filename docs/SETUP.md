@@ -74,6 +74,11 @@ Ardından önüne HTTPS ters vekil koyup `VALHALLA_URL` güncellenir.
 2. GitHub → Settings → Secrets → Actions → `SUPABASE_DB_URL` olarak ekle.
 3. GitHub → Actions → **OSM verisi içe aktarma (Türkiye)** → *Run workflow*. Sonra her ayın 3'ünde kendiliğinden çalışır.
 
-## 6. Vercel
+## 6. Vercel (yayın: https://rovia-seven.vercel.app)
 
-Ortam değişkenleri: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL` (üretim alan adı); isteğe bağlı olarak §5'teki harita değişkenleri.
+- Proje: `rovia` (ekip `onurbuyukcanavar`), GitHub `onurbuyukcanavar/rovia` deposuna bağlı. `main` dalına her gönderim üretime, diğer dallar önizlemeye yayınlanır.
+- Fonksiyon bölgesi `fra1` (Supabase eu-central-1'e yakın), Node 22.
+- Erişim koruması (Vercel Authentication) yalnızca önizlemelerde; üretim adresi herkese açık (uygulama kendi girişini ister).
+- Ortam değişkenleri: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (tüm ortamlar), `NEXT_PUBLIC_SITE_URL=https://rovia-seven.vercel.app` (yalnızca üretim; önizlemede `VERCEL_URL` kullanılır). İsteğe bağlı: §5'teki harita değişkenleri. Gizli anahtar yok.
+- **Supabase'de bir kez:** Authentication → URL Configuration → Site URL `https://rovia-seven.vercel.app`, Redirect URLs'e `https://rovia-seven.vercel.app/**` ve `https://*-onurbuyukcanavars-projects.vercel.app/**` eklenir. Google OAuth istemcisinin "Authorized JavaScript origins" listesine `https://rovia-seven.vercel.app` eklenir.
+- GPS kaydı (Kayıt Modu) tarayıcıda yalnızca HTTPS'te çalışır: telefonda test için üretim adresi kullanılır.
