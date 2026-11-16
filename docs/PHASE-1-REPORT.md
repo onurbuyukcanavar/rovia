@@ -1,6 +1,6 @@
 # PHASE 1 Raporu — Proje altyapısı
 
-**Tarih:** 16 Kasım 2026 · **Durum:** Kod tamamlandı. Uçtan uca (tarayıcı → Supabase) testler kısmen bekliyor (bkz. "Açık kalanlar").
+**Tarih:** 16 Kasım 2026 · **Durum:** ✅ Tamamlandı ve gerçek ortamda doğrulandı. CI: GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Yapılanlar
 
@@ -40,9 +40,20 @@
 | Supabase Performance Advisor | ℹ️ Yalnızca "kullanılmamış indeks" (boş veritabanında beklenen durum) |
 | Ekran kontrolü (masaüstü 1440 px, mobil 390 px) | ✅ Tanıtım, giriş, kayıt ve 404 sayfaları. `/panel` oturumsuzken `/giris?next=/panel` adresine yönleniyor |
 
-## Açık kalanlar (dürüst durum)
+| **E2E (Playwright, GitHub Actions, gerçek Supabase)** | ✅ **13/13**: koruma yönlendirmesi, açık yönlendirme engeli, form doğrulamaları, hatalı şifre mesajı, giriş → panel → çıkış, `next` dönüşü, profil güncelleme ve kalıcılığı, kullanıcı adı benzersizliği, bağlı hesaplar, PostgREST üzerinden RLS (okuma, güncelleme, silme, sahte ekleme), anonim erişim engeli, mobil alt menü |
+| **Uzak Supabase'de SQL ile RLS** | ✅ **13/13** (işlem sonunda geri alındı, iz bırakmadı) |
+| Sunucu log denetimi | ✅ E2E sırasında sıfır hata. CI, hata görürse başarısız olacak şekilde ayarlandı |
 
-1. **Tarayıcıdan gerçek kayıt/giriş testi yapılamadı.** Geliştirme ortamımın ağ politikası `supabase.co` adresine bağlantıyı engelliyor. Uygulama kodu derleniyor ve Supabase'e karşı yapılandırıldı, ancak "kayıt ol → e-posta doğrula → giriş → panel" akışını bu ortamdan çalıştıramadım. Çözüm: Vercel önizleme dağıtımı ya da senin bilgisayarında `npm run dev`.
-2. **RLS'nin uzak veritabanında SQL ile testi** onay bekliyor. Supabase bağlayıcısı betikteki `DELETE` için onay istedi ve soru zaman aşımına uğradı. Betik bir işlem içinde çalışıp sonunda tamamen geri alınıyor; veri bırakmıyor.
-3. **Google ile giriş** için Google Cloud OAuth istemcisi gerekiyor (docs/SETUP.md §4).
-4. **Hesap silme ve veri dışa aktarma** düğmeleri PHASE 10'a planlı. Ayarlar sayfasında bu açıkça yazıyor. Şema tarafı (cascade silme) hazır ve test edildi.
+## Testler sırasında bulunup düzeltilen hatalar
+1. Sunucudan istemci bileşenine ikon fonksiyonu geçiriliyordu. Yalnızca Supabase yapılandırılmışken ortaya çıkıyordu (`app-shell`).
+2. Partial Prefetching'in oturumlu ön-render'ında Supabase Auth `Date.now()` ve `fetch` hatası üretiyordu. `io()` ile ertelendi.
+3. Playwright masaüstü projesi mobil testi de çalıştırıyordu.
+4. Tanıtım ve giriş sayfasındaki rota çizimi metinle çakışıyordu. Türkçe yerelde "FIND" kelimesi "FİND" diye büyütülüyordu.
+
+## Bilinçli olarak sonraya bırakılanlar
+- **Gerçek e-posta ile yeni kayıt testi:** Supabase'in yerleşik e-posta servisi yalnızca organizasyon üyelerine gönderim yapıyor. Özel SMTP kurulunca E2E'ye eklenecek. Arayüz bu durumu (`email_address_not_authorized`) Türkçe mesajla karşılıyor.
+- **Google ile giriş:** Google Cloud OAuth istemcisi gerekiyor (docs/SETUP.md §4). Kod hazır.
+- **Hesap silme ve veri dışa aktarma düğmeleri:** PHASE 10. Şema tarafı (cascade silme) hazır ve test edildi.
+
+## Test hesapları
+`e2e-alice@rovia.test` ve `e2e-bob@rovia.test`: e-postası doğrulanmış, boş test hesapları. Şifreleri GitHub Secrets'ta (`E2E_ALICE_PASSWORD`, `E2E_BOB_PASSWORD`).
