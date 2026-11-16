@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, BookOpenText, Clock3, Gauge, Heart, Images, MapPin, Route } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -27,13 +28,13 @@ export function QuickActions() {
           const available = item.phase <= CURRENT_PHASE;
           return (
             <li key={key} className={cn(i === 0 && "col-span-2 sm:col-span-1")}>
-              {/* Faz 1'de hiçbir hızlı işlem modülü henüz etkin değil; tıklanamaz ve açıkça etiketli */}
-              <div
-                aria-disabled={!available}
+              {/* Etkin modüller bağlantıdır; henüz etkin olmayanlar tıklanamaz ve açıkça "Yakında" etiketlidir */}
+              <QuickActionShell
+                href={available ? item.href : null}
                 className={cn(
                   "flex h-full min-h-28 flex-col justify-between rounded-2xl border p-4",
                   accent ? "border-ink-900 bg-ink-900 text-paper" : "border-sand-200 bg-paper-50",
-                  !available && "opacity-75",
+                  available ? "transition hover:-translate-y-0.5 hover:shadow-md" : "opacity-75",
                 )}
               >
                 <div className="flex items-start justify-between">
@@ -47,13 +48,18 @@ export function QuickActions() {
                   )}
                 </div>
                 <span className="mt-4 text-[0.95rem] leading-snug font-bold">{label}</span>
-              </div>
+              </QuickActionShell>
             </li>
           );
         })}
       </ul>
     </section>
   );
+}
+
+function QuickActionShell({ href, className, children }: { href: string | null; className: string; children: ReactNode }) {
+  if (href) return <Link href={href} className={className}>{children}</Link>;
+  return <div aria-disabled className={className}>{children}</div>;
 }
 
 export function StatsGrid({ stats }: { stats: DashboardStats }) {
@@ -110,7 +116,11 @@ export function TripList({ trips, empty }: { trips: TripSummary[]; empty: string
             <Route className="size-5" aria-hidden />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold">{trip.title}</p>
+            {trip.status === "planned" ? (
+              <Link href={`/planla/${trip.id}`} className="block truncate font-semibold hover:underline">{trip.title}</Link>
+            ) : (
+              <p className="truncate font-semibold">{trip.title}</p>
+            )}
             <p className="flex items-center gap-1 truncate text-sm text-stone-600">
               {trip.origin && trip.destination ? (
                 <>{trip.origin} <ArrowRight className="size-3" aria-hidden /> {trip.destination}</>

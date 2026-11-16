@@ -1,17 +1,17 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { isAvailable, navItem } from "@/config/navigation";
+import { NAV_ITEMS, isAvailable, navItem } from "@/config/navigation";
 import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
 
-const isActive = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);
+/** pathname null: ön işleme sırasında (dinamik rotalarda adres henüz bilinmiyor) hiçbir öğe etkin gösterilmez. */
+const isActive = (pathname: string | null, href: string) => !!pathname && (pathname === href || pathname.startsWith(`${href}/`));
 
 /** Masaüstü sol menü öğesi. Henüz etkin olmayan fazlar tıklanamaz ve açıkça etiketlenir. */
 // Not: Sunucu bileşenlerinden yalnızca anahtar gelir; ikon bileşenleri (fonksiyon) istemci sınırını geçemez.
-export function SidebarLink({ itemKey }: { itemKey: string }) {
+function SidebarLink({ itemKey, pathname }: { itemKey: string; pathname: string | null }) {
   const item = navItem(itemKey);
-  const pathname = usePathname();
   const Icon = item.icon;
   const available = isAvailable(item);
 
@@ -47,10 +47,9 @@ export function SidebarLink({ itemKey }: { itemKey: string }) {
   );
 }
 
-export function MobileTab({ itemKey, emphasized = false }: { itemKey: string; emphasized?: boolean }) {
+function MobileTab({ itemKey, pathname, emphasized = false }: { itemKey: string; pathname: string | null; emphasized?: boolean }) {
   const item = navItem(itemKey);
   const label = item.shortLabel ?? item.label;
-  const pathname = usePathname();
   const Icon = item.icon;
   const available = isAvailable(item);
   const active = available && isActive(pathname, item.href);
@@ -91,8 +90,7 @@ export function MobileTab({ itemKey, emphasized = false }: { itemKey: string; em
   );
 }
 
-export function MoreTab() {
-  const pathname = usePathname();
+function MoreTab({ pathname }: { pathname: string | null }) {
   const active = isActive(pathname, "/diger") || isActive(pathname, "/ayarlar");
   return (
     <Link href="/diger" aria-current={active ? "page" : undefined}
@@ -105,4 +103,31 @@ export function MoreTab() {
       </span>
     </Link>
   );
+}
+
+// Not: Adres yalnızca çalışma anında bilinir. Menüler kabukta <Suspense> içinde canlı sürümle
+// render edilir; ön işleme (özellikle dinamik rotalar) sırasında etkin öğesiz sürüm gösterilir.
+
+export function SidebarNav({ pathname }: { pathname: string | null }) {
+  return NAV_ITEMS.map((item) => <SidebarLink key={item.key} itemKey={item.key} pathname={pathname} />);
+}
+
+export function SidebarNavLive() {
+  return <SidebarNav pathname={usePathname()} />;
+}
+
+export function MobileNav({ pathname }: { pathname: string | null }) {
+  return (
+    <>
+      <MobileTab itemKey="overview" pathname={pathname} />
+      <MobileTab itemKey="map" pathname={pathname} />
+      <MobileTab itemKey="record" pathname={pathname} emphasized />
+      <MobileTab itemKey="trips" pathname={pathname} />
+      <MoreTab pathname={pathname} />
+    </>
+  );
+}
+
+export function MobileNavLive() {
+  return <MobileNav pathname={usePathname()} />;
 }

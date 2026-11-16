@@ -1,0 +1,49 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { MapExplorer } from "@/components/map/map-explorer";
+import { Alert } from "@/components/ui/alert";
+import { ButtonLink } from "@/components/ui/button";
+import { requireUser } from "@/lib/dal";
+import { mapStyleUrl } from "@/lib/env";
+import { getTripForEdit } from "@/lib/queries/trips";
+import { t } from "@/i18n";
+
+export const metadata: Metadata = { title: t.trips.editTitle };
+
+export default function EditTripPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<PlannerSkeleton />}>
+      <TripPlanner params={params} />
+    </Suspense>
+  );
+}
+
+async function TripPlanner({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  await requireUser();
+  const trip = await getTripForEdit(id);
+  if (!trip) notFound();
+
+  if (trip.status !== "planned") {
+    return (
+      <div className="mx-auto max-w-xl space-y-4 px-4 py-10">
+        <h1 className="text-2xl font-extrabold tracking-tight">{trip.title}</h1>
+        <Alert>{t.trips.errors.notEditable}</Alert>
+        <ButtonLink href="/yolculuklar" variant="secondary">{t.trips.backToList}</ButtonLink>
+      </div>
+    );
+  }
+  return <MapExplorer key={trip.id} styleUrl={mapStyleUrl()} mode="plan" trip={trip} />;
+}
+
+function PlannerSkeleton() {
+  return (
+    <div className="flex h-[calc(100dvh-3.5rem-4.5rem)] flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]" aria-label={t.common.loading}>
+      <div className="order-1 h-[42%] animate-pulse bg-sand-100 lg:order-2 lg:h-full" />
+      <div className="order-2 space-y-4 p-5 lg:order-1">
+        {[0, 1, 2, 3].map((i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-sand-100" />)}
+      </div>
+    </div>
+  );
+}

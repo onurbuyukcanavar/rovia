@@ -9,8 +9,10 @@ export function formatDistance(meters: number): string {
 
 export function formatDuration(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return "0 dk";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.round((seconds % 3600) / 60);
+  // Önce dakikaya yuvarla; aksi hâlde 3599 sn "60 dk", 7199 sn "1 sa 60 dk" olur
+  const totalMinutes = Math.max(1, Math.round(seconds / 60));
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
   if (h === 0) return `${m} dk`;
   return m === 0 ? `${nf.format(h)} sa` : `${nf.format(h)} sa ${m} dk`;
 }

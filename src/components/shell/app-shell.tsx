@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
-import { NAV_ITEMS } from "@/config/navigation";
-import { MobileTab, MoreTab, SidebarLink } from "./nav-link";
+import { MobileNav, MobileNavLive, SidebarNav, SidebarNavLive } from "./nav-link";
 import { MobileHeaderAvatar, SidebarUser } from "./user-menu";
 import { t } from "@/i18n";
 
@@ -15,7 +14,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Logo inverted />
         </Link>
         <nav aria-label="Ana menü" className="mt-8 flex-1 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.map((item) => <SidebarLink key={item.key} itemKey={item.key} />)}
+          <Suspense fallback={<SidebarNav pathname={null} />}>
+            <SidebarNavLive />
+          </Suspense>
         </nav>
         <Suspense fallback={<div className="h-14 animate-pulse rounded-2xl bg-paper/5" />}>
           <SidebarUser />
@@ -35,11 +36,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Mobil: alt navigasyon */}
       <nav aria-label="Alt menü"
         className="fixed inset-x-0 bottom-0 z-30 flex border-t border-sand-200 bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
-        <MobileTab itemKey="overview" />
-        <MobileTab itemKey="map" />
-        <MobileTab itemKey="record" emphasized />
-        <MobileTab itemKey="trips" />
-        <MoreTab />
+        <Suspense fallback={<MobileNav pathname={null} />}>
+          <MobileNavLive />
+        </Suspense>
       </nav>
       <span className="sr-only">{t.brand.slogan}</span>
     </div>

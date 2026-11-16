@@ -845,12 +845,15 @@ export type Database = {
           route_polyline: string | null;
           route_distance_m: number | null;
           route_duration_s: number | null;
-          routing_preference: string;
           route_computed_at: string | null;
           vehicle_id: string | null;
           visibility: string;
           created_at: string;
           updated_at: string;
+          version: number;
+          route_legs: Json | null;
+          route_has_toll: boolean;
+          route_has_ferry: boolean;
         };
         Insert: {
           id?: string;
@@ -864,12 +867,15 @@ export type Database = {
           route_polyline?: string | null;
           route_distance_m?: number | null;
           route_duration_s?: number | null;
-          routing_preference?: string;
           route_computed_at?: string | null;
           vehicle_id?: string | null;
           visibility?: string;
           created_at?: string;
           updated_at?: string;
+          version?: number;
+          route_legs?: Json | null;
+          route_has_toll?: boolean;
+          route_has_ferry?: boolean;
         };
         Update: {
           id?: string;
@@ -883,12 +889,15 @@ export type Database = {
           route_polyline?: string | null;
           route_distance_m?: number | null;
           route_duration_s?: number | null;
-          routing_preference?: string;
           route_computed_at?: string | null;
           vehicle_id?: string | null;
           visibility?: string;
           created_at?: string;
           updated_at?: string;
+          version?: number;
+          route_legs?: Json | null;
+          route_has_toll?: boolean;
+          route_has_ferry?: boolean;
         };
         Relationships: [];
       };
@@ -976,6 +985,7 @@ export type Database = {
       consume_rate_limit: { Args: { p_bucket: string }; Returns: boolean };
       dashboard_stats: { Args: Record<string, never>; Returns: Json };
       reverse_geocode: { Args: { p_lat: number; p_lng: number }; Returns: { label: string | null; settlement: string | null; district: string | null; province: string | null }[] };
+      save_trip_plan: { Args: { p_trip_id: string; p_expected_version: number; p_title: string; p_description: string; p_planned_date: string; p_stops: Json; p_route: Json }; Returns: { trip_id: string | null; trip_version: number | null }[] };
       search_features_along_route: { Args: { p_route: Json; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null; along_m: number | null }[] };
       search_features_nearby: { Args: { p_lat: number; p_lng: number; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null }[] };
       search_places: { Args: { p_query: string; p_lat?: number; p_lng?: number; p_limit?: number }; Returns: { osm_ref: string | null; kind: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; lat: number | null; lng: number | null; score: number | null }[] };

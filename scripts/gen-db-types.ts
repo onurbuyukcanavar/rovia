@@ -32,7 +32,7 @@ async function main() {
   const fns = await db.query<{ name: string; result: string; args: string }>(`
     select p.proname as name, pg_get_function_result(p.oid) as result, pg_get_function_arguments(p.oid) as args
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname = 'public' and p.proname not in ('set_updated_at','enforce_parent_owner','handle_new_user')
+    where n.nspname = 'public' and p.prorettype <> 'pg_catalog.trigger'::regtype -- tetikleyici fonksiyonları API değildir
     order by 1`);
 
   const ts = (t: string) => PG_TO_TS[t] ?? "unknown";

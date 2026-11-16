@@ -18,7 +18,14 @@ test.describe("mobil", () => {
     for (const label of ["Genel Bakış", "Haritayı Keşfet", "Yolculuk Planla", "Seyahatnamelerim", "ROVIA Garage", "Ayarlar"]) {
       await expect(menu.getByText(label, { exact: true })).toBeVisible();
     }
-    // PHASE 2 ile Haritayı Keşfet etkin: bağlantı olarak görünmeli
+    // Etkin fazların bölümleri bağlantı olarak görünür (PHASE 2: harita, PHASE 3: planlama ve yolculuklar)
     await expect(menu.getByRole("link", { name: "Haritayı Keşfet" })).toBeVisible();
+    await expect(menu.getByRole("link", { name: "Yolculuk Planla" })).toBeVisible();
+
+    // Alt menüdeki "Yolculuklar" sekmesi yolculuk listesini açar
+    await nav.getByRole("link", { name: "Yolculuklar" }).click();
+    await expect(page).toHaveURL(/\/yolculuklar$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Yolculuklarım" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Yeni yolculuk planla" })).toBeVisible();
   });
 });

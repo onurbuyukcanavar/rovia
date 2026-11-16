@@ -75,6 +75,26 @@ describe("yakın çevre, isimle arama ve ters geocoding", () => {
     expect(g.rows[0]?.name).toBe("Göreme");
   });
 
+  it("tam ad eşleşmesi daha önemli ilgi noktalarının önüne geçer; geniş sorguda şehir aday dışında kalmaz", async () => {
+    // Göreme yerleşiminden daha "önemli" bir müze ve 'ankara' ile başlayan 450 gürültü kaydı (uzak, alışveriş)
+    await db.exec(`
+      insert into public.geo_features (osm_ref, kind, category, subtype, name, name_search, admin, geog, importance) values
+        ('n8', 'poi', 'museum', 'museum', 'Göreme Açık Hava Müzesi', 'goreme acik hava muzesi', 'Nevşehir', 'SRID=4326;POINT(34.845 38.64)', 0.9);
+      insert into public.geo_features (osm_ref, kind, category, subtype, name, name_search, geog, importance)
+        select 'n' || (1000 + i), 'poi', 'shopping', 'supermarket', 'Ankara Market ' || i, 'ankara market ' || i, 'SRID=4326;POINT(40 40)', 0.6
+        from generate_series(1, 450) i;`);
+    try {
+      const g = await asAuthed((tx) => tx.query<{ name: string }>("select * from public.search_places('goreme', null, null, 5)"));
+      expect(g.rows.map((x) => x.name).slice(0, 2)).toEqual(["Göreme", "Göreme Açık Hava Müzesi"]);
+      const a = await asAuthed((tx) => tx.query<{ name: string }>("select * from public.search_places('ankara', null, null, 5)"));
+      expect(a.rows[0].name).toBe("Ankara");
+      const short = await asAuthed((tx) => tx.query<{ name: string }>("select * from public.search_places('an', null, null, 5)"));
+      expect(short.rows[0].name).toBe("Ankara");
+    } finally {
+      await db.exec("delete from public.geo_features where osm_ref = 'n8' or (osm_ref like 'n1___' and category = 'shopping')");
+    }
+  });
+
   it("ters geocoding: yerleşim, ilçe, il", async () => {
     const r = await asAuthed((tx) => tx.query<{ label: string; province: string }>("select * from public.reverse_geocode(38.645, 34.83)"));
     expect(r.rows[0]).toMatchObject({ label: "Göreme, Nevşehir Merkez, Nevşehir", province: "Nevşehir" });

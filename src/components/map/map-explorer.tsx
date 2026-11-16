@@ -2,12 +2,22 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import MapView, { NavigationControl, ScaleControl, type MapLayerMouseEvent } from "react-map-gl/maplibre";
 import { useCallback, useMemo, useReducer, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, BookmarkPlus } from "lucide-react";
 import { decodePolyline, type LatLng } from "@/lib/geo";
 import { mapsApi } from "@/lib/maps/client";
 import {
   explorerReducer, initialExplorerState, newKey, routeRequest, routeRequestKey, type SlotRef,
 } from "@/lib/maps/explorer-state";
-import type { FoundPlace, RouteResult, Stop } from "@/lib/maps/types";
+import type { FoundPlace, RouteOption, RouteResult, Stop } from "@/lib/maps/types";
+import {
+  closestRouteIndex, orderedStops, planFingerprint, shortPlaceName, stateFromStops, type TripFields,
+} from "@/lib/maps/trip-draft";
+import { useLeaveGuard } from "@/lib/maps/use-leave-guard";
+import { saveTripPlan } from "@/lib/actions/trips";
+import type { EditableTrip } from "@/lib/queries/trips";
+import { Button } from "@/components/ui/button";
+import { SaveBar, TripDetailsForm } from "@/components/trips/trip-plan-panel";
 import { useGeolocation } from "@/lib/maps/use-geolocation";
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import { Alert } from "@/components/ui/alert";
@@ -20,12 +30,23 @@ import { t } from "@/i18n";
 
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
 
+const OSM_REF = /^[nwr][0-9]{1,19}$/;
+const EMPTY_FIELDS: TripFields = { title: "", description: "", plannedDate: "" };
+
+type Props = {
+  styleUrl: string;
+  /** explore: Haritayı Keşfet (isteğe bağlı kaydetme) · plan: Yolculuk Planla */
+  mode?: "explore" | "plan";
+  /** Düzenlenen kayıtlı yolculuk; yeni planda null */
+  trip?: EditableTrip | null;
+};
+
 /**
- * Haritayı Keşfet — tamamen açık kaynak altyapı:
+ * Haritayı Keşfet ve Yolculuk Planla — tamamen açık kaynak altyapı:
  * MapLibre GL JS (çizim) + OpenFreeMap (karolar, OSM) + Valhalla (rota) + ROVIA PostGIS (arama).
  */
-export function MapExplorer({ styleUrl }: { styleUrl: string }) {
-  const [state, dispatch] = useReducer(explorerReducer, undefined, initialExplorerState);
+export function MapExplorer({ styleUrl, mode = "explore", trip = null }: Props) {
+  const [state, dispatch] = useReducer(explorerReducer, trip, (tr) => (tr ? stateFromStops(tr.stops) : initialExplorerState()));
   const [picking, setPicking] = useState<SlotRef | null>(null);
   const [mapCenter, setMapCenter] = useState<LatLng>(TURKEY_CENTER);
   const [category, setCategory] = useState<string | null>(null);
@@ -33,6 +54,8 @@ export function MapExplorer({ styleUrl }: { styleUrl: string }) {
   const [selectedPlace, setSelectedPlace] = useState<FoundPlace | null>(null);
   const [mapError, setMapError] = useState(false);
   const geo = useGeolocation();
+  /** Kullanıcı alternatif rotayı kendisi seçti mi (kaydedilmemiş değişiklik sayılır) */
+  const [routeTouched, setRouteTouched] = useState(false);
 
   // ---------------------------------------------------------------- Rota hesaplama
   // reqKey isteğin tüm girdilerini kapsar; aynı duraklar için tekrar istek atılmaz
@@ -42,8 +65,24 @@ export function MapExplorer({ styleUrl }: { styleUrl: string }) {
     (signal) => mapsApi.route(routeRequest(state)!, { alternatives: true }, signal),
     { delayMs: 500, keepPrevious: true },
   );
-  const routeResult = route.error ? null : (route.data ?? null);
-  const selectedRoute = routeResult?.routes[state.selectedRoute] ?? routeResult?.routes[0] ?? null;
+
+  // Kayıtlı plan açıldığında: kullanıcının seçtiği alternatif korunur (kayıtlı mesafeye en yakın rota)
+  const [initialKey] = useState(() => routeRequestKey(state));
+  const [preferSaved, setPreferSaved] = useState(!!trip?.route);
+  if (preferSaved && !route.loading) {
+    setPreferSaved(false);
+    if (route.data && reqKey === initialKey) {
+      const index = closestRouteIndex(route.data.routes, trip!.route!.distanceMeters);
+      if (index !== state.selectedRoute) dispatch({ type: "selectRoute", index });
+    }
+  }
+  // Rota servisine ulaşılamazsa ve duraklar değişmediyse kayıtlı rota gösterilir
+  const usingSavedRoute = !!trip?.route && !!route.error && reqKey === initialKey;
+  const routeResult: RouteResult | null = usingSavedRoute
+    ? { routes: [trip!.route!], alternativesSupported: false }
+    : route.error ? null : (route.data ?? null);
+  const selectedIndex = routeResult && state.selectedRoute < routeResult.routes.length ? state.selectedRoute : 0;
+  const selectedRoute = routeResult?.routes[selectedIndex] ?? null;
   const polyline = selectedRoute?.encodedPolyline ?? null;
 
   // ---------------------------------------------------------------- Kategori araması
@@ -85,6 +124,7 @@ export function MapExplorer({ styleUrl }: { styleUrl: string }) {
       const alt = e.features?.find((f) => f.layer.id === ALT_ROUTE_LAYER);
       if (alt && !picking) {
         dispatch({ type: "selectRoute", index: Number(alt.properties?.index ?? 0) });
+        setRouteTouched(true);
         return;
       }
       if (!picking) return;
@@ -104,13 +144,102 @@ export function MapExplorer({ styleUrl }: { styleUrl: string }) {
     dispatch({ type: "set", slot: { kind: "origin" }, stop: { ...stop, label: `${t.maps.myLocation} · ${stop.label}` } });
   }, [geo, stopFromPoint]);
 
+  // ---------------------------------------------------------------- Yolculuk planı (kaydetme)
+  const [planOpen, setPlanOpen] = useState(mode === "plan" || !!trip);
+  const [fields, setFields] = useState<TripFields>(() =>
+    trip ? { title: trip.title, description: trip.description ?? "", plannedDate: trip.plannedDate ?? "" } : EMPTY_FIELDS,
+  );
+  const [saved, setSaved] = useState(() => ({
+    id: trip?.id ?? null,
+    version: trip?.version ?? null,
+    fingerprint: planFingerprint(fields, state, null),
+    savedAt: null as string | null,
+  }));
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const fingerprint = planFingerprint(fields, state, null);
+  const dirty = planOpen && (fingerprint !== saved.fingerprint || routeTouched);
+  useLeaveGuard(dirty, t.trips.leaveWarning);
+
+  const stops = orderedStops(state);
+  const titleSuggestion =
+    state.origin.stop && state.destination.stop
+      ? t.trips.suggestedName(shortPlaceName(state.origin.stop.label), shortPlaceName(state.destination.stop.label))
+      : null;
+  const routePending = route.loading && !usingSavedRoute;
+  const blockedReason = !state.origin.stop || !state.destination.stop
+    ? t.trips.needEndpoints
+    : !stops ? t.trips.needAllStops
+    : routePending ? t.trips.waitRoute
+    : null;
+  const saveNote = usingSavedRoute ? t.trips.savedRouteNote : stops && !routePending && !selectedRoute ? t.trips.routeless : null;
+
+  const selectRoute = (index: number) => {
+    dispatch({ type: "selectRoute", index });
+    setRouteTouched(true);
+  };
+
+  async function savePlan() {
+    if (!stops || saving || blockedReason) return;
+    const title = fields.title.trim() || titleSuggestion || "";
+    const savedFields = { ...fields, title };
+    const savedFingerprint = planFingerprint(savedFields, state, null);
+    const routeToSave: RouteOption | null = selectedRoute;
+    setSaving(true);
+    setSaveError(null);
+    setFieldErrors({});
+    try {
+      const res = await saveTripPlan({
+        id: saved.id,
+        version: saved.version,
+        title,
+        description: fields.description,
+        plannedDate: fields.plannedDate,
+        stops: stops.map((s) => ({
+          name: s.label.slice(0, 200),
+          address: s.address?.slice(0, 500) ?? null,
+          lat: s.location.lat,
+          lng: s.location.lng,
+          ref: s.ref && OSM_REF.test(s.ref) ? s.ref : null,
+        })),
+        route: routeToSave
+          ? {
+              encodedPolyline: routeToSave.encodedPolyline,
+              distanceMeters: Math.round(routeToSave.distanceMeters),
+              durationSeconds: Math.round(routeToSave.durationSeconds),
+              legs: routeToSave.legs.map((l) => ({ distanceMeters: Math.round(l.distanceMeters), durationSeconds: Math.round(l.durationSeconds) })),
+              hasToll: routeToSave.hasToll,
+              hasFerry: routeToSave.hasFerry,
+            }
+          : null,
+      });
+      if (res.ok) {
+        setFields((f) => (f.title.trim() ? f : { ...f, title }));
+        setSaved({ id: res.id, version: res.version, fingerprint: savedFingerprint, savedAt: res.savedAt });
+        setRouteTouched(false);
+        // Bileşeni yeniden yüklemeden adresi kalıcı plana çevir (yenileme ve paylaşma için)
+        const target = `/planla/${res.id}`;
+        if (window.location.pathname !== target) window.history.replaceState(null, "", target);
+      } else {
+        setSaveError(res.message);
+        setFieldErrors(res.fieldErrors ?? {});
+      }
+    } catch {
+      setSaveError(t.common.unexpectedError);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   // ---------------------------------------------------------------- Görünüm
   const stopPoints = useMemo(
     () => [state.origin.stop, ...state.waypoints.map((w) => w.stop), state.destination.stop].filter((s): s is Stop => !!s).map((s) => s.location),
     [state],
   );
   const fitPoints = useMemo(() => (selectedRoute ? decodePolyline(selectedRoute.encodedPolyline) : stopPoints), [selectedRoute, stopPoints]);
-  const fitKey = selectedRoute ? `r:${reqKey}:${state.selectedRoute}` : `s:${stopPoints.map((p) => `${p.lat},${p.lng}`).join(";")}`;
+  const fitKey = selectedRoute ? `r:${reqKey}:${selectedIndex}` : `s:${stopPoints.map((p) => `${p.lat},${p.lng}`).join(";")}`;
 
   const routeContext = useMemo(() => {
     const req = routeRequest(state);
@@ -138,7 +267,7 @@ export function MapExplorer({ styleUrl }: { styleUrl: string }) {
         >
           <NavigationControl position="top-right" showCompass={false} />
           <ScaleControl position="bottom-left" unit="metric" />
-          {routeResult && <RouteLines routes={routeResult.routes} selected={state.selectedRoute} />}
+          {routeResult && <RouteLines routes={routeResult.routes} selected={selectedIndex} />}
           <StopMarkers origin={state.origin.stop} waypoints={state.waypoints.map((w) => w.stop)} destination={state.destination.stop} />
           {results && <ResultMarkers places={results} selectedId={selectedPlace?.id ?? null} onSelect={setSelectedPlace} />}
           <MyLocationMarker position={geo.position} />
@@ -170,18 +299,39 @@ export function MapExplorer({ styleUrl }: { styleUrl: string }) {
           />
         ) : (
           <div className="space-y-6">
-            <header className="hidden lg:block">
-              <h1 className="text-2xl font-extrabold tracking-tight">{t.maps.title}</h1>
-              <p className="text-sm text-stone-600">{t.maps.subtitle}</p>
-            </header>
+            {planOpen ? (
+              <header className="space-y-1">
+                <Link href="/yolculuklar" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
+                  <ArrowLeft className="size-4" aria-hidden /> {t.trips.backToList}
+                </Link>
+                <h1 className="text-2xl font-extrabold tracking-tight">{saved.id ? t.trips.editTitle : t.trips.planTitle}</h1>
+                <p className="text-sm text-stone-600">{t.trips.planSubtitle}</p>
+              </header>
+            ) : (
+              <header className="hidden lg:block">
+                <h1 className="text-2xl font-extrabold tracking-tight">{t.maps.title}</h1>
+                <p className="text-sm text-stone-600">{t.maps.subtitle}</p>
+              </header>
+            )}
             {geo.error && <Alert tone="error">{geo.error}</Alert>}
+            {planOpen && (
+              <TripDetailsForm fields={fields} onChange={setFields} titleSuggestion={titleSuggestion} fieldErrors={fieldErrors} />
+            )}
             <RouteBuilder state={state} dispatch={dispatch} bias={geo.position ?? undefined} picking={picking}
               onPick={setPicking} onLocate={onLocate} locating={geo.status === "locating"} />
-            <RouteSummary result={routeResult} selected={state.selectedRoute}
-              onSelect={(i) => dispatch({ type: "selectRoute", index: i })}
-              loading={route.loading} error={route.error ?? null} hasWaypoints={state.waypoints.length > 0} />
+            <RouteSummary result={routeResult} selected={selectedIndex} onSelect={selectRoute}
+              loading={routePending} error={usingSavedRoute ? null : (route.error ?? null)} hasWaypoints={state.waypoints.length > 0} />
+            {!planOpen && selectedRoute && (
+              <Button type="button" variant="secondary" className="w-full" onClick={() => setPlanOpen(true)}>
+                <BookmarkPlus className="size-4" aria-hidden /> {t.trips.saveAsTrip}
+              </Button>
+            )}
             <DiscoverPanel hasRoute={!!polyline} category={category} onCategory={chooseCategory} radius={radius} onRadius={setRadius}
               results={results} loading={search.loading} error={search.error ?? null} selectedId={null} onSelect={setSelectedPlace} />
+            {planOpen && (
+              <SaveBar isNew={!saved.id} dirty={dirty} saving={saving} savedAt={saved.savedAt} blockedReason={blockedReason}
+                note={saveNote} error={saveError} onSave={savePlan} />
+            )}
           </div>
         )}
       </aside>
