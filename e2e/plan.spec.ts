@@ -56,11 +56,14 @@ test.describe("Yolculuk planlama (PHASE 3)", () => {
 
     // Kaydedilmemiş değişiklik varken uygulama içi gezinme onay ister
     await expect(saveStatus(page)).toHaveText("Kaydedilmemiş değişiklikler var");
-    const dialog = page.waitForEvent("dialog");
+    // Onay penceresi tıklamayı bekletir: işleyici tıklamadan önce kurulmalı
+    let dialogMessage = "";
+    page.once("dialog", (dlg) => {
+      dialogMessage = dlg.message();
+      void dlg.dismiss();
+    });
     await page.getByRole("link", { name: "Yolculuklarım" }).first().click();
-    const d = await dialog;
-    expect(d.message()).toMatch(/Kaydedilmemiş değişiklikler kaybolacak/);
-    await d.dismiss();
+    await expect.poll(() => dialogMessage).toMatch(/Kaydedilmemiş değişiklikler kaybolacak/);
     await expect(page).toHaveURL(/\/planla$/);
 
     await page.getByRole("button", { name: "Yolculuğu kaydet" }).click();
@@ -120,7 +123,7 @@ test.describe("Yolculuk planlama (PHASE 3)", () => {
     await expect(page.getByTestId("trip-save-bar").getByRole("alert")).toContainText("başka bir sekmede ya da cihazda değiştirilmiş");
 
     // Sil (iki adımlı onay) — sayfadan ayrılırken onay penceresi kabul edilir
-    page.once("dialog", (dlg) => dlg.accept());
+    page.once("dialog", (dlg) => void dlg.accept());
     await page.getByRole("link", { name: "Yolculuklarım" }).first().click();
     await expect(page).toHaveURL(/\/yolculuklar$/);
     const renamed = page.getByTestId("trip-card").filter({ hasText: `${PREFIX} İkinci sekme` });
