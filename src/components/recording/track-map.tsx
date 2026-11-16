@@ -1,5 +1,6 @@
 "use client";
 import "maplibre-gl/dist/maplibre-gl.css";
+import "@/lib/maps/maplibre-setup";
 import { useMemo, useState } from "react";
 import MapView, { Layer, Marker, NavigationControl, ScaleControl, Source } from "react-map-gl/maplibre";
 import { Alert } from "@/components/ui/alert";
