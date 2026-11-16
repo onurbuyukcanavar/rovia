@@ -39,7 +39,8 @@ jobs:
           curl -fsSL --retry 3 -o turkey.osm.pbf "$PBF_URL"
           curl -fsSL --retry 3 -o turkey.osm.pbf.md5 "$PBF_URL.md5"
           echo "$(cut -d' ' -f1 turkey.osm.pbf.md5)  turkey.osm.pbf" | md5sum -c -
-          echo "DATA_TS=$(curl -fsSI "$PBF_URL" | grep -i '^last-modified:' | cut -d' ' -f2- | tr -d '\r' | xargs -I{} date -u -d '{}' +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+          # Veri tarihi: PBF başlığındaki replikasyon zaman damgası (Geofabrik HEAD yanıtında Last-Modified yok)
+          echo "DATA_TS=$(python3 -c 'import osmium,sys; print(osmium.io.Reader(sys.argv[1], osmium.osm.osm_entity_bits.NOTHING).header().get("osmosis_replication_timestamp", ""))' turkey.osm.pbf)" >> "$GITHUB_ENV"
           ls -lh turkey.osm.pbf
       - name: Çıkarım (yerleşimler, ilgi noktaları, il/ilçe sınırları)
         run: |
