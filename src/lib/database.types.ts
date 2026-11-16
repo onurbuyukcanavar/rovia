@@ -982,8 +982,17 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      assert_recording_time: { Args: { p_at: string }; Returns: unknown };
       consume_rate_limit: { Args: { p_bucket: string }; Returns: boolean };
       dashboard_stats: { Args: Record<string, never>; Returns: Json };
+      purge_expired_gps_points: { Args: { p_batch?: number }; Returns: number };
+      recording_add_points: { Args: { p_id: string; p_segment_id: string; p_points: Json }; Returns: number };
+      recording_cancel: { Args: { p_id: string }; Returns: string };
+      recording_finish: { Args: { p_id: string; p_at: string }; Returns: string };
+      recording_pause: { Args: { p_id: string; p_segment_id: string; p_at: string }; Returns: string };
+      recording_resume: { Args: { p_id: string; p_segment_id: string; p_at: string }; Returns: string };
+      recording_start: { Args: { p_id: string; p_segment_id: string; p_started_at: string; p_trip_id: string; p_title: string }; Returns: { recording_id: string | null; trip_id: string | null; status: string | null }[] };
+      recording_track: { Args: { p_id: string }; Returns: Json };
       reverse_geocode: { Args: { p_lat: number; p_lng: number }; Returns: { label: string | null; settlement: string | null; district: string | null; province: string | null }[] };
       save_trip_plan: { Args: { p_trip_id: string; p_expected_version: number; p_title: string; p_description: string; p_planned_date: string; p_stops: Json; p_route: Json }; Returns: { trip_id: string | null; trip_version: number | null }[] };
       search_features_along_route: { Args: { p_route: Json; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null; along_m: number | null }[] };

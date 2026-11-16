@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { MapExplorer } from "@/components/map/map-explorer";
 import { Alert } from "@/components/ui/alert";
@@ -25,6 +25,9 @@ async function TripPlanner({ params }: { params: Promise<{ id: string }> }) {
   const trip = await getTripForEdit(id);
   if (!trip) notFound();
 
+  // Başlamış yolculuk kayıt ekranında, tamamlanmış yolculuk özet sayfasında
+  if (trip.status === "active") redirect("/kayit-modu");
+  if (trip.status === "completed") redirect(`/yolculuklar/${trip.id}`);
   if (trip.status !== "planned") {
     return (
       <div className="mx-auto max-w-xl space-y-4 px-4 py-10">

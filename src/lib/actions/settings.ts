@@ -65,3 +65,23 @@ export async function unlinkGoogle(): Promise<void> {
   revalidatePath("/ayarlar");
   redirect("/ayarlar?unlinked=google");
 }
+
+const RETENTION_VALUES = { "0": 0, "30": 30, "90": 90, "365": 365, forever: null } as const;
+
+/** Ham GPS noktalarının saklanma süresi (user_settings.gps_raw_retention_days). */
+export async function updateGpsRetention(_prev: FormState, fd: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const key = String(fd.get("retention") ?? "");
+  if (!(key in RETENTION_VALUES)) return { status: "error", message: t.common.unexpectedError };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("user_settings")
+    .update({ gps_raw_retention_days: RETENTION_VALUES[key as keyof typeof RETENTION_VALUES] })
+    .eq("user_id", user.id);
+  if (error) {
+    console.error("[rovia] Konum ayarı kaydedilemedi:", error.code);
+    return { status: "error", message: t.common.unexpectedError };
+  }
+  revalidatePath("/ayarlar");
+  return { status: "success", message: t.gpsSettings.saved };
+}

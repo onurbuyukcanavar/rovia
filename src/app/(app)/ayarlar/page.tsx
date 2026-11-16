@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { KeyRound, Mail, ShieldCheck } from "lucide-react";
+import { KeyRound, Mail, MapPinned, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ProfileForm } from "@/components/settings/profile-form";
+import { GpsRetentionForm } from "@/components/settings/gps-retention-form";
 import { NewPasswordForm } from "@/components/auth/reset-forms";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +44,10 @@ async function SettingsBody({ searchParams }: Props) {
   const flash = flashKey ? MESSAGES[flashKey] : null;
 
   const supabase = await createClient();
-  const { data: idData, error: idError } = await supabase.auth.getUserIdentities();
+  const [{ data: idData, error: idError }, { data: settings }] = await Promise.all([
+    supabase.auth.getUserIdentities(),
+    supabase.from("user_settings").select("gps_raw_retention_days").eq("user_id", user.id).maybeSingle(),
+  ]);
   if (idError) console.error("[rovia] Kimlikler okunamadı:", idError.code);
   const identities = idData?.identities ?? [];
   const google = identities.find((i) => i.provider === "google");
@@ -100,6 +104,13 @@ async function SettingsBody({ searchParams }: Props) {
         <div className="mt-5 max-w-sm">
           <NewPasswordForm submitLabel={hasEmail ? t.settings.changePassword : t.settings.setPassword} onDoneHref={null} />
         </div>
+      </section>
+
+      <section className="card p-6">
+        <h2 className="flex items-center gap-2 text-lg font-bold"><MapPinned className="size-5" aria-hidden /> {t.gpsSettings.title}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-stone-600">{t.gpsSettings.body}</p>
+        <div className="mt-5"><GpsRetentionForm days={settings ? settings.gps_raw_retention_days : 90} /></div>
+        <p className="mt-4 text-xs text-stone-500">{t.gpsSettings.perTrip}</p>
       </section>
 
       <section className="card p-6">

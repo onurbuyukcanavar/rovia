@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GeoError } from "@/lib/geo-services/errors";
 
 /** Kova adları ve limitleri veritabanında sabittir (migration 20261116000300). */
-type Bucket = "autocomplete" | "route" | "search" | "geocode";
+type Bucket = "autocomplete" | "route" | "search" | "geocode" | "gps";
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 /**

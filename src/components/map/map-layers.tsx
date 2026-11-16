@@ -35,7 +35,7 @@ export function RouteLines({ routes, selected }: { routes: RouteOption[]; select
   );
 }
 
-function StopPin({ label, tone }: { label: string; tone: "origin" | "waypoint" | "destination" }) {
+export function StopPin({ label, tone }: { label: string; tone: "origin" | "waypoint" | "destination" }) {
   return (
     <span
       className={cn(

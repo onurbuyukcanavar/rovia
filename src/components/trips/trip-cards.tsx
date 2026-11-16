@@ -85,6 +85,9 @@ function TripCard({ trip }: { trip: TripListItem }) {
             <Button type="button" size="sm" variant="ghost" onClick={() => setConfirming(true)} aria-label={`${t.trips.delete}: ${trip.title}`}>
               <Trash2 className="size-4" aria-hidden /> {t.trips.delete}
             </Button>
+            <Link href={`/kayit-modu?yolculuk=${trip.id}`} className="inline-flex h-9 items-center rounded-full border border-sand-300 px-4 text-sm font-semibold hover:bg-sand-100">
+              {t.trips.startRecording}
+            </Link>
             <Link href={`/planla/${trip.id}`} className="inline-flex h-9 items-center rounded-full bg-ink-900 px-4 text-sm font-semibold text-paper hover:bg-ink-800">
               {t.trips.edit}
             </Link>

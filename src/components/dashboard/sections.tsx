@@ -116,11 +116,9 @@ export function TripList({ trips, empty }: { trips: TripSummary[]; empty: string
             <Route className="size-5" aria-hidden />
           </span>
           <div className="min-w-0 flex-1">
-            {trip.status === "planned" ? (
-              <Link href={`/planla/${trip.id}`} className="block truncate font-semibold hover:underline">{trip.title}</Link>
-            ) : (
-              <p className="truncate font-semibold">{trip.title}</p>
-            )}
+            <Link href={trip.status === "planned" ? `/planla/${trip.id}` : `/yolculuklar/${trip.id}`} className="block truncate font-semibold hover:underline">
+              {trip.title}
+            </Link>
             <p className="flex items-center gap-1 truncate text-sm text-stone-600">
               {trip.origin && trip.destination ? (
                 <>{trip.origin} <ArrowRight className="size-3" aria-hidden /> {trip.destination}</>
