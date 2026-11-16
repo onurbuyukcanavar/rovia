@@ -23,7 +23,9 @@ FOSSGIS Valhalla sunucusuna (sürüm 3.9.2) GitHub Actions üzerinden doğrudan 
 
 **Önerilerin seçimi:**
 - **Hangi yerler:** Yalnızca kayda değer olanlar alınıyor: Vikipedi/Vikiveri kaydı ya da koruma etiketi olan yerler, veya kale, ören yeri, şelale, kanyon, milli park, kervansaray, seyir noktası gibi öne çıkan türler.
-- **Rota boyunca dağılım:** Rota eşit parçalara bölünüyor ve her parçadan en iyi yer seçiliyor. Böylece öneriler başlangıç şehrinde kümelenmiyor.
+- **Rota boyunca dağılım:** Rota eşit parçalara bölünüyor ve her parçadan en iyi yer seçiliyor. Başlangıç ve varışın hemen çevresi önerilmiyor (rotanın %10'u, en fazla 15 km). Böylece öneriler şehirde kümelenmiyor.
+  - **İlk sürümdeki sorun:** İstanbul → Ankara'da önerilerin 4'ü Fatih'teki müzelerdi.
+  - **Düzeltmeden sonra canlıda:** İstanbul Oyuncak Müzesi (16. km), Sipahiler Göleti (95), Deprem Müzesi (156), Bolu Müzesi (275), Yeniçağa Kuş Gözlemevi (316), Havacılık Müzesi (440).
 - **Arama genişliği:** Rota uzunluğuna göre değişiyor: kısa rotada 1,5 km, orta rotada 3 km, uzun rotada 5 km.
 - **Kullanım:**
   - Öneriler haritada yıldızla gösteriliyor ve tek dokunuşla doğru sıraya durak olarak ekleniyor.
@@ -34,7 +36,7 @@ FOSSGIS Valhalla sunucusuna (sürüm 3.9.2) GitHub Actions üzerinden doğrudan 
 
 - **Rota motoru:** `src/lib/geo-services/valhalla.ts`
 - **Öneriler (sunucu):** `src/lib/geo-services/features.ts` (`routeSuggestions`, `spreadAlongRoute`)
-- **Veritabanı:** `supabase/migrations/20261116001200_route_options.sql` (`trips.route_options`, `save_trip_plan(..., p_route_options)`, `route_suggestions()`). Canlıya uygulandı.
+- **Veritabanı:** `supabase/migrations/20261116001200_route_options.sql` (`trips.route_options`, `save_trip_plan(..., p_route_options)`, `route_suggestions()`) ve `20261116001300_route_suggestions_spread.sql` (rota boyunca dağılım). İkisi de canlıya uygulandı.
 - **Arayüz:** `src/components/map/route-extras.tsx` (seçenekler, yol tarifi, öneriler), `route-summary.tsx`, `map-layers.tsx`, `map-explorer.tsx`
 
 ## Testler
