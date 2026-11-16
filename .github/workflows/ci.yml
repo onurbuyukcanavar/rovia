@@ -65,7 +65,15 @@ jobs:
           name: next-build
           path: .next
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test
+      - name: Playwright
+        run: |
+          set -o pipefail
+          npx playwright test 2>&1 | tee e2e.log
+      - name: Sunucu loglarında hata olmamalı
+        run: |
+          if grep -E "\[WebServer\].*(Error:|\[rovia\])" e2e.log; then
+            echo "::error::E2E sırasında sunucu hata logladı"; exit 1
+          fi
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
