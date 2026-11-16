@@ -1,0 +1,33 @@
+name: Yayın kontrolü
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Kontrol edilecek adres"
+        default: "https://rovia-seven.vercel.app"
+  deployment_status:
+
+jobs:
+  prod-check:
+    # Elle tetiklenince veya Vercel üretim dağıtımı başarıyla bitince
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      E2E_BASE_URL: ${{ inputs.url || 'https://rovia-seven.vercel.app' }}
+      NEXT_PUBLIC_SUPABASE_URL: https://lbocidoprcqiuxtqhoye.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_iwaXltsu1QuuBjHXAo0c-g_bQLrbqnc
+      E2E_ALICE_EMAIL: ${{ secrets.E2E_ALICE_EMAIL }}
+      E2E_ALICE_PASSWORD: ${{ secrets.E2E_ALICE_PASSWORD }}
+      E2E_BOB_EMAIL: ${{ secrets.E2E_BOB_EMAIL }}
+      E2E_BOB_PASSWORD: ${{ secrets.E2E_BOB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test e2e/prod-diagnose.spec.ts e2e/map.spec.ts --project=desktop --retries=0
