@@ -13,6 +13,10 @@ jobs:
     # Elle tetiklenince veya Vercel üretim dağıtımı başarıyla bitince
     if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
+    # Aynı test hesaplarını (Supabase) kullanan E2E işleri asla aynı anda koşmaz
+    concurrency:
+      group: e2e-shared-supabase
+      cancel-in-progress: false
     timeout-minutes: 15
     env:
       E2E_BASE_URL: ${{ inputs.url || 'https://rovia-seven.vercel.app' }}

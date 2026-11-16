@@ -52,6 +52,10 @@ jobs:
     name: E2E (gerçek Supabase)
     needs: check
     runs-on: ubuntu-latest
+    # Aynı test hesaplarını (Supabase) kullanan E2E işleri asla aynı anda koşmaz
+    concurrency:
+      group: e2e-shared-supabase
+      cancel-in-progress: false
     timeout-minutes: 20
     env:
       E2E_ALICE_EMAIL: e2e-alice@rovia.test
