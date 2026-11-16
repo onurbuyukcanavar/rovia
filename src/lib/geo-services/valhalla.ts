@@ -66,7 +66,8 @@ export function buildRouteRequest(points: LatLng[], alternatives: boolean, optio
     costing_options: costing(options, tollMode),
     units: "kilometers",
     language: "tr-TR",
-    directions_type: "maneuvers",
+    // "instructions": manevralar + Türkçe anlatım ("maneuvers" anlatımı içermez)
+    directions_type: "instructions",
     // Valhalla alternatifleri yalnızca iki noktalı isteklerde hesaplar
     ...(alternatives && points.length === 2 ? { alternates: 2 } : {}),
   };

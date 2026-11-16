@@ -30,7 +30,7 @@ describe("Valhalla rota istemcisi", () => {
   it("istek: tüm noktalar 'break', araç, km; alternatif yalnızca iki noktada", () => {
     const two = buildRouteRequest([IST, ANK], true);
     expect(two).toMatchObject({
-      costing: "auto", units: "kilometers", language: "tr-TR", directions_type: "maneuvers", alternates: 2,
+      costing: "auto", units: "kilometers", language: "tr-TR", directions_type: "instructions", alternates: 2,
       // Feribotlar cezasız: Eskihisar–Topçular gibi seçenekler rota/alternatif olabilsin
       costing_options: { auto: { use_ferry: 1 } },
     });
