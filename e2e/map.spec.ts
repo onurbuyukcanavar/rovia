@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { hasCredentials, login } from "./helpers";
+import { collectMapErrors, hasCredentials, login, mapColorCount, mapHasColor } from "./helpers";
 
 const IST = { lat: 41.0082, lng: 28.9784 };
 const ANK = { lat: 39.9334, lng: 32.8597 };
@@ -7,12 +7,20 @@ const ANK = { lat: 39.9334, lng: 32.8597 };
 test.describe("Haritayı Keşfet (açık kaynak altyapı)", () => {
   test.skip(!hasCredentials, "E2E_* secret'ları tanımlı değil");
 
-  test("harita MapLibre ile yüklenir; OpenStreetMap atfı görünür", async ({ page }) => {
+  test("harita MapLibre ile yüklenir ve gerçekten çizilir; OpenStreetMap atfı görünür", async ({ page }) => {
+    const errors = collectMapErrors(page);
+    // Worker dosyası yayınlanıyor olmalı (MapLibre çizimi bu dosyada yapar)
+    const worker = await page.request.get("/maplibre/maplibre-gl-worker.js");
+    expect(worker.status()).toBe(200);
+    expect(worker.headers()["content-type"]).toMatch(/javascript/);
+
     await login(page, "alice", "/harita");
     await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 20_000 });
     await expect(page.locator(".maplibregl-ctrl-attrib")).toContainText(/OpenStreetMap/, { timeout: 20_000 });
-    await page.waitForTimeout(2_000); // karoların çizilmesi için
+    // Karolar çizilince harita alanında çok sayıda renk olur; boş (çizilmemiş) harita tek renktir
+    await expect.poll(() => mapColorCount(page), { timeout: 30_000 }).toBeGreaterThan(40);
     await page.screenshot({ path: "test-results/screens/harita-bos.png" });
+    expect(errors).toEqual([]);
   });
 
   test("rota API'si: İstanbul → Ankara gerçek yol mesafesi (Valhalla)", async ({ page }) => {
@@ -49,6 +57,7 @@ test.describe("Haritayı Keşfet — uçtan uca akış (OSM verisi gerekli)", ()
   test.skip(!hasCredentials, "E2E_* secret'ları tanımlı değil");
 
   test("İstanbul → Ankara rotası, rota üzerinde benzinlik, rotaya durak ekleme", async ({ page }) => {
+    const errors = collectMapErrors(page);
     await login(page, "alice", "/harita");
     test.skip(!(await hasGeoData(page)), "OSM verisi henüz yüklenmedi (osm-import iş akışı)");
 
@@ -60,6 +69,9 @@ test.describe("Haritayı Keşfet — uçtan uca akış (OSM verisi gerekli)", ()
     await pick("Varış", "Ankara", /^Ankara/);
 
     await expect(page.getByTestId("route-distance")).toHaveText(/\d+ km/, { timeout: 30_000 });
+    // Rota haritada çizilmiş olmalı: rota rengi (amber #e8912d) ekranda görünür
+    await expect.poll(() => mapHasColor(page, [0xe8, 0x91, 0x2d]), { timeout: 20_000 }).toBe(true);
+    expect(errors).toEqual([]);
 
     await page.getByRole("button", { name: "Benzin istasyonları" }).click();
     const results = page.getByTestId("results");
