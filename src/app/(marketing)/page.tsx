@@ -4,6 +4,7 @@ import { Logo } from "@/components/brand/logo";
 import { RouteIllustration } from "@/components/brand/route-illustration";
 import { ButtonLink } from "@/components/ui/button";
 import { t } from "@/i18n";
+import { LegalLinks } from "@/components/legal/legal-page";
 
 const ICONS = { discover: Compass, journey: Route, remember: BookOpenText } as const;
 
@@ -67,6 +68,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-sm text-stone-600">
           <Logo />
           <p>© 2026 ROVIA · {t.marketing.footer}</p>
+          <LegalLinks className="w-full sm:w-auto" />
         </div>
       </footer>
     </div>

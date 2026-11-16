@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
 import { RouteIllustration } from "@/components/brand/route-illustration";
 import { t } from "@/i18n";
+import { LegalLinks } from "@/components/legal/legal-page";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -24,6 +25,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <Logo />
         </Link>
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">{children}</div>
+        <LegalLinks className="mx-auto w-full max-w-sm text-xs text-stone-500" />
       </main>
     </div>
   );

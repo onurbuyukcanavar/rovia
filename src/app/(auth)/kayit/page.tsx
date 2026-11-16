@@ -19,6 +19,11 @@ export default function SignupPage() {
         <OrDivider />
         <SignupForm />
       </div>
+      <p className="mt-6 text-xs leading-relaxed text-stone-600" data-testid="legal-consent">
+        Kaydolarak <Link href="/kullanim-kosullari" className="font-semibold underline">Kullanım Koşulları</Link>&apos;nı kabul etmiş
+        olursun. Kişisel verilerinin nasıl işlendiği{" "}
+        <Link href="/gizlilik" className="font-semibold underline">Gizlilik Politikası ve KVKK Aydınlatma Metni</Link>&apos;nde açıklanır.
+      </p>
       <p className="mt-6 text-xs leading-relaxed text-stone-600">{t.auth.locationNote}</p>
       <p className="mt-6 text-center text-sm text-stone-600">
         {t.auth.haveAccount}{" "}
