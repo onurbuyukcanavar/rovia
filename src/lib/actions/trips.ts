@@ -57,7 +57,11 @@ export async function saveTripPlan(input: TripPlanInput): Promise<SaveTripResult
     p_stops: plan.stops,
     p_route: route,
   };
-  const { data, error } = await supabase.rpc("save_trip_plan", args as never).single<{ trip_id: string; trip_version: number }>();
+  // Ağ/veritabanı askıda kalırsa kullanıcı "Kaydediliyor…" durumunda takılı kalmaz
+  const { data, error } = await supabase
+    .rpc("save_trip_plan", args as never)
+    .abortSignal(AbortSignal.timeout(15_000))
+    .single<{ trip_id: string; trip_version: number }>();
 
   if (error || !data?.trip_id || !data.trip_version) {
     const msg = error?.message ?? "";
