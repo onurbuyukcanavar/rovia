@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { strToU8, zipSync } from "fflate";
-import { collectMapErrors, hasCredentials, login, mapColorCount, users } from "./helpers";
+import { collectMapErrors, hasCredentials, login, mapColorCount, mapHasColor, users } from "./helpers";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
@@ -122,6 +122,9 @@ test.describe("Favoriler ve içe aktarma (PHASE 5)", () => {
     const search = page.getByRole("searchbox", { name: "Listede ara" });
     await search.fill(PREFIX);
     await expect(page.getByTestId("favorites-count")).toHaveText("3 yer");
+    // Favori noktaları gerçekten çizilir (amber #e8912d)
+    await expect.poll(() => mapHasColor(page, [0xe8, 0x91, 0x2d]), { timeout: 20_000 }).toBe(true);
+    expect(errors).toEqual([]);
 
     // Liste türü: "Daha sonra gideceğim" yalnızca Galata
     await page.getByRole("tab", { name: /Daha sonra gideceğim/ }).click();

@@ -86,7 +86,8 @@ export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate
             id={FAVORITE_LAYER}
             type="circle"
             paint={{
-              "circle-radius": ["case", ["get", "selected"], 10, ["interpolate", ["linear"], ["zoom"], 4, 5, 12, 8]],
+              // MapLibre: "zoom" yalnızca en dıştaki interpolate'te kullanılabilir; seçili durum her durakta ayrı
+              "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, ["case", ["get", "selected"], 9, 5], 12, ["case", ["get", "selected"], 12, 8]],
               "circle-color": ["case", ["==", ["get", "list"], "want_to_go"], "#1d3557", "#e8912d"],
               "circle-stroke-color": ["case", ["get", "selected"], "#0e1726", "#ffffff"],
               "circle-stroke-width": ["case", ["get", "selected"], 3, 2],
