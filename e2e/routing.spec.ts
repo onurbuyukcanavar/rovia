@@ -109,6 +109,7 @@ test.describe("Rota seçenekleri, feribot ve öneriler", () => {
     await expect(sug).toBeVisible({ timeout: 30_000 });
     await expect(sug.getByTestId("suggestion").first().or(sug.getByText("Bu rotada öne çıkan bir yer bulunamadı."))).toBeVisible({ timeout: 30_000 });
     const count = await sug.getByTestId("suggestion").count();
+    console.log("[öneriler İstanbul→Ankara]", (await sug.getByTestId("suggestion").allInnerTexts()).map((x) => x.replace(/\s+/g, " ")).join(" | "));
     expect(count).toBeLessThanOrEqual(6);
     if (count > 0) {
       await expect(page.getByTestId("suggestion-marker")).toHaveCount(count);
