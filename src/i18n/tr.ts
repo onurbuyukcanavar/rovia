@@ -78,6 +78,7 @@ export const tr = {
     emailNotConfirmed: "E-posta adresin henüz doğrulanmamış. Gelen kutundaki bağlantıya tıkla.",
     userExists: "Bu e-posta ile kayıtlı bir hesap zaten var.",
     weakPassword: "Şifre çok zayıf. En az 8 karakter, harf ve rakam kullan.",
+    emailUnavailable: "Şu anda bu adrese doğrulama e-postası gönderilemiyor. Lütfen daha sonra tekrar dene veya Google ile devam et.",
     rateLimited: "Çok fazla deneme yapıldı. Lütfen biraz bekleyip tekrar dene.",
     callbackError: "Giriş tamamlanamadı. Bağlantının süresi dolmuş olabilir; lütfen tekrar dene.",
     legal: "Devam ederek Kullanım Şartları'nı ve Gizlilik Politikası'nı kabul etmiş olursun.",

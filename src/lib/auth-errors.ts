@@ -16,6 +16,9 @@ export function authErrorMessage(error: { code?: string; status?: number; messag
       return t.auth.userExists;
     case "weak_password":
       return t.auth.weakPassword;
+    case "email_address_not_authorized":
+      // Supabase'in yerleşik e-posta servisi yalnızca ekip adreslerine gönderir; özel SMTP gerekir (docs/SETUP.md §3)
+      return t.auth.emailUnavailable;
     case "over_request_rate_limit":
     case "over_email_send_rate_limit":
       return t.auth.rateLimited;
