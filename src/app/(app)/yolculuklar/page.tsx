@@ -8,8 +8,9 @@ import { EmptyState } from "@/components/dashboard/sections";
 import { TripCards } from "@/components/trips/trip-cards";
 import { requireUser } from "@/lib/dal";
 import { listPlannedTrips } from "@/lib/queries/trips";
-import { getActiveRecording, listCompletedTrips } from "@/lib/queries/recordings";
-import { formatDate, formatDistance, formatDuration } from "@/lib/format";
+import { getActiveRecording } from "@/lib/queries/recordings";
+import { listArchive } from "@/lib/queries/journal";
+import { ArchiveList } from "@/components/journal/archive-list";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.trips.listTitle };
@@ -65,27 +66,9 @@ async function ActiveBanner() {
 
 async function CompletedList() {
   await requireUser();
-  const trips = await listCompletedTrips();
+  const trips = await listArchive();
   if (!trips.length) return <EmptyState icon={Flag}>{t.tripSummary.emptyCompleted}</EmptyState>;
-  return (
-    <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-testid="completed-list">
-      {trips.map((trip) => (
-        <li key={trip.id}>
-          <Link href={`/yolculuklar/${trip.id}`} className="card block p-5 transition hover:-translate-y-0.5 hover:shadow-md" data-testid="completed-card">
-            <p className="text-lg leading-snug font-bold">{trip.title}</p>
-            {(trip.startLabel || trip.endLabel) && (
-              <p className="mt-1 truncate text-sm text-stone-600">{[trip.startLabel, trip.endLabel].filter(Boolean).join(" → ")}</p>
-            )}
-            <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-600 tabular-nums">
-              <span>{formatDate(trip.endedAt)}</span>
-              <span className="font-semibold text-ink-900">{formatDistance(trip.distanceM)}</span>
-              <span>{formatDuration(trip.elapsedS)}</span>
-            </p>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
+  return <ArchiveList trips={trips} />;
 }
 
 function ListSkeleton() {

@@ -2,6 +2,7 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@/lib/maps/maplibre-setup";
 import { useMemo, useState } from "react";
+import { Camera, NotebookPen } from "lucide-react";
 import MapView, { Layer, Marker, NavigationControl, ScaleControl, Source } from "react-map-gl/maplibre";
 import { Alert } from "@/components/ui/alert";
 import { FitBounds, MyLocationMarker, PanTo, StopPin } from "@/components/map/map-layers";
@@ -9,6 +10,9 @@ import { decodePolyline, type LatLng } from "@/lib/geo";
 import { t } from "@/i18n";
 
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
+
+/** Haritadaki günlük işaretleri: fotoğrafın çekildiği yer ya da notun yeri */
+export type MapPin = { id: string; lat: number; lng: number; kind: "photo" | "note"; label: string };
 
 type Props = {
   styleUrl: string;
@@ -20,11 +24,12 @@ type Props = {
   plannedPolyline?: string | null;
   /** Özet ekranı: başlangıç/bitiş işaretleri ve tüm izi gösteren kamera */
   showEndpoints?: boolean;
+  pins?: MapPin[];
   className?: string;
 };
 
 /** GPS izi haritası (MapLibre + OpenFreeMap). */
-export function TrackMap({ styleUrl, paths, position = null, plannedPolyline = null, showEndpoints = false, className }: Props) {
+export function TrackMap({ styleUrl, paths, position = null, plannedPolyline = null, showEndpoints = false, pins = [], className }: Props) {
   const [mapError, setMapError] = useState(false);
 
   const track = useMemo(
@@ -97,6 +102,16 @@ export function TrackMap({ styleUrl, paths, position = null, plannedPolyline = n
             <span title={t.tripSummary.end}><StopPin label="B" tone="destination" /></span>
           </Marker>
         )}
+        {pins.map((p) => (
+          <Marker key={p.id} longitude={p.lng} latitude={p.lat} anchor="center">
+            <span title={p.label} aria-label={p.label} data-testid={`pin-${p.kind}`}
+              className={p.kind === "photo"
+                ? "grid size-6 place-items-center rounded-full border-2 border-white bg-amber-500 text-ink-950 shadow-md"
+                : "grid size-6 place-items-center rounded-full border-2 border-white bg-ink-900 text-paper shadow-md"}>
+              {p.kind === "photo" ? <Camera className="size-3.5" aria-hidden /> : <NotebookPen className="size-3.5" aria-hidden />}
+            </span>
+          </Marker>
+        ))}
         <MyLocationMarker position={position} />
         <FitBounds points={fitPoints} deps={showEndpoints ? all.length : plannedPolyline} />
         {!showEndpoints && <PanTo position={position} />}

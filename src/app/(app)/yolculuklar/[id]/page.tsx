@@ -9,6 +9,9 @@ import { SummaryActions, SummaryMap } from "@/components/recording/summary-parts
 import { requireUser } from "@/lib/dal";
 import { mapStyleUrl } from "@/lib/env";
 import { getTripDetail } from "@/lib/queries/recordings";
+import { getTripJournal } from "@/lib/queries/journal";
+import { TripJournal } from "@/components/journal/trip-journal";
+import { TripInfo } from "@/components/journal/trip-info";
 import { formatDate, formatDistance, formatDuration, formatSpeed, formatTime } from "@/lib/format";
 import { t } from "@/i18n";
 
@@ -24,10 +27,17 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
 
 async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await requireUser();
+  const user = await requireUser();
   const trip = await getTripDetail(id);
   if (!trip) notFound();
   if (trip.status === "planned") redirect(`/planla/${trip.id}`);
+  const journal = await getTripJournal(trip.id);
+  const pins = [
+    ...journal.media.filter((m) => m.lat !== null && m.lng !== null)
+      .map((m) => ({ id: `m${m.id}`, lat: m.lat!, lng: m.lng!, kind: "photo" as const, label: m.caption ?? t.journal.tabs.gallery })),
+    ...journal.notes.filter((n) => n.lat !== null && n.lng !== null)
+      .map((n) => ({ id: `n${n.id}`, lat: n.lat!, lng: n.lng!, kind: "note" as const, label: n.locationName ?? n.title ?? t.journal.kinds[n.kind] })),
+  ];
 
   const rec = trip.recording;
   const active = trip.status === "active" || rec?.status === "recording" || rec?.status === "paused";
@@ -35,7 +45,7 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="flex min-h-app-mobile flex-col lg:grid lg:h-dvh lg:min-h-0 lg:grid-cols-[26rem_1fr]">
       <div className="relative order-1 h-[42vh] shrink-0 lg:order-2 lg:h-full">
-        <SummaryMap styleUrl={mapStyleUrl()} polyline={rec?.polyline ?? null} plannedPolyline={trip.routePolyline} />
+        <SummaryMap styleUrl={mapStyleUrl()} polyline={rec?.polyline ?? null} plannedPolyline={trip.routePolyline} pins={pins} />
       </div>
       <aside className="order-2 space-y-6 border-t border-sand-200 bg-paper px-4 py-5 lg:order-1 lg:overflow-y-auto lg:border-t-0 lg:border-r lg:px-6 lg:py-6">
         <header className="space-y-1">
@@ -43,7 +53,7 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
             <ArrowLeft className="size-4" aria-hidden /> {t.trips.backToList}
           </Link>
           <p className="eyebrow">{t.tripSummary.title}</p>
-          <h1 className="text-2xl font-extrabold tracking-tight">{trip.title}</h1>
+          <TripInfo id={trip.id} title={trip.title} description={trip.description} />
           {rec && (
             <p className="text-sm text-stone-600" data-testid="summary-date">
               {formatDate(rec.startedAt)} · {formatTime(rec.startedAt)}{rec.endedAt ? ` – ${formatTime(rec.endedAt)}` : ""}
@@ -83,6 +93,11 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
             </p>
           </>
         ) : null}
+
+        {!active && (
+          <TripJournal userId={user.id} tripId={trip.id} notes={journal.notes} media={journal.media} startedAt={rec?.startedAt ?? null} />
+        )}
+        {!active && <p className="text-xs text-stone-500">{t.archive.travelogueSoon}</p>}
 
         {!active && <SummaryActions tripId={trip.id} recordingId={rec?.recordingId ?? null} hasRawPoints={(rec?.rawPointCount ?? 0) > 0} />}
       </aside>

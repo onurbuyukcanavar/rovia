@@ -77,6 +77,7 @@ export type TripRecordingSummary = {
 export type TripDetail = {
   id: string;
   title: string;
+  description: string | null;
   status: string;
   plannedDate: string | null;
   routePolyline: string | null;
@@ -89,7 +90,7 @@ export async function getTripDetail(id: string): Promise<TripDetail | null> {
   const supabase = await createClient();
   const { data: trip, error } = await supabase
     .from("trips")
-    .select("id, title, status, planned_date, route_polyline")
+    .select("id, title, description, status, planned_date, route_polyline")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`TRIP_DETAIL_QUERY_FAILED: ${error.message}`);
@@ -121,6 +122,7 @@ export async function getTripDetail(id: string): Promise<TripDetail | null> {
   return {
     id: trip.id,
     title: trip.title,
+    description: trip.description,
     status: trip.status,
     plannedDate: trip.planned_date,
     routePolyline: trip.route_polyline,
@@ -146,36 +148,3 @@ export async function getTripDetail(id: string): Promise<TripDetail | null> {
   };
 }
 
-export type CompletedTripItem = {
-  id: string;
-  title: string;
-  endedAt: string | null;
-  distanceM: number;
-  elapsedS: number;
-  startLabel: string | null;
-  endLabel: string | null;
-};
-
-/** Tamamlanan yolculuklar (en yeni önce). Ayrıntılı arşiv ve filtreler Faz 6'da. */
-export async function listCompletedTrips(): Promise<CompletedTripItem[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("trip_recordings")
-    .select("trip_id, ended_at, total_distance_m, elapsed_duration_s, start_label, end_label, trips(title)")
-    .eq("status", "completed")
-    .order("ended_at", { ascending: false })
-    .limit(100);
-  if (error) throw new Error(`COMPLETED_TRIPS_QUERY_FAILED: ${error.message}`);
-  return ((data ?? []) as unknown as {
-    trip_id: string; ended_at: string | null; total_distance_m: number | string; elapsed_duration_s: number;
-    start_label: string | null; end_label: string | null; trips: { title: string } | null;
-  }[]).map((r) => ({
-    id: r.trip_id,
-    title: r.trips?.title ?? "",
-    endedAt: r.ended_at,
-    distanceM: Number(r.total_distance_m),
-    elapsedS: r.elapsed_duration_s,
-    startLabel: r.start_label,
-    endLabel: r.end_label,
-  }));
-}
