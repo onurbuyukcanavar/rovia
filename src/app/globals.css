@@ -1,26 +1,65 @@
 @import "tailwindcss";
+@import "@fontsource-variable/manrope";
+@import "@fontsource-variable/newsreader";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * ROVIA tasarım token'ları
+ * Koyu lacivert/antrasit · kırık beyaz · sıcak gri · kontrollü amber vurgu
+ */
+@theme {
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader Variable", ui-serif, Georgia, serif;
+
+  --color-ink-950: #0a111d;
+  --color-ink-900: #0e1726;
+  --color-ink-800: #16223a;
+  --color-ink-700: #22304b;
+  --color-ink-600: #36455f;
+  --color-ink-400: #7b879b;
+
+  --color-paper: #f7f5f0;
+  --color-paper-50: #fbfaf7;
+  --color-sand-100: #efebe3;
+  --color-sand-200: #e4dfd4;
+  --color-sand-300: #d3ccbf;
+  --color-stone-500: #8a847a;
+  --color-stone-600: #6e685f;
+  --color-stone-700: #4f4a43;
+
+  --color-amber-300: #f5c37a;
+  --color-amber-400: #f0a94a;
+  --color-amber-500: #e8912d;
+  --color-amber-600: #c9741a;
+  --color-amber-700: #9e5912;
+
+  --color-success: #2f7d5b;
+  --color-danger: #b3412e;
+
+  --radius-card: 1.25rem;
+  --shadow-card: 0 1px 2px rgb(14 23 38 / 0.04), 0 8px 24px -12px rgb(14 23 38 / 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-paper font-sans text-ink-900 antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-amber-500;
+  }
+  ::selection {
+    @apply bg-amber-300/60;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .card {
+    @apply rounded-[var(--radius-card)] border border-sand-200 bg-paper-50 shadow-[var(--shadow-card)];
+  }
+  .eyebrow {
+    @apply text-[0.7rem] font-semibold tracking-[0.18em] text-stone-500 uppercase;
+  }
 }
