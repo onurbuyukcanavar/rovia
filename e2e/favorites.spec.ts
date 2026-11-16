@@ -210,8 +210,12 @@ test.describe("Favoriler ve içe aktarma (PHASE 5)", () => {
     test.setTimeout(120_000);
     await login(page, "alice", "/harita");
     test.skip(!(await hasGeoData(page)), "OSM verisi yüklü değil");
-    await page.getByRole("combobox", { name: "Başlangıç" }).fill("Ankara");
-    await page.getByRole("option", { name: /^Ankara/ }).first().click();
+    // Rota boyunca arama (harita merkezine bağlı değil; kararlı)
+    for (const [label, text] of [["Başlangıç", "İstanbul"], ["Varış", "Ankara"]] as const) {
+      await page.getByRole("combobox", { name: label }).fill(text);
+      await page.getByRole("option", { name: new RegExp(`^${text}`) }).first().click();
+    }
+    await expect(page.getByTestId("route-distance")).toHaveText(/\d+ km/, { timeout: 30_000 });
     await page.getByRole("button", { name: "Benzin istasyonları" }).click();
     const results = page.getByTestId("results");
     await expect(results.getByRole("button").first()).toBeVisible({ timeout: 20_000 });
