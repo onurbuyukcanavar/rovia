@@ -119,8 +119,16 @@ test.describe("Yolculuk planlama (PHASE 3)", () => {
     await other.close();
 
     await page.getByLabel("Açıklama").fill("İlk sekmeden değişiklik");
-    await page.getByRole("button", { name: "Değişiklikleri kaydet" }).click();
-    await expect(page.getByTestId("trip-save-bar").getByRole("alert")).toContainText("başka bir sekmede ya da cihazda değiştirilmiş");
+    const saveBtn = page.getByRole("button", { name: "Değişiklikleri kaydet" });
+    await expect(saveBtn).toBeEnabled();
+    await saveBtn.click();
+    try {
+      await expect(page.getByTestId("trip-save-bar").getByRole("alert")).toContainText("başka bir sekmede ya da cihazda değiştirilmiş", { timeout: 15_000 });
+    } catch (e) {
+      console.log("[e2e] kaydetme çubuğu:", await page.getByTestId("trip-save-bar").innerText());
+      console.log("[e2e] adres:", page.url(), "ad:", await page.getByLabel("Yolculuk adı").inputValue());
+      throw e;
+    }
 
     // Sil (iki adımlı onay) — sayfadan ayrılırken onay penceresi kabul edilir
     page.once("dialog", (dlg) => void dlg.accept());
