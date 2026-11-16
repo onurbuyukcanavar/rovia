@@ -10,4 +10,4 @@ const schema = z.object({
   trafficAware: z.boolean().default(false),
 });
 
-export const POST = mapsHandler({ bucket: "route", perMinute: 30, perDay: 500 }, schema, (input) => computeRoutes(input));
+export const POST = mapsHandler({ bucket: "route" }, schema, (input) => computeRoutes(input));

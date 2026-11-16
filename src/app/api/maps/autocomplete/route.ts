@@ -8,6 +8,6 @@ const schema = z.object({
   bias: latLngSchema.optional(),
 });
 
-export const POST = mapsHandler({ bucket: "autocomplete", perMinute: 120, perDay: 2_000 }, schema, (input) =>
+export const POST = mapsHandler({ bucket: "autocomplete" }, schema, (input) =>
   autocomplete(input).then((suggestions) => ({ suggestions })),
 );

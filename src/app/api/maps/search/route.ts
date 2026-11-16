@@ -18,6 +18,6 @@ const schema = z.discriminatedUnion("mode", [
   }),
 ]);
 
-export const POST = mapsHandler({ bucket: "search", perMinute: 20, perDay: 300 }, schema, async (input) => ({
+export const POST = mapsHandler({ bucket: "search" }, schema, async (input) => ({
   places: input.mode === "route" ? await searchAlongRoute(input) : await searchNearby(input),
 }));

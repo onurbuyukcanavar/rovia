@@ -4,7 +4,8 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { MapsError } from "@/lib/google/errors";
 
-type Limits = { bucket: string; perMinute: number; perDay: number };
+/** Kova adları ve limitleri veritabanında sabittir (migration 20261116000300). */
+type Limits = { bucket: "autocomplete" | "place" | "details" | "photo" | "route" | "search" | "geocode" };
 
 /**
  * Harita API uç noktaları için ortak sarmalayıcı:
@@ -26,12 +27,9 @@ export function mapsHandler<S extends z.ZodType, R>(
       const parsed = schema.safeParse(raw);
       if (!parsed.success) throw new MapsError("invalid_request", z.prettifyError(parsed.error));
 
-      const [minute, day] = await Promise.all([
-        supabase.rpc("consume_rate_limit", { p_bucket: `${limits.bucket}:m`, p_limit: limits.perMinute, p_window_seconds: 60 }),
-        supabase.rpc("consume_rate_limit", { p_bucket: `${limits.bucket}:d`, p_limit: limits.perDay, p_window_seconds: 86_400 }),
-      ]);
-      if (minute.error || day.error) throw new Error(`rate_limit_rpc: ${(minute.error ?? day.error)?.message}`);
-      if (!minute.data || !day.data) throw new MapsError("rate_limited");
+      const limit = await supabase.rpc("consume_rate_limit", { p_bucket: limits.bucket });
+      if (limit.error) throw new Error(`rate_limit_rpc: ${limit.error.message}`);
+      if (!limit.data) throw new MapsError("rate_limited");
 
       const result = await run(parsed.data, req);
       return options.respond ? options.respond(result) : NextResponse.json(result);

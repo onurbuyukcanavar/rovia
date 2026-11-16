@@ -260,25 +260,27 @@ describe("iş kuralları", () => {
 });
 
 describe("API hız sınırlama", () => {
-  it("pencere içinde sınırı aşınca false döner; kullanıcılar birbirini etkilemez", async () => {
+  it("dakikalık sınır aşılınca false döner; kullanıcılar birbirini etkilemez", async () => {
     const consume = (id: string) =>
-      asUser(db, id, async (tx) =>
-        (await tx.query<{ ok: boolean }>("select public.consume_rate_limit('test', 3, 3600) as ok")).rows[0].ok,
-      );
-    expect([await consume(alice), await consume(alice), await consume(alice), await consume(alice)]).toEqual([true, true, true, false]);
+      asUser(db, id, async (tx) => (await tx.query<{ ok: boolean }>("select public.consume_rate_limit('search') as ok")).rows[0].ok);
+    const results: boolean[] = [];
+    for (let i = 0; i < 21; i++) results.push(await consume(alice)); // search: 20/dk
+    expect(results.slice(0, 20).every(Boolean)).toBe(true);
+    expect(results[20]).toBe(false);
     expect(await consume(bob)).toBe(true);
   });
 
-  it("sayaç tablosu doğrudan okunamaz; anonim kullanıcı fonksiyonu çağıramaz", async () => {
-    await expect(asUser(db, alice, (tx) => tx.query("select * from api_rate_limits"))).rejects.toThrow(/permission denied/);
+  it("izin listesinde olmayan kova reddedilir (keyfi satır üretilemez)", async () => {
     await expect(
-      asUser(db, null, (tx) => tx.query("select public.consume_rate_limit('x', 1, 60)")),
-    ).rejects.toThrow(/permission denied/);
+      asUser(db, alice, (tx) => tx.query("select public.consume_rate_limit('spam-' || gen_random_uuid())")),
+    ).rejects.toThrow(/unknown_rate_limit_bucket/);
   });
 
-  it("geçersiz argümanları reddeder", async () => {
+  it("sayaç tablosu doğrudan okunamaz; anonim kullanıcı fonksiyonu çağıramaz; eski imza kaldırıldı", async () => {
+    await expect(asUser(db, alice, (tx) => tx.query("select * from api_rate_limits"))).rejects.toThrow(/permission denied/);
+    await expect(asUser(db, null, (tx) => tx.query("select public.consume_rate_limit('route')"))).rejects.toThrow(/permission denied/);
     await expect(
-      asUser(db, alice, (tx) => tx.query("select public.consume_rate_limit('x', 0, 60)")),
-    ).rejects.toThrow(/invalid_rate_limit_arguments/);
+      asUser(db, alice, (tx) => tx.query("select public.consume_rate_limit('x', 1, 60)")),
+    ).rejects.toThrow(/does not exist/);
   });
 });

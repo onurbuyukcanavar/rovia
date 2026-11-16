@@ -10,7 +10,7 @@ import { mapsHandler } from "@/lib/api/maps-handler";
 const schema = z.object({ name: z.string().min(10).max(600), w: z.coerce.number().int().min(100).max(1600).default(800) });
 
 export const GET = mapsHandler(
-  { bucket: "photo", perMinute: 60, perDay: 600 },
+  { bucket: "photo" },
   schema,
   ({ name, w }) => photoUri(name, w),
   {

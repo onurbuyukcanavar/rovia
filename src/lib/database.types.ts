@@ -892,7 +892,7 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
-      consume_rate_limit: { Args: { p_bucket: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
+      consume_rate_limit: { Args: { p_bucket: string }; Returns: boolean };
       dashboard_stats: { Args: Record<string, never>; Returns: Json };
     };
     Enums: { [_ in never]: never };
