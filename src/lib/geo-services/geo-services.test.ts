@@ -72,8 +72,8 @@ describe("Valhalla rota istemcisi", () => {
       .toEqual({ auto: { exclude_ferries: true, exclude_highways: true } });
     expect(buildRouteRequest([IST, ANK], false, { avoidTolls: true, avoidHighways: false, avoidFerries: false }, "exclude").costing_options)
       .toEqual({ auto: { use_ferry: 1, exclude_tolls: true } });
-    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: true, avoidHighways: false, avoidFerries: false }, "soft").costing_options)
-      .toEqual({ auto: { use_ferry: 1, use_tolls: 0 } });
+    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: true, avoidHighways: false, avoidFerries: false }, "shortest").costing_options)
+      .toEqual({ auto: { use_ferry: 1, shortest: true } });
   });
 
   it("manevralar: feribot ücreti 'ücretli yol' sayılmaz; yol tarifi adımları ve konumları", () => {
@@ -110,7 +110,7 @@ describe("Valhalla rota istemcisi", () => {
     });
     // 1. istek (exclude_tolls): 116 km'lik dolambaçlı ücretsiz yol
     responses.push({ status: 200, body: { trip: trip(116.6, 96, []) } });
-    // 2. istek (use_tolls=0): köprü (ücretli) + feribot
+    // 2. istek (normal, alternatifli): köprü (ücretli) + feribot
     responses.push({ status: 200, body: {
       trip: trip(40.1, 40, [{ type: 23, length: 9, time: 400, begin_shape_index: 0, toll: true }]),
       alternates: [{ trip: trip(29.6, 61, [{ type: 28, length: 8.5, time: 2400, begin_shape_index: 0, toll: true, ferry: true }]) }],
@@ -118,8 +118,23 @@ describe("Valhalla rota istemcisi", () => {
     const r = await computeRoute([IST, ANK], true, { avoidTolls: true, avoidHighways: false, avoidFerries: false });
     expect(calls).toHaveLength(2);
     expect(JSON.parse(String(calls[0].init.body)).costing_options.auto).toMatchObject({ exclude_tolls: true });
-    expect(JSON.parse(String(calls[1].init.body)).costing_options.auto).toMatchObject({ use_tolls: 0, use_ferry: 1 });
+    expect(JSON.parse(String(calls[1].init.body)).costing_options.auto).toEqual({ use_ferry: 1 });
     expect(r.routes.map((x) => [Math.round(x.distanceMeters / 100) / 10, x.hasFerry, x.hasToll])).toEqual([[29.6, true, false], [116.6, false, false]]);
+  }, 10_000);
+
+  it("normal rotaların hepsi ücretliyse en kısa rota denenir", async () => {
+    const shape = encodePolyline([IST, ANK], 6);
+    const trip = (km: number, min: number, maneuvers: object[]) => ({
+      legs: [{ shape, summary: { length: km, time: min * 60 }, maneuvers }],
+      summary: { length: km, time: min * 60, has_toll: maneuvers.length > 0, has_ferry: false, has_highway: false },
+    });
+    responses.push({ status: 200, body: { trip: trip(116.6, 96, []) } });
+    responses.push({ status: 200, body: { trip: trip(40.1, 40, [{ type: 23, length: 9, time: 400, begin_shape_index: 0, toll: true }]) } });
+    responses.push({ status: 200, body: { trip: trip(29.0, 60, [{ type: 28, length: 8.5, time: 2400, begin_shape_index: 0, toll: true, ferry: true }]) } });
+    const r = await computeRoute([IST, BOLU, ANK], true, { avoidTolls: true, avoidHighways: false, avoidFerries: false });
+    expect(calls).toHaveLength(3);
+    expect(JSON.parse(String(calls[2].init.body)).costing_options.auto).toEqual({ use_ferry: 1, shortest: true });
+    expect(r.routes[0]).toMatchObject({ hasFerry: true, hasToll: false });
   }, 10_000);
 
   it("ücretli yol + feribottan kaçın: tek istek; benzer rotalar tekilleşir", async () => {

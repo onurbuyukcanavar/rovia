@@ -45,19 +45,21 @@ type VResponse = { trip?: VTrip; alternates?: { trip: VTrip }[]; error_code?: nu
  * Valhalla "auto" seçenekleri.
  * - Feribotlar varsayılan olarak cezasız (use_ferry=1): Eskihisar–Topçular gibi gerçek seçenekler rota/alternatif olur.
  * - Kaçınma seçenekleri kesin dışlamadır (exclude_*), Google Maps'teki "... kaçın" davranışı gibi.
- * - tollMode "soft": ücretli yolları güçlü biçimde cezalandır ama feribotu (OSM'de toll=yes) dışlama.
+ * - tollMode "shortest": en kısa rota (ücretsiz feribotlu aday aramak için; bkz. computeRoute).
  */
-function costing(options: RouteOptions, tollMode: "none" | "exclude" | "soft") {
+function costing(options: RouteOptions, tollMode: TollMode) {
   const auto: Record<string, unknown> = {};
   if (options.avoidFerries) auto.exclude_ferries = true;
   else auto.use_ferry = 1;
   if (options.avoidHighways) auto.exclude_highways = true;
   if (tollMode === "exclude") auto.exclude_tolls = true;
-  if (tollMode === "soft") auto.use_tolls = 0;
+  if (tollMode === "shortest") auto.shortest = true;
   return { auto };
 }
 
-export function buildRouteRequest(points: LatLng[], alternatives: boolean, options: RouteOptions = NO_OPTIONS, tollMode: "none" | "exclude" | "soft" = "none") {
+type TollMode = "none" | "exclude" | "shortest";
+
+export function buildRouteRequest(points: LatLng[], alternatives: boolean, options: RouteOptions = NO_OPTIONS, tollMode: TollMode = "none") {
   if (points.length < 2) throw new GeoError("invalid_request", "need ≥2 points");
   if (points.length > MAX_INTERMEDIATES + 2) throw new GeoError("invalid_request", "too many points");
   return {
@@ -145,7 +147,7 @@ function mapError(httpStatus: number, body: VResponse): GeoError {
   return new GeoError("upstream", detail);
 }
 
-async function request(points: LatLng[], alternatives: boolean, options: RouteOptions, tollMode: "none" | "exclude" | "soft") {
+async function request(points: LatLng[], alternatives: boolean, options: RouteOptions, tollMode: TollMode) {
   const { status, body } = await fetchJson<VResponse>(`${valhallaUrl()}/route`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -170,10 +172,13 @@ export function mergeRoutes(groups: ComputedRoute[][]): ComputedRoute[] {
 }
 
 /**
- * Rota hesapla. "Ücretli yollardan kaçın" + feribot serbest olduğunda iki istek atılır:
- * kesin ücretsiz rota ve ücretli yolu cezalandıran (feribota izin veren) rota. İkincisinden yalnızca
- * karayolu ücreti olmayanlar (ör. Eskihisar–Topçular feribotu) alınır. OSM'de feribotlar ücretli
- * işaretli olduğundan tek başına exclude_tolls feribotu da dışlar ve gereksiz uzun yol verirdi.
+ * Rota hesapla. "Ücretli yollardan kaçın" + feribot serbest olduğunda: OSM'de feribotlar da ücretli
+ * işaretli olduğundan Valhalla'nın ücret kaçınması (kesin ya da yumuşak) feribotu da dışlar ve
+ * gereksiz uzun yol verir. Bu yüzden adaylar sırayla toplanır:
+ *   1. kesin ücretsiz rota (exclude_tolls),
+ *   2. normal rotalar (alternatiflerle) → yalnızca karayolu ücreti olmayanlar (ör. Eskihisar–Topçular feribotu),
+ *   3. 2'den aday çıkmazsa en kısa rota → karayolu ücreti yoksa.
+ * Herkese açık sunucu saniyede 1 istek istediği için istekler aralıklı ve sırayla atılır.
  */
 export async function computeRoute(points: LatLng[], alternatives: boolean, options: RouteOptions = NO_OPTIONS): Promise<RouteResponse> {
   const alternativesSupported = points.length === 2;
@@ -183,25 +188,36 @@ export async function computeRoute(points: LatLng[], alternatives: boolean, opti
   if (options.avoidFerries) {
     return { routes: mergeRoutes([await request(points, alternatives, options, "exclude")]), alternativesSupported };
   }
-  // Herkese açık sunucu saniyede 1 istek ister: istekler sırayla
+
+  let last = Date.now();
+  const spaced = async <T>(fn: () => Promise<T>) => {
+    const wait = 1_050 - (Date.now() - last);
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    try {
+      return await fn();
+    } finally {
+      last = Date.now();
+    }
+  };
+  const noRoadToll = (routes: ComputedRoute[]) => routes.filter((r) => !r.hasToll);
+
   let strict: ComputedRoute[] = [];
-  let strictError: GeoError | null = null;
-  const started = Date.now();
+  let firstError: unknown = null;
   try {
     strict = await request(points, alternatives, options, "exclude");
   } catch (e) {
     if (!(e instanceof GeoError) || e.code !== "zero_results") throw e;
-    strictError = e;
+    firstError = e;
   }
-  let soft: ComputedRoute[] = [];
-  const wait = 1_050 - (Date.now() - started);
-  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  last = Date.now();
+  let extra: ComputedRoute[] = [];
   try {
-    soft = (await request(points, alternatives, options, "soft")).filter((r) => !r.hasToll);
+    extra = noRoadToll(await spaced(() => request(points, alternatives, options, "none")));
+    if (!extra.length) extra = noRoadToll(await spaced(() => request(points, false, options, "shortest")));
   } catch (e) {
     if (!strict.length) throw e;
   }
-  const routes = mergeRoutes([strict, soft]);
-  if (!routes.length) throw strictError ?? new GeoError("zero_results", "no toll-free route");
+  const routes = mergeRoutes([strict, extra]);
+  if (!routes.length) throw firstError ?? new GeoError("zero_results", "no toll-free route");
   return { routes, alternativesSupported };
 }
