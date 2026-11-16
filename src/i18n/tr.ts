@@ -288,6 +288,7 @@ export const tr = {
       "Konumun yalnızca Kayıt Modu'nda sen kaydı başlattığında ve kayıt sürerken alınır; kaydı istediğin an duraklatabilir, bitirebilir veya iptal edebilirsin. Tamamlanan yolculukların özeti ve sadeleştirilmiş rota çizgisi saklanır; saniye saniye ham GPS noktaları aşağıdaki süre sonunda otomatik silinir.",
     retention: "Ham GPS noktalarını sakla",
     options: { "0": "Yolculuk tamamlanınca sil", "30": "30 gün", "90": "90 gün", "365": "1 yıl", forever: "Süresiz" } as Record<string, string>,
+    save: "Saklama süresini kaydet",
     saved: "Konum verisi ayarı kaydedildi.",
     perTrip: "Tek bir yolculuğun ham noktalarını veya yolculuğun tamamını, yolculuk özeti sayfasından silebilirsin.",
   },

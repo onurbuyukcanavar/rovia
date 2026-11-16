@@ -69,7 +69,13 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
   const elapsedS = rec.session ? (now - rec.session.startedAt) / 1000 : 0;
   const avgKmh = rec.stats.movingS >= 30 ? (rec.stats.distanceM / rec.stats.movingS) * 3.6 : null;
   const position = fix ? { lat: fix.lat, lng: fix.lng } : null;
-  const showRemote = rec.phase === "idle" && serverActive && !rec.session;
+  // Sunucunun sayfa açılışında bildirdiği aktif kayıt bu cihazdaki kayıtsa, o kayıt kapandıktan
+  // sonra (iptal/tamamlama) eski bilgiyle "süren kaydın var" paneli gösterilmez.
+  const [handledRemote, setHandledRemote] = useState<string | null>(null);
+  if (serverActive && rec.session?.recordingId === serverActive.recordingId && handledRemote !== serverActive.recordingId) {
+    setHandledRemote(serverActive.recordingId);
+  }
+  const showRemote = rec.phase === "idle" && !!serverActive && !rec.session && handledRemote !== serverActive.recordingId;
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem-4.5rem-env(safe-area-inset-bottom))] flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
@@ -182,7 +188,13 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
                 <div className="flex justify-end gap-2">
                   <Button type="button" size="sm" variant="ghost" onClick={() => setConfirming(null)} disabled={busy}>{t.recording.keep}</Button>
                   <Button type="button" size="sm" variant={confirming === "finish" ? "accent" : "danger"} disabled={busy}
-                    onClick={() => run(confirming === "finish" ? rec.finish : rec.cancel)}>
+                    onClick={() => run(async () => {
+                      if (confirming === "finish") await rec.finish();
+                      else {
+                        await rec.cancel();
+                        router.refresh(); // planlı yolculuk listesi ve sunucu durumu güncellensin
+                      }
+                    })}>
                     {confirming === "finish" ? t.recording.finishYes : t.recording.cancelYes}
                   </Button>
                 </div>

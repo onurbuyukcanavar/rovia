@@ -168,7 +168,7 @@ test.describe("GPS izni", () => {
     });
     await login(page, "alice", "/kayit-modu");
     await page.getByRole("button", { name: "Kaydı Başlat" }).click();
-    await expect(page.getByRole("alert")).toContainText("Konum izni reddedildi");
+    await expect(page.getByRole("alert").filter({ hasText: "Konum izni reddedildi" })).toBeVisible();
     await expect(page.getByTestId("recorder-idle")).toBeVisible();
     await context.close();
   });

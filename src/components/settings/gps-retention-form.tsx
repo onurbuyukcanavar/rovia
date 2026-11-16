@@ -21,7 +21,7 @@ export function GpsRetentionForm({ days }: { days: number | null }) {
           {ORDER.map((k) => <option key={k} value={k}>{t.gpsSettings.options[k]}</option>)}
         </select>
       </div>
-      <SubmitButton variant="secondary" pendingLabel={t.common.saving}>{t.common.save}</SubmitButton>
+      <SubmitButton variant="secondary" pendingLabel={t.common.saving}>{t.gpsSettings.save}</SubmitButton>
     </form>
   );
 }
