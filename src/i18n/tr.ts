@@ -198,6 +198,8 @@ export const tr = {
     hasHighway: "Otoyol",
     noHighway: "Otoyolsuz",
     tollShort: "Ücretli",
+    bridgeShort: "Köprü geçişi",
+    bridgeNote: (names: string) => `Bu rota ${names} üzerinden geçiyor. Köprü geçişi ücretlidir; isteğin üzerine “ücretli yol” sayılmaz.`,
     ferryShort: "Feribot",
     fastest: "En hızlı",
     options: {
@@ -260,6 +262,7 @@ export const tr = {
       busy: "Rota servisi şu anda yoğun. Birkaç saniye sonra tekrar dene.",
       not_found: "Aradığın yer bulunamadı.",
       zero_results: "Bu noktalar arasında araçla gidilebilecek bir rota bulunamadı.",
+      no_suitable_route: "Uygun rota bulunamamaktadır. Seçtiğin rota seçenekleriyle bu duraklar arasında makul bir yol yok; seçeneklerden birini kapatmayı dene.",
       timeout: "Harita servisi zamanında yanıt vermedi. Tekrar dene.",
       upstream: "Harita servisinden beklenmeyen bir yanıt geldi. Tekrar dene.",
     },

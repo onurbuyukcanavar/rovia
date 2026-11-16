@@ -37,6 +37,8 @@ export type RouteOption = {
   hasToll: boolean;
   hasFerry: boolean;
   hasHighway: boolean;
+  /** İstisna köprüler (15 Temmuz, FSM, 1915 Çanakkale): ücretli yol sayılmaz ama geçiş ücretlidir */
+  tollBridges?: string[];
   steps?: RouteStep[];
 };
 

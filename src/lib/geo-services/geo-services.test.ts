@@ -3,7 +3,20 @@ import { decodePolyline, encodePolyline } from "@/lib/geo";
 import { GeoError } from "./errors";
 import { autocomplete, reverseGeocode, searchAlongRoute } from "./features";
 import { searchAddresses } from "./photon";
-import { buildRouteRequest, computeRoute, MAX_INTERMEDIATES, mergeRoutes, stepKind, toRoute } from "./valhalla";
+import { chooseBridge, isEuropeanSide } from "./straits";
+import { buildRouteRequest, computeRoute, isAbsurd, MAX_INTERMEDIATES, mergeRoutes, stepKind, toRoute } from "./valhalla";
+
+/** Valhalla yanıtı üretici: noktalar [enlem, boylam], km, dakika */
+function trip(points: [number, number][], km: number, min: number, maneuvers: ReturnType<typeof man>[]) {
+  return {
+    legs: [{ shape: encodePolyline(points.map(([lat, lng]) => ({ lat, lng })), 6), summary: { length: km, time: min * 60 }, maneuvers }],
+    summary: { length: km, time: min * 60 },
+  };
+}
+function man(type: number, begin: number, end: number, o: { names?: string[]; instruction?: string; length?: number; time?: number; toll?: boolean; highway?: boolean; ferry?: boolean } = {}) {
+  return { type, begin_shape_index: begin, end_shape_index: end, street_names: o.names, instruction: o.instruction ?? "",
+    length: o.length ?? 1, time: o.time ?? 60, toll: o.toll, highway: o.highway, ferry: o.ferry };
+}
 
 type Call = { url: string; init: RequestInit };
 let calls: Call[];
@@ -67,86 +80,157 @@ describe("Valhalla rota istemcisi", () => {
     expect(path.at(-1)).toEqual({ lat: 39.93340, lng: 32.85970 });
   });
 
-  it("seçenekler: kaçınmalar kesin dışlama; feribottan kaçınınca use_ferry yok", () => {
-    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: false, avoidHighways: true, avoidFerries: true }).costing_options)
-      .toEqual({ auto: { exclude_ferries: true, exclude_highways: true } });
-    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: true, avoidHighways: false, avoidFerries: false }, "exclude").costing_options)
-      .toEqual({ auto: { use_ferry: 1, exclude_tolls: true } });
-    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: true, avoidHighways: false, avoidFerries: false }, "shortest").costing_options)
+  it("istek kipleri: kesin dışlama, serbest (yalnız feribot kesin) ve en kısa", () => {
+    const all = { avoidTolls: true, avoidHighways: true, avoidFerries: true };
+    expect(buildRouteRequest([IST, ANK], false, all, "strict").costing_options)
+      .toEqual({ auto: { exclude_ferries: true, exclude_highways: true, exclude_tolls: true } });
+    expect(buildRouteRequest([IST, ANK], false, all, "relaxed").costing_options).toEqual({ auto: { exclude_ferries: true } });
+    expect(buildRouteRequest([IST, ANK], false, { ...all, avoidFerries: false }, "relaxed-shortest").costing_options)
       .toEqual({ auto: { use_ferry: 1, shortest: true } });
+    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: false, avoidHighways: false, avoidFerries: false }, "plain").costing_options)
+      .toEqual({ auto: { use_ferry: 1 } });
   });
 
-  it("manevralar: feribot ücreti 'ücretli yol' sayılmaz; yol tarifi adımları ve konumları", () => {
-    const shape = encodePolyline([{ lat: 40.80, lng: 29.43 }, { lat: 40.77, lng: 29.43 }, { lat: 40.69, lng: 29.40 }, { lat: 40.655, lng: 29.276 }], 6);
-    const r = toRoute({
-      legs: [{ shape, summary: { length: 29.6, time: 3660 }, maneuvers: [
-        { type: 3, instruction: "güney yönüne doğru sürün.", length: 3.5, time: 300, begin_shape_index: 0 },
-        { type: 28, instruction: "Eskihisar - Topçular feribotuna binin.", length: 8.5, time: 2400, begin_shape_index: 1, toll: true, ferry: true },
-        { type: 29, instruction: "Feribottan inin.", length: 17.6, time: 960, begin_shape_index: 2 },
-        { type: 4, instruction: "Varış noktanıza ulaştınız.", length: 0, time: 0, begin_shape_index: 3 },
-      ] }],
-      summary: { length: 29.6, time: 3660, has_toll: true, has_ferry: true, has_highway: false },
-    });
-    expect(r).toMatchObject({ hasToll: false, hasFerry: true, hasHighway: false });
+  it("manevralar: feribot ücreti ücretli yol değil; yol tarifi adımları ve konumları", () => {
+    const r = toRoute(trip([[40.80, 29.43], [40.77, 29.43], [40.69, 29.40], [40.655, 29.276]], 29.6, 61, [
+      man(3, 0, 1, { instruction: "güney yönüne doğru sürün.", length: 3.5 }),
+      man(28, 1, 2, { instruction: "Eskihisar - Topçular feribotuna binin.", length: 8.5, time: 2400, toll: true, ferry: true }),
+      man(29, 2, 3, { instruction: "Feribottan inin.", length: 17.6 }),
+      man(4, 3, 3, { instruction: "Varış noktanıza ulaştınız.", length: 0 }),
+    ]));
+    expect(r).toMatchObject({ hasToll: false, hasFerry: true, hasHighway: false, tollBridges: [] });
     expect(r.steps.map((s) => s.kind)).toEqual(["depart", "ferry", "ferry", "arrive"]);
     expect(r.steps[1]).toMatchObject({ distanceMeters: 8500, durationSeconds: 2400, toll: false, location: { lat: 40.77, lng: 29.43 } });
-
-    const bridge = toRoute({
-      legs: [{ shape, summary: { length: 39.3, time: 2100 }, maneuvers: [
-        { type: 23, instruction: "Osmangazi Köprüsü'ne doğru sağda kalın.", length: 12, time: 500, begin_shape_index: 1, toll: true, highway: true },
-      ] }],
-      summary: { length: 39.3, time: 2100, has_toll: true, has_ferry: false, has_highway: true },
-    });
-    expect(bridge).toMatchObject({ hasToll: true, hasFerry: false });
     expect(stepKind(15)).toBe("left");
     expect(stepKind(26)).toBe("roundabout");
   });
 
-  it("ücretli yollardan kaçın (feribot serbest): kesin ücretsiz + feribotlu rota birleştirilir, köprülü rota elenir", async () => {
-    const shape = encodePolyline([IST, ANK], 6);
-    const trip = (km: number, min: number, maneuvers: object[]) => ({
-      legs: [{ shape, summary: { length: km, time: min * 60 }, maneuvers }],
-      summary: { length: km, time: min * 60, has_toll: maneuvers.length > 0, has_ferry: false, has_highway: false },
+  it("boğaz köprüleri ücretli yol/otoyol sayılmaz (gerçek Valhalla manevraları); diğer ücretli geçişler sayılır", () => {
+    // Kadıköy → Beşiktaş: 15 Temmuz Şehitler Köprüsü (yönlendirme tabelasında Avrasya Tüneli de anılıyor)
+    const temmuz = toRoute(trip([[40.9905, 29.036], [41.0562, 29.0215]], 14.3, 28, [
+      man(20, 0, 1, { names: ["34-11"], toll: true, highway: true, length: 10,
+        instruction: "Fikirtepe/Avrasya Tüneli/15 Temmuz Şehitler Köprüsü/Edirne işaretine doğru K-15 çıkıştan çıkın." }),
+    ]));
+    expect(temmuz).toMatchObject({ hasToll: false, hasHighway: false, tollBridges: ["15 Temmuz Şehitler Köprüsü"] });
+    // Sarıyer → Beykoz: FSM (O-2)
+    const fsm = toRoute(trip([[41.1011, 29.0007], [41.0911, 29.0878]], 31.6, 56, [
+      man(24, 0, 1, { names: ["O-2"], toll: true, highway: true, length: 7.6, instruction: "O-2 üzerinde bulunan K-5 çıkışından çıkın." }),
+    ]));
+    expect(fsm).toMatchObject({ hasToll: false, hasHighway: false, tollBridges: ["Fatih Sultan Mehmet Köprüsü"] });
+    // Lapseki → Gelibolu: 1915 Çanakkale Köprüsü ve gişe kavşağı
+    const canakkale = toRoute(trip([[40.3065, 26.652], [40.3695, 26.606], [40.3628, 26.6181]], 28.8, 31, [
+      man(24, 0, 1, { names: ["O-6", "E-90"], toll: true, highway: true, length: 10.9, instruction: "1915 Çanakkale Köprüsü işaretine doğru solda kalın." }),
+      man(20, 1, 2, { names: ["Gelibolu Güney Kavşağı"], toll: true, length: 1.7, instruction: "Gelibolu (Güney) işaretine doğru çıkın." }),
+    ]));
+    expect(canakkale).toMatchObject({ hasToll: false, hasHighway: false, tollBridges: ["1915 Çanakkale Köprüsü"] });
+    // Avrasya Tüneli, Osmangazi (O-5) ve köprü dışındaki O-6 ücretli kalır
+    const avrasya = toRoute(trip([[41.0028, 28.9649], [40.8169, 29.3617]], 41.4, 40, [
+      man(24, 0, 1, { names: ["Avrasya Tüneli"], toll: true, length: 41.4, instruction: "Avrasya Tüneli caddesine girin." }),
+    ]));
+    expect(avrasya).toMatchObject({ hasToll: true, tollBridges: [] });
+    const avrasyaShort = toRoute(trip([[41.0, 29.01], [40.99, 29.03]], 3, 4, [
+      man(24, 0, 1, { names: ["Avrasya Tüneli"], toll: true, length: 3, instruction: "Avrasya Tüneli." }),
+    ]));
+    expect(avrasyaShort.hasToll).toBe(true);
+    const o5 = toRoute(trip([[40.1932, 28.3525], [40.2894, 29.0192]], 61.8, 40, [
+      man(24, 0, 1, { names: ["O-5"], toll: true, highway: true, length: 61.8, instruction: "O-5 caddesine girin." }),
+    ]));
+    expect(o5).toMatchObject({ hasToll: true, hasHighway: true });
+    const o6north = toRoute(trip([[40.6, 26.75], [40.9, 26.9]], 40, 25, [
+      man(24, 0, 1, { names: ["O-6"], toll: true, highway: true, length: 40, instruction: "O-6 caddesine girin." }),
+    ]));
+    expect(o6north).toMatchObject({ hasToll: true, hasHighway: true });
+  });
+
+  it("üç kaçınma birden: anlamsız dolambaç reddedilir, boğaz köprüsü üzerinden zorlanan rota kurulur", async () => {
+    const TEKIRDAG = { lat: 40.978, lng: 27.511 };
+    const BURSA = { lat: 40.195, lng: 29.06 };
+    const modes: string[] = [];
+    const req = async (points: { lat: number; lng: number }[], _alt: boolean, _o: unknown, mode: string) => {
+      modes.push(`${mode}:${points.length}`);
+      if (mode === "strict" && points[0] === TEKIRDAG && points[1] === BURSA) {
+        // Kazakistan üzerinden 15.718 km (gerçek gözlem)
+        return [trip([[40.978, 27.511], [45, 60], [40.195, 29.06]], 15718, 14528 * 60 / 60, [])];
+      }
+      if (mode === "relaxed" || mode === "relaxed-shortest") {
+        if (points.length === 2 && points[0] === TEKIRDAG) {
+          return [trip([[40.978, 27.511], [40.2894, 29.0192]], 372, 336, [
+            man(24, 0, 1, { names: ["Avrasya Tüneli"], toll: true, length: 41, instruction: "Avrasya Tüneli." }),
+          ])];
+        }
+        // Köprü geçişi (15 Temmuz)
+        return [trip([[41.0612, 29.0058], [41.0228, 29.0482]], 6, 8, [
+          man(23, 0, 1, { names: ["O-1"], toll: true, highway: true, length: 5.1, instruction: "15 Temmuz Şehitler Köprüsü/Edirne işaretine doğru sağda kalın." }),
+        ])];
+      }
+      // Kesin parçalar: Tekirdağ → köprü (Avrupa) ve köprü (Anadolu) → Bursa (körfez çevresinden, D-100/D-130)
+      if (mode === "strict" && points[0] === TEKIRDAG) return [trip([[40.978, 27.511], [41.0612, 29.0058]], 135, 120, [man(1, 0, 0, { length: 135 })])];
+      return [trip([[41.0228, 29.0482], [40.195, 29.06]], 190, 200, [man(4, 1, 1, { length: 0 })])];
+    };
+    const all = { avoidTolls: true, avoidHighways: true, avoidFerries: true };
+    const r = await computeRoute([TEKIRDAG, BURSA], true, all, req as never);
+    expect(modes).toEqual(["strict:2", "relaxed:2", "relaxed-shortest:2", "strict:2", "strict:2", "relaxed:2"]);
+    expect(r.routes).toHaveLength(1);
+    expect(r.routes[0]).toMatchObject({
+      distanceMeters: 331_000, hasToll: false, hasHighway: false, hasFerry: false, tollBridges: ["15 Temmuz Şehitler Köprüsü"],
     });
-    // 1. istek (exclude_tolls): 116 km'lik dolambaçlı ücretsiz yol
-    responses.push({ status: 200, body: { trip: trip(116.6, 96, []) } });
-    // 2. istek (normal, alternatifli): köprü (ücretli) + feribot
-    responses.push({ status: 200, body: {
-      trip: trip(40.1, 40, [{ type: 23, length: 9, time: 400, begin_shape_index: 0, toll: true }]),
-      alternates: [{ trip: trip(29.6, 61, [{ type: 28, length: 8.5, time: 2400, begin_shape_index: 0, toll: true, ferry: true }]) }],
-    } });
-    const r = await computeRoute([IST, ANK], true, { avoidTolls: true, avoidHighways: false, avoidFerries: false });
-    expect(calls).toHaveLength(2);
-    expect(JSON.parse(String(calls[0].init.body)).costing_options.auto).toMatchObject({ exclude_tolls: true });
-    expect(JSON.parse(String(calls[1].init.body)).costing_options.auto).toEqual({ use_ferry: 1 });
+    expect(r.routes[0].legs).toHaveLength(1);
+    // Yol tarifinde ara parçaların varış/çıkış adımları tekrarlanmaz
+    expect(r.routes[0].steps.filter((s) => s.kind === "depart" || s.kind === "arrive")).toHaveLength(2);
+  });
+
+  it("uygun aday yoksa: no_suitable_route ve Türkçe mesaj", async () => {
+    const A = { lat: 39.92, lng: 32.85 };
+    const B = { lat: 38.643, lng: 34.829 };
+    const req = async () => [trip([[39.92, 32.85], [55, 80], [38.643, 34.829]], 9000, 9000, [
+      man(24, 0, 1, { names: ["O-21"], toll: true, highway: true, length: 100 }),
+    ])];
+    const err = await computeRoute([A, B], true, { avoidTolls: true, avoidHighways: true, avoidFerries: true }, req as never).catch((e) => e);
+    expect(err).toBeInstanceOf(GeoError);
+    expect(err.code).toBe("no_suitable_route");
+    expect(err.userMessage).toMatch(/^Uygun rota bulunamamaktadır/);
+  });
+
+  it("ücretli yoldan kaçın (feribot serbest): ücretsiz 116 km + feribotlu rota; köprülü rota elenir", async () => {
+    const G = { lat: 40.8027, lng: 29.4307 };
+    const Y = { lat: 40.655, lng: 29.276 };
+    const req = async (_p: unknown, _a: boolean, _o: unknown, mode: string) => mode === "strict"
+      ? [trip([[40.8, 29.43], [40.75, 29.9], [40.655, 29.276]], 116.6, 96, [])]
+      : [
+        trip([[40.8, 29.43], [40.655, 29.276]], 40.1, 40, [man(23, 0, 1, { names: ["O-5"], toll: true, highway: true, length: 9 })]),
+        trip([[40.8, 29.43], [40.77, 29.43], [40.655, 29.276]], 29.6, 61, [man(28, 1, 2, { toll: true, ferry: true, length: 8.5 })]),
+      ];
+    const r = await computeRoute([G, Y], true, { avoidTolls: true, avoidHighways: false, avoidFerries: false }, req as never);
     expect(r.routes.map((x) => [Math.round(x.distanceMeters / 100) / 10, x.hasFerry, x.hasToll])).toEqual([[29.6, true, false], [116.6, false, false]]);
-  }, 10_000);
+  });
 
-  it("normal rotaların hepsi ücretliyse en kısa rota denenir", async () => {
-    const shape = encodePolyline([IST, ANK], 6);
-    const trip = (km: number, min: number, maneuvers: object[]) => ({
-      legs: [{ shape, summary: { length: km, time: min * 60 }, maneuvers }],
-      summary: { length: km, time: min * 60, has_toll: maneuvers.length > 0, has_ferry: false, has_highway: false },
-    });
-    responses.push({ status: 200, body: { trip: trip(116.6, 96, []) } });
-    responses.push({ status: 200, body: { trip: trip(40.1, 40, [{ type: 23, length: 9, time: 400, begin_shape_index: 0, toll: true }]) } });
-    responses.push({ status: 200, body: { trip: trip(29.0, 60, [{ type: 28, length: 8.5, time: 2400, begin_shape_index: 0, toll: true, ferry: true }]) } });
-    const r = await computeRoute([IST, BOLU, ANK], true, { avoidTolls: true, avoidHighways: false, avoidFerries: false });
-    expect(calls).toHaveLength(3);
-    expect(JSON.parse(String(calls[2].init.body)).costing_options.auto).toEqual({ use_ferry: 1, shortest: true });
-    expect(r.routes[0]).toMatchObject({ hasFerry: true, hasToll: false });
-  }, 10_000);
-
-  it("ücretli yol + feribottan kaçın: tek istek; benzer rotalar tekilleşir", async () => {
-    responses.push({ status: 200, body: { trip: { legs: [{ shape: encodePolyline([IST, ANK], 6), summary: { length: 450, time: 16000 } }], summary: { length: 450, time: 16000 } } } });
-    await computeRoute([IST, ANK], true, { avoidTolls: true, avoidHighways: false, avoidFerries: true });
-    expect(calls).toHaveLength(1);
-    expect(JSON.parse(String(calls[0].init.body)).costing_options.auto).toEqual({ exclude_ferries: true, exclude_tolls: true });
-
-    const base = { encodedPolyline: "", legs: [], hasToll: false, hasFerry: false, hasHighway: false, steps: [] };
+  it("benzer rotalar tekilleşir", () => {
+    const base = { encodedPolyline: "", legs: [], hasToll: false, hasFerry: false, hasHighway: false, tollBridges: [], steps: [] };
     const merged = mergeRoutes([[{ ...base, distanceMeters: 100_000, durationSeconds: 4000 }],
       [{ ...base, distanceMeters: 100_500, durationSeconds: 4010 }, { ...base, distanceMeters: 90_000, durationSeconds: 5000 }]]);
     expect(merged.map((m) => m.distanceMeters)).toEqual([100_000, 90_000]);
+  });
+
+  it("yaka sınıflaması ve köprü seçimi", () => {
+    const eu = (lat: number, lng: number) => isEuropeanSide({ lat, lng });
+    // Avrupa: Beşiktaş, Bakırköy, Sarıyer, Tekirdağ, Edirne, Gelibolu, Eceabat
+    expect([eu(41.043, 29.007), eu(40.978, 28.873), eu(41.168, 29.05), eu(40.978, 27.511), eu(41.67, 26.56), eu(40.41, 26.67), eu(40.184, 26.357)])
+      .toEqual([true, true, true, true, true, true, true]);
+    // Anadolu: Kadıköy, Üsküdar, Beykoz, Gebze, Yalova, Bursa, Çanakkale, Lapseki, Ankara
+    expect([eu(40.99, 29.028), eu(41.026, 29.015), eu(41.13, 29.1), eu(40.8, 29.43), eu(40.655, 29.276), eu(40.195, 29.06), eu(40.146, 26.405), eu(40.344, 26.685), eu(39.92, 32.85)])
+      .toEqual([false, false, false, false, false, false, false, false, false]);
+    expect(chooseBridge({ lat: 40.978, lng: 27.511 }, { lat: 40.195, lng: 29.06 }).bridge.id).toBe("15temmuz");
+    expect(chooseBridge({ lat: 41.168, lng: 29.05 }, { lat: 41.13, lng: 29.1 }).bridge.id).toBe("fsm");
+    expect(chooseBridge({ lat: 40.184, lng: 26.357 }, { lat: 39.6, lng: 27.0 }).bridge.id).toBe("canakkale1915");
+  });
+
+  it("anlamsız dolambaç ölçütü", () => {
+    const base = { encodedPolyline: "", legs: [], hasToll: false, hasFerry: false, hasHighway: false, tollBridges: [], steps: [] };
+    const gebzeYalova = [{ lat: 40.8027, lng: 29.4307 }, { lat: 40.655, lng: 29.276 }];
+    expect(isAbsurd({ ...base, distanceMeters: 116_600, durationSeconds: 1 }, gebzeYalova)).toBe(false);
+    const tekirdagBursa = [{ lat: 40.978, lng: 27.511 }, { lat: 40.195, lng: 29.06 }];
+    expect(isAbsurd({ ...base, distanceMeters: 6_436_000, durationSeconds: 1 }, tekirdagBursa)).toBe(true);
+    expect(isAbsurd({ ...base, distanceMeters: 331_000, durationSeconds: 1 }, tekirdagBursa)).toBe(false);
   });
 
   it("VALHALLA_URL ile kendi sunucumuza yönlenir", async () => {

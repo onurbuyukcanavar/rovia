@@ -2,11 +2,11 @@ import { t } from "@/i18n";
 
 export type GeoErrorCode =
   | "unauthorized" | "rate_limited" | "invalid_request" | "busy"
-  | "not_found" | "zero_results" | "timeout" | "upstream";
+  | "not_found" | "zero_results" | "no_suitable_route" | "timeout" | "upstream";
 
 const STATUS: Record<GeoErrorCode, number> = {
   unauthorized: 401, rate_limited: 429, invalid_request: 400, busy: 503,
-  not_found: 404, zero_results: 404, timeout: 504, upstream: 502,
+  not_found: 404, zero_results: 404, no_suitable_route: 404, timeout: 504, upstream: 502,
 };
 
 /** Kullanıcıya gösterilebilir, iç ayrıntı sızdırmayan hata. Ham ayrıntı yalnızca sunucu loguna gider. */

@@ -9,7 +9,10 @@ const PREFIX = "E2E rt";
 const GEBZE = { lat: 40.8027, lng: 29.4307 };
 const YALOVA = { lat: 40.655, lng: 29.276 };
 
-type Route = { distanceMeters: number; hasToll: boolean; hasFerry: boolean; hasHighway: boolean; steps: { instruction: string; kind: string }[] };
+type Route = {
+  distanceMeters: number; hasToll: boolean; hasFerry: boolean; hasHighway: boolean; tollBridges: string[];
+  steps: { instruction: string; kind: string }[];
+};
 
 async function cleanup() {
   if (!url || !key) return;
@@ -19,10 +22,14 @@ async function cleanup() {
   await sb.from("trips").delete().like("title", `${PREFIX}%`);
 }
 
-async function route(page: Page, options: Record<string, boolean> = {}) {
+async function raw(page: Page, options: Record<string, boolean>, origin = GEBZE, destination = YALOVA) {
   // Herkese açık rota sunucusu saniyede 1 istek ister
   await page.waitForTimeout(1_200);
-  const res = await page.request.post("/api/maps/route", { data: { origin: GEBZE, destination: YALOVA, alternatives: true, options } });
+  return page.request.post("/api/maps/route", { data: { origin, destination, alternatives: true, options }, timeout: 90_000 });
+}
+
+async function route(page: Page, options: Record<string, boolean> = {}, origin = GEBZE, destination = YALOVA) {
+  const res = await raw(page, options, origin, destination);
   expect(res.ok(), await res.text()).toBe(true);
   return (await res.json()).routes as Route[];
 }
@@ -71,6 +78,31 @@ test.describe("Rota seçenekleri, feribot ve öneriler", () => {
     // Otoyoldan kaçın
     const noHighway = await route(page, { avoidHighways: true });
     expect(noHighway.every((r) => !r.hasHighway)).toBe(true);
+  });
+
+  test("üç seçenek birden: Tekirdağ → Bursa köprü üzerinden makul rota; İstanbul içi köprü; mümkün değilse 'Uygun rota bulunamamaktadır'", async ({ page }) => {
+    test.setTimeout(180_000);
+    await login(page, "alice");
+    const all = { avoidTolls: true, avoidHighways: true, avoidFerries: true };
+
+    // Önceden Kazakistan üzerinden 15.718 km dönüyordu
+    const tb = await route(page, all, { lat: 40.978, lng: 27.511 }, { lat: 40.195, lng: 29.06 });
+    console.log("[Tekirdağ→Bursa üçü birden]", tb.map((r) => `${(r.distanceMeters / 1000).toFixed(0)} km köprü=${r.tollBridges.join(",")}`).join(" | "));
+    expect(tb[0].distanceMeters).toBeLessThan(500_000);
+    expect(tb.every((r) => !r.hasToll && !r.hasHighway && !r.hasFerry)).toBe(true);
+    expect(tb[0].tollBridges.some((b) => /15 Temmuz|Fatih Sultan Mehmet/.test(b))).toBe(true);
+
+    // İstanbul içinde Boğaz geçişi ücretli yoldan kaçınırken köprüden
+    const kb = await route(page, { avoidTolls: true }, { lat: 40.990, lng: 29.028 }, { lat: 41.043, lng: 29.007 });
+    expect(kb[0].distanceMeters).toBeLessThan(40_000);
+    expect(kb[0].tollBridges.length).toBeGreaterThan(0);
+
+    // Feribotsuz adaya yol yok
+    const res = await raw(page, { avoidFerries: true }, { lat: 40.146, lng: 26.405 }, { lat: 39.836, lng: 26.067 });
+    expect(res.status()).toBe(404);
+    const body = await res.json();
+    expect(body.error.code).toBe("no_suitable_route");
+    expect(body.error.message).toMatch(/^Uygun rota bulunamamaktadır/);
   });
 
   test("planlayıcı: seçenek kaydedilir ve geri gelir; yol tarifi; rota üzerindeki öneriden durak ekleme", async ({ page }) => {

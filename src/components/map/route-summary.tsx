@@ -1,5 +1,5 @@
 "use client";
-import { Clock3, Gauge, LoaderCircle, Ship, Ticket } from "lucide-react";
+import { Clock3, Landmark, Gauge, LoaderCircle, Ship, Ticket } from "lucide-react";
 import type { RouteResult } from "@/lib/maps/types";
 import { formatDistance, formatDuration } from "@/lib/format";
 import { Alert } from "@/components/ui/alert";
@@ -46,6 +46,11 @@ export function RouteSummary({ result, selected, onSelect, loading, error, hasWa
           {route.hasToll && <Badge className="gap-1"><Ticket className="size-3" aria-hidden /> {t.maps.hasToll}</Badge>}
           {route.hasFerry && <Badge className="gap-1"><Ship className="size-3" aria-hidden /> {t.maps.hasFerry}</Badge>}
         </div>
+      )}
+      {!!route.tollBridges?.length && (
+        <p className="flex items-start gap-1.5 text-xs text-stone-600" data-testid="bridge-note">
+          <Landmark className="mt-0.5 size-3.5 shrink-0" aria-hidden /> {t.maps.bridgeNote(route.tollBridges.join(" ve "))}
+        </p>
       )}
 
       {result.routes.length > 1 && (

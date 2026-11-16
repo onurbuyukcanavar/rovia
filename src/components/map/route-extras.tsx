@@ -49,6 +49,7 @@ export function RouteFlags({ route, fastest }: { route: RouteOption; fastest?: b
       {fastest && <Flagish className="bg-success/10 text-success">{t.maps.fastest}</Flagish>}
       {route.hasToll && <Flagish><Ticket className="size-3" aria-hidden /> {t.maps.tollShort}</Flagish>}
       {route.hasFerry && <Flagish className="bg-sky-100 text-sky-800"><Ship className="size-3" aria-hidden /> {t.maps.ferryShort}</Flagish>}
+      {!!route.tollBridges?.length && <Flagish><Landmark className="size-3" aria-hidden /> {t.maps.bridgeShort}</Flagish>}
       {!route.hasHighway && <Flagish>{t.maps.noHighway}</Flagish>}
     </span>
   );
