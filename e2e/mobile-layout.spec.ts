@@ -73,6 +73,7 @@ test.describe("mobil yerleşim", () => {
   test("yazı alanları 16px (iOS yakınlaştırmaz); harita dokununca tam ekran olur, Küçült ve geri ile döner", async ({ page }) => {
     test.setTimeout(90_000);
     await login(page, "alice", "/favoriler");
+    await expect(page.getByRole("searchbox", { name: "Listede ara" })).toBeVisible({ timeout: 20_000 });
     const sizes = await page.evaluate(() =>
       Array.from(document.querySelectorAll("input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea"))
         .filter((el) => (el as HTMLElement).offsetParent !== null)
