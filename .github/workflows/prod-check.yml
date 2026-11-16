@@ -18,9 +18,9 @@ jobs:
       E2E_BASE_URL: ${{ inputs.url || 'https://rovia-seven.vercel.app' }}
       NEXT_PUBLIC_SUPABASE_URL: https://lbocidoprcqiuxtqhoye.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_iwaXltsu1QuuBjHXAo0c-g_bQLrbqnc
-      E2E_ALICE_EMAIL: ${{ secrets.E2E_ALICE_EMAIL }}
+      E2E_ALICE_EMAIL: e2e-alice@rovia.test
       E2E_ALICE_PASSWORD: ${{ secrets.E2E_ALICE_PASSWORD }}
-      E2E_BOB_EMAIL: ${{ secrets.E2E_BOB_EMAIL }}
+      E2E_BOB_EMAIL: e2e-bob@rovia.test
       E2E_BOB_PASSWORD: ${{ secrets.E2E_BOB_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
