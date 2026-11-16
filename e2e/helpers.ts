@@ -22,7 +22,7 @@ export async function login(page: Page, who: keyof typeof users, next?: string) 
  * Worker yüklenemezse ya da karolar gelmezse alan tek renktir (arka plan); çizilmiş haritada yüzlerce renk olur.
  */
 export async function mapColorCount(page: Page, selector = ".maplibregl-canvas") {
-  const png = (await page.locator(selector).first().screenshot()).toString("base64");
+  const png = await canvasOnlyScreenshot(page, selector);
   return page.evaluate(async (b64) => {
     const img = new Image();
     img.src = `data:image/png;base64,${b64}`;
@@ -52,7 +52,7 @@ export function collectMapErrors(page: Page) {
 
 /** Harita alanında verilen renge (±12) yakın piksel var mı (ör. çizilen rota). */
 export async function mapHasColor(page: Page, rgb: [number, number, number], selector = ".maplibregl-canvas") {
-  const png = (await page.locator(selector).first().screenshot()).toString("base64");
+  const png = await canvasOnlyScreenshot(page, selector);
   return page.evaluate(async ({ b64, rgb }) => {
     const img = new Image();
     img.src = `data:image/png;base64,${b64}`;
@@ -70,4 +70,19 @@ export async function mapHasColor(page: Page, rgb: [number, number, number], sel
     }
     return false;
   }, { b64: png, rgb });
+}
+
+/**
+ * Yalnızca harita tuvalinin görüntüsü: işaretler, açılır pencereler ve kontroller (DOM öğeleri)
+ * gizlenir; aksi hâlde örn. amber varış işareti, çizilmemiş rotayı çizilmiş gibi gösterir.
+ */
+async function canvasOnlyScreenshot(page: Page, selector: string) {
+  const style = await page.addStyleTag({
+    content: ".maplibregl-marker,.maplibregl-popup,.maplibregl-control-container{visibility:hidden!important}",
+  });
+  try {
+    return (await page.locator(selector).first().screenshot()).toString("base64");
+  } finally {
+    await style.evaluate((el) => (el as Element).remove());
+  }
 }
