@@ -61,3 +61,24 @@ FOSSGIS Valhalla sunucusuna (sürüm 3.9.2) GitHub Actions üzerinden doğrudan 
 - **Feribot süresi:** Valhalla'nın feribot süresi tahmini (bekleme dahil) gerçek sefer saatlerini bilmiyor.
 - **Alternatif rotalar:** Ara duraklı rotalarda alternatif hesaplanmıyor (Valhalla kısıtı). "Ücretli yoldan kaçın" bu durumda ücretsiz ya da feribotlu en uygun tek rotayı veriyor.
 - **Yol tarifinin dili:** Türkçe metin Valhalla'nın Türkçe çeviri dosyasından geliyor. Bazı cümleler mekanik ("… caddesine doğru sağa dönün").
+
+## Ek düzeltme (17 Kasım 2026): üç seçenek birlikte ve boğaz köprüleri
+
+**Sorun:** Tekirdağ → Bursa için iki seçenek açıkken (ücretli yol + feribot) 6.436 km'lik, üç seçenek açıkken 15.718 km'lik rota (Kazakistan üzerinden) çıkıyordu. Nedenleri:
+- Boğaz köprüleri OSM'de hem ücretli hem otoyol işaretli. Bu yüzden ikisi de kapanınca feribotsuz tek geçiş Karadeniz'in çevresi kalıyordu.
+- Bu kadar uzun yanıt, sunucuda yığın taşmasıyla ("Maximum call stack size exceeded") çöküyordu.
+
+**Kullanıcı kararı:** 15 Temmuz Şehitler Köprüsü, Fatih Sultan Mehmet Köprüsü ve 1915 Çanakkale Köprüsü (bağlantı rampalarıyla) "ücretli yol" ve "otoyol" kaçınmasında sayılmaz. Bunlar `src/lib/geo-services/straits.ts` dosyasında tanımlı.
+- Köprü geçişi gerçekte ücretli olduğu için rotada "Köprü geçişi" rozeti ve açıklama notu gösteriliyor.
+- Avrasya Tüneli, Yavuz Sultan Selim ve Osmangazi köprüleri ile diğer otoyollar istisna değil.
+
+**Çözüm:**
+1. **Aday rotalar:** Kesin dışlamalı, serbest ve en kısa rota adayları köprü istisnasıyla sınıflandırılıyor. Hiçbiri uymazsa yakası değişen bacak için en yakın köprü seçiliyor; köprüye kadar ve köprüden sonrası kesin kaçınmalarla, köprü geçişi serbest hesaplanıp parçalar birleştiriliyor.
+2. **Dolambaç sınırı:** Kuş uçuşunun 3 katından ve 300 km fazlasından uzun rotalar eleniyor. Uygun rota kalmazsa "Uygun rota bulunamamaktadır" mesajı çıkıyor.
+3. **Yığın taşması:** Çok uzun yanıtlar artık çökmeden işleniyor.
+
+**D-100:** İstanbul'da OSM'de otoyol değil (gövde yol), bu yüzden "otoyollardan kaçın" açıkken de kullanılıyor. Tanılamada doğrulandı.
+
+**Sonuç (canlı):** Tekirdağ → Bursa, üç seçenek açık: **382 km**, 15 Temmuz Şehitler Köprüsü üzerinden; ücretli yol, otoyol ve feribot yok.
+
+**Not:** E2E test hesabı bir günde 500 rota isteği sınırına ulaştı. Yalnızca iki test hesabının sayaçları sıfırlandı; gerçek kullanıcıların sınırları değişmedi.
