@@ -21,6 +21,7 @@
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.0",
     "clsx": "^2.1.1",
+    "fflate": "^0.8.3",
     "idb": "^8.0.4",
     "lucide-react": "^1.73.0",
     "maplibre-gl": "^6.18.0",

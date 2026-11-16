@@ -141,10 +141,12 @@ export function SavedPlaceList({ places }: { places: { id: string; name: string;
   return (
     <ul className="space-y-2">
       {places.map((p) => (
-        <li key={p.id} className="flex items-center gap-3">
-          <MapPin className="size-4 shrink-0 text-amber-600" aria-hidden />
-          <span className="min-w-0 flex-1 truncate font-medium">{p.name}</span>
-          {p.source !== "manual" && <Badge>{p.source === "google_takeout" ? "Google" : p.source}</Badge>}
+        <li key={p.id}>
+          <Link href="/favoriler" className="flex items-center gap-3 rounded-lg hover:bg-sand-100/60">
+            <MapPin className="size-4 shrink-0 text-amber-600" aria-hidden />
+            <span className="min-w-0 flex-1 truncate font-medium">{p.name}</span>
+            {p.source !== "manual" && <Badge>{t.favorites.sourceBadge[p.source] ?? p.source}</Badge>}
+          </Link>
         </li>
       ))}
     </ul>

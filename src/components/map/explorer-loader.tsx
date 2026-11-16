@@ -1,0 +1,28 @@
+import { MapExplorer } from "@/components/map/map-explorer";
+import { favoriteToStopServer } from "@/lib/favorites/stop";
+import { requireUser } from "@/lib/dal";
+import { mapStyleUrl } from "@/lib/env";
+import { listFavoriteStops } from "@/lib/queries/favorites";
+import { t } from "@/i18n";
+
+/** Haritayı Keşfet / Yeni yolculuk: kullanıcının kayıtlı yerleriyle birlikte yüklenir. */
+export async function ExplorerLoader({ mode, searchParams }: { mode: "explore" | "plan"; searchParams?: Promise<{ hedef?: string | string[] }> }) {
+  const [, favorites, params] = await Promise.all([requireUser(), listFavoriteStops(), searchParams ?? Promise.resolve({} as { hedef?: string })]);
+  const hedef = typeof params.hedef === "string" ? params.hedef : null;
+  const target = hedef ? favorites.find((f) => f.id === hedef) : undefined;
+  return (
+    <MapExplorer key={hedef ?? mode} styleUrl={mapStyleUrl()} mode={mode} favorites={favorites}
+      initialDestination={target ? favoriteToStopServer(target) : null} />
+  );
+}
+
+export function ExplorerSkeleton() {
+  return (
+    <div className="flex h-[calc(100dvh-3.5rem-4.5rem)] flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]" aria-label={t.common.loading}>
+      <div className="order-1 h-[42%] animate-pulse bg-sand-100 lg:order-2 lg:h-full" />
+      <div className="order-2 space-y-4 p-5 lg:order-1">
+        {[0, 1, 2, 3].map((i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-sand-100" />)}
+      </div>
+    </div>
+  );
+}

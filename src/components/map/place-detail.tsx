@@ -1,6 +1,6 @@
 "use client";
 import { ArrowLeft, BookOpen, Clock3, ExternalLink, Globe, LoaderCircle, MapPin, Mountain, Phone, Plus, Utensils } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { decodePolyline, insertionIndexForLegs, projectOntoPolyline } from "@/lib/geo";
 import { mapsApi } from "@/lib/maps/client";
 import { MAX_WAYPOINTS } from "@/lib/maps/explorer-state";
@@ -18,6 +18,8 @@ type Props = {
   onAddAsWaypoint: (stop: Stop, index: number) => void;
   onSetEndpoint: (stop: Stop, which: "origin" | "destination") => void;
   onClose: () => void;
+  /** Favorilere ekle / daha sonra git düğmeleri (oturum açmış kullanıcı) */
+  favoriteActions?: ReactNode;
 };
 
 type Detour = { index: number; distanceMeters: number; durationSeconds: number };
@@ -41,7 +43,7 @@ function wikipediaUrl(raw: string | undefined): string | null {
   return m ? `https://${m[1]}.wikipedia.org/wiki/${encodeURIComponent(m[2].replace(/ /g, "_"))}` : null;
 }
 
-export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoint, onClose }: Props) {
+export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoint, onClose, favoriteActions }: Props) {
   const stop: Stop = useMemo(
     () => ({ id: place.id, label: place.name, address: place.address, ref: place.id, location: place.location }),
     [place],
@@ -89,6 +91,7 @@ export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoin
         {place.typeLabel && <p className="eyebrow">{place.typeLabel}</p>}
         <h2 id="place-title" className="mt-1 text-xl font-extrabold tracking-tight">{place.name}</h2>
       </header>
+      {favoriteActions}
 
       <dl className="space-y-2.5 text-sm">
         {(street || place.address) && (

@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { requireUser } from "@/lib/dal";
 import { mapStyleUrl } from "@/lib/env";
 import { getTripForEdit } from "@/lib/queries/trips";
+import { listFavoriteStops } from "@/lib/queries/favorites";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.trips.editTitle };
@@ -22,7 +23,7 @@ export default function EditTripPage({ params }: { params: Promise<{ id: string 
 async function TripPlanner({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   await requireUser();
-  const trip = await getTripForEdit(id);
+  const [trip, favorites] = await Promise.all([getTripForEdit(id), listFavoriteStops()]);
   if (!trip) notFound();
 
   // Başlamış yolculuk kayıt ekranında, tamamlanmış yolculuk özet sayfasında
@@ -37,7 +38,7 @@ async function TripPlanner({ params }: { params: Promise<{ id: string }> }) {
       </div>
     );
   }
-  return <MapExplorer key={trip.id} styleUrl={mapStyleUrl()} mode="plan" trip={trip} />;
+  return <MapExplorer key={trip.id} styleUrl={mapStyleUrl()} mode="plan" trip={trip} favorites={favorites} />;
 }
 
 function PlannerSkeleton() {

@@ -8,13 +8,15 @@ import { ArrowLeft, BookmarkPlus } from "lucide-react";
 import { decodePolyline, type LatLng } from "@/lib/geo";
 import { mapsApi } from "@/lib/maps/client";
 import {
-  explorerReducer, initialExplorerState, newKey, routeRequest, routeRequestKey, type SlotRef,
+  explorerReducer, initialExplorerState, MAX_WAYPOINTS, newKey, routeRequest, routeRequestKey, type SlotRef,
 } from "@/lib/maps/explorer-state";
 import type { FoundPlace, RouteOption, RouteResult, Stop } from "@/lib/maps/types";
 import {
   closestRouteIndex, orderedStops, planFingerprint, shortPlaceName, stateFromStops, type TripFields,
 } from "@/lib/maps/trip-draft";
 import { useLeaveGuard } from "@/lib/maps/use-leave-guard";
+import { FavoriteActions, FavoritePicker, favoriteToStop } from "@/components/favorites/favorite-actions";
+import type { FavoriteStopItem, ListType } from "@/lib/favorites/types";
 import { saveTripPlan } from "@/lib/actions/trips";
 import type { EditableTrip } from "@/lib/queries/trips";
 import { Button } from "@/components/ui/button";
@@ -40,14 +42,26 @@ type Props = {
   mode?: "explore" | "plan";
   /** Düzenlenen kayıtlı yolculuk; yeni planda null */
   trip?: EditableTrip | null;
+  /** Kullanıcının kayıtlı yerleri (favori düğmeleri ve "Favorilerimden ekle") */
+  favorites?: FavoriteStopItem[];
+  /** /planla?hedef=<favori> ile açılınca varış noktası */
+  initialDestination?: Stop | null;
 };
 
 /**
  * Haritayı Keşfet ve Yolculuk Planla — tamamen açık kaynak altyapı:
  * MapLibre GL JS (çizim) + OpenFreeMap (karolar, OSM) + Valhalla (rota) + ROVIA PostGIS (arama).
  */
-export function MapExplorer({ styleUrl, mode = "explore", trip = null }: Props) {
-  const [state, dispatch] = useReducer(explorerReducer, trip, (tr) => (tr ? stateFromStops(tr.stops) : initialExplorerState()));
+export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites = [], initialDestination = null }: Props) {
+  const [state, dispatch] = useReducer(explorerReducer, trip, (tr) => {
+    if (tr) return stateFromStops(tr.stops);
+    const init = initialExplorerState();
+    return initialDestination ? { ...init, destination: { ...init.destination, stop: initialDestination } } : init;
+  });
+  // OSM kaydına göre kayıtlı yerler (ayrıntı panelinde "kayıtlı" durumu); bu oturumda eklenenler de işlenir
+  const [savedRefs, setSavedRefs] = useState<Map<string, ListType>>(
+    () => new Map(favorites.filter((f) => f.osmRef).map((f) => [f.osmRef!, f.listType])),
+  );
   const [picking, setPicking] = useState<SlotRef | null>(null);
   const [mapCenter, setMapCenter] = useState<LatLng>(TURKEY_CENTER);
   const [category, setCategory] = useState<string | null>(null);
@@ -297,6 +311,10 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null }: Props) 
               dispatch({ type: "set", slot: { kind: which }, stop });
               setSelectedPlace(null);
             }}
+            favoriteActions={
+              <FavoriteActions place={selectedPlace} saved={savedRefs.get(selectedPlace.id) ?? null}
+                onSaved={(list) => setSavedRefs((m) => new Map(m).set(selectedPlace.id, m.get(selectedPlace.id) ?? list))} />
+            }
           />
         ) : (
           <div className="space-y-6">
@@ -320,6 +338,20 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null }: Props) 
             )}
             <RouteBuilder state={state} dispatch={dispatch} bias={geo.position ?? undefined} picking={picking}
               onPick={setPicking} onLocate={onLocate} locating={geo.status === "locating"} />
+            {(planOpen || favorites.length > 0) && (
+              <FavoritePicker favorites={favorites} disabled={!!state.origin.stop && !!state.destination.stop && state.waypoints.length >= MAX_WAYPOINTS}
+                onPick={(f) => {
+                  const stop = favoriteToStop(f);
+                  if (!state.origin.stop) dispatch({ type: "set", slot: { kind: "origin" }, stop });
+                  else if (!state.destination.stop) dispatch({ type: "set", slot: { kind: "destination" }, stop });
+                  else {
+                    // Boş ara durak varsa oraya, yoksa varıştan önceye
+                    const empty = state.waypoints.find((w) => !w.stop);
+                    if (empty) dispatch({ type: "set", slot: { kind: "waypoint", key: empty.key }, stop });
+                    else dispatch({ type: "addWaypoint", key: newKey(), stop });
+                  }
+                }} />
+            )}
             <RouteSummary result={routeResult} selected={selectedIndex} onSelect={selectRoute}
               loading={routePending} error={usingSavedRoute ? null : (route.error ?? null)} hasWaypoints={state.waypoints.length > 0} />
             {!planOpen && selectedRoute && (
