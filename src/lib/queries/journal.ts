@@ -7,7 +7,7 @@ type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 /** Özel kovadaki dosyalar için kısa ömürlü imzalı bağlantılar (1 saat). */
 const SIGNED_URL_TTL = 3600;
 
-async function signPaths(supabase: SupabaseClient, paths: (string | null)[]): Promise<Map<string, string>> {
+export async function signPaths(supabase: SupabaseClient, paths: (string | null)[]): Promise<Map<string, string>> {
   const unique = [...new Set(paths.filter((p): p is string => !!p))];
   const out = new Map<string, string>();
   for (let i = 0; i < unique.length; i += 500) {
@@ -21,13 +21,13 @@ async function signPaths(supabase: SupabaseClient, paths: (string | null)[]): Pr
   return out;
 }
 
-type MediaRow = {
+export type MediaRow = {
   id: string; trip_id: string | null; storage_path: string; thumb_path: string | null; width: number | null; height: number | null;
   taken_at: string | null; created_at: string; latitude: number | null; longitude: number | null; caption: string | null;
 };
-const MEDIA_COLS = "id, trip_id, storage_path, thumb_path, width, height, taken_at, created_at, latitude, longitude, caption";
+export const MEDIA_COLS = "id, trip_id, storage_path, thumb_path, width, height, taken_at, created_at, latitude, longitude, caption";
 
-async function toMediaItems(supabase: SupabaseClient, rows: MediaRow[]): Promise<MediaItem[]> {
+export async function toMediaItems(supabase: SupabaseClient, rows: MediaRow[]): Promise<MediaItem[]> {
   const urls = await signPaths(supabase, rows.flatMap((r) => [r.storage_path, r.thumb_path]));
   return rows.map((r) => ({
     id: r.id, tripId: r.trip_id,

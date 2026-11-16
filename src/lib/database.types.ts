@@ -631,6 +631,7 @@ export type Database = {
           sort_order: number;
           created_at: string;
           updated_at: string;
+          version: number;
         };
         Insert: {
           id?: string;
@@ -643,6 +644,7 @@ export type Database = {
           sort_order: number;
           created_at?: string;
           updated_at?: string;
+          version?: number;
         };
         Update: {
           id?: string;
@@ -655,6 +657,7 @@ export type Database = {
           sort_order?: number;
           created_at?: string;
           updated_at?: string;
+          version?: number;
         };
         Relationships: [];
       };
@@ -674,6 +677,7 @@ export type Database = {
           ordering: string;
           created_at: string;
           updated_at: string;
+          version: number;
         };
         Insert: {
           id?: string;
@@ -690,6 +694,7 @@ export type Database = {
           ordering?: string;
           created_at?: string;
           updated_at?: string;
+          version?: number;
         };
         Update: {
           id?: string;
@@ -706,6 +711,7 @@ export type Database = {
           ordering?: string;
           created_at?: string;
           updated_at?: string;
+          version?: number;
         };
         Relationships: [];
       };
@@ -1006,6 +1012,7 @@ export type Database = {
       media_register: { Args: { p_trip_id: string; p_items: Json }; Returns: Json };
       normalize_route_options: { Args: { p: Json }; Returns: Json };
       place_name_key: { Args: { p: string }; Returns: string };
+      plain_to_doc: { Args: { p_text: string }; Returns: Json };
       purge_expired_gps_points: { Args: { p_batch?: number }; Returns: number };
       recording_add_points: { Args: { p_id: string; p_segment_id: string; p_points: Json }; Returns: number };
       recording_cancel: { Args: { p_id: string }; Returns: string };
@@ -1021,6 +1028,15 @@ export type Database = {
       search_features_along_route: { Args: { p_route: Json; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null; along_m: number | null }[] };
       search_features_nearby: { Args: { p_lat: number; p_lng: number; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null }[] };
       search_places: { Args: { p_query: string; p_lat?: number; p_lng?: number; p_limit?: number }; Returns: { osm_ref: string | null; kind: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; lat: number | null; lng: number | null; score: number | null }[] };
+      travelogue_create: { Args: { p_trip_id: string; p_title: string; p_import_notes?: boolean }; Returns: string };
+      travelogue_entry_create: { Args: { p_travelogue_id: string; p_fields: Json }; Returns: string };
+      travelogue_entry_save: { Args: { p_id: string; p_version: number; p_patch: Json; p_force?: boolean }; Returns: Json };
+      travelogue_entry_set_media: { Args: { p_entry_id: string; p_items: Json }; Returns: unknown };
+      travelogue_list: { Args: Record<string, never>; Returns: { id: string | null; title: string | null; subtitle: string | null; status: string | null; trip_id: string | null; trip_title: string | null; cover_thumb: string | null; entry_count: number | null; photo_count: number | null; first_visit: string | null; last_visit: string | null; updated_at: string | null }[] };
+      travelogue_reorder: { Args: { p_travelogue_id: string; p_kind: string; p_ids: string[] }; Returns: unknown };
+      travelogue_save: { Args: { p_id: string; p_version: number; p_patch: Json; p_force?: boolean }; Returns: Json };
+      travelogue_section_add: { Args: { p_travelogue_id: string; p_title: string }; Returns: string };
+      travelogue_section_save: { Args: { p_id: string; p_version: number; p_patch: Json; p_force?: boolean }; Returns: Json };
       trip_archive: { Args: Record<string, never>; Returns: { id: string | null; title: string | null; description: string | null; started_at: string | null; ended_at: string | null; distance_m: number | null; elapsed_s: number | null; moving_s: number | null; start_label: string | null; end_label: string | null; polyline: string | null; photo_count: number | null; note_count: number | null; cover_thumb: string | null }[] };
       trip_delete: { Args: { p_id: string; p_with_journal: boolean }; Returns: string[] };
     };

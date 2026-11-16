@@ -3,6 +3,8 @@
  * Yeni dil eklemek için aynı şekle sahip bir sözlük (ör. en.ts) oluşturup
  * src/i18n/index.ts içindeki `dictionaries` nesnesine eklemek yeterlidir.
  */
+import { travelogue } from "./travelogue";
+
 export const tr = {
   brand: {
     name: "ROVIA",
@@ -639,6 +641,7 @@ export const tr = {
     nameMax: "Ad en fazla 120 karakter olabilir.",
     username: "Kullanıcı adı 3–30 karakter olmalı; yalnızca küçük harf, rakam, nokta ve alt çizgi.",
   },
+  travelogue,
 } as const;
 
 export type Dictionary = typeof tr;
