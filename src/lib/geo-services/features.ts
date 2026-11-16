@@ -151,9 +151,12 @@ export function spreadAlongRoute<T extends { alongRoute: number | null; score: n
     used.add(b);
     picked.push(c);
   }
+  // Boş kalan parçalar için: seçilenlerden en az yarım parça uzaktaki en iyi adaylar (kümelenme olmasın)
   for (const c of sorted) {
     if (picked.length >= limit) break;
-    if (!picked.includes(c)) picked.push(c);
+    if (picked.includes(c)) continue;
+    const far = picked.every((p) => Math.abs((p.alongRoute ?? 0) - (c.alongRoute ?? 0)) >= bucketLen / 2);
+    if (far) picked.push(c);
   }
   return picked.slice(0, limit).sort((a, b) => (a.alongRoute ?? 0) - (b.alongRoute ?? 0));
 }
@@ -174,7 +177,7 @@ export async function routeSuggestions(db: Supabase, input: { encodedPolyline: s
   const { data, error } = await db.rpc("route_suggestions", {
     p_route: { type: "LineString", coordinates: simplified.map((p) => [p.lng, p.lat]) },
     p_radius_m: radius,
-    p_limit: 40,
+    p_limit: 60,
   });
   if (error) throw rpcError("route_suggestions", error);
   const candidates = (data ?? []).map((r) => ({

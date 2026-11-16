@@ -270,7 +270,8 @@ describe("rota önerilerinin dağıtılması", () => {
       c("b", 150_000, 0.2), c("c", 250_000, 0.25), c("d", 420_000, 0.3)];
     const picked = spreadAlongRoute(cands, 450_000, 4);
     expect(picked.map((p) => p.id)).toEqual(["a1", "b", "c", "d"]);
-    expect(spreadAlongRoute(cands.slice(0, 3), 450_000, 4).map((p) => p.id)).toEqual(["a1", "a2", "a3"]);
+    // Yalnızca bir bölgede aday varsa aynı yerden doldurulmaz
+    expect(spreadAlongRoute(cands.slice(0, 3), 450_000, 4).map((p) => p.id)).toEqual(["a1"]);
     expect([suggestionRadius(20_000), suggestionRadius(120_000), suggestionRadius(800_000)]).toEqual([1_500, 3_000, 5_000]);
   });
 });

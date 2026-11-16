@@ -63,6 +63,22 @@ describe("route_suggestions", () => {
     for (let i = 1; i < rows.length; i++) expect(rows[i - 1].score).toBeGreaterThanOrEqual(rows[i].score);
   });
 
+  it("başlangıç ve varışın hemen çevresi önerilmez; her rota parçasından en fazla 3 aday", async () => {
+    // Uzun düz rota (≈ 220 km): başlangıçta 6 müze, ortada 1 kale
+    const long = JSON.stringify({ type: "LineString", coordinates: [[30.0, 40.0], [32.6, 40.0]] });
+    const values = Array.from({ length: 6 }, (_, i) =>
+      `('n90${i}', 'poi', 'museum', 'museum', 'Başlangıç Müzesi ${i}', 'baslangic muzesi', 'X', 'SRID=4326;POINT(${30.0 + i * 0.001} 40.001)', '{"wikidata":"Q"}', 0.3)`);
+    values.push(`('n909', 'poi', 'museum', 'museum', 'Yolüstü Müzesi', 'yolustu muzesi', 'Y', 'SRID=4326;POINT(30.3 40.001)', '{"wikidata":"Q"}', 0.3)`);
+    values.push(`('n999', 'poi', 'historic', 'castle', 'Orta Kale', 'orta kale', 'Z', 'SRID=4326;POINT(31.3 40.002)', '{}', 0.2)`);
+    await db.exec(`insert into public.geo_features (osm_ref, kind, category, subtype, name, name_search, admin, geog, tags, importance) values ${values.join(",")};`);
+    const rows = await asUser(db, alice, async (tx) =>
+      (await tx.query<{ osm_ref: string }>("select osm_ref from route_suggestions($1::jsonb, 3000, 40)", [long])).rows);
+    const refs = rows.map((r) => r.osm_ref);
+    expect(refs).toContain("n999"); // yolun ortasındaki kale
+    expect(refs).toContain("n909"); // 25. km'deki müze
+    expect(refs.filter((r) => /^n90[0-5]$/.test(r))).toEqual([]); // ilk 15 km içindekiler
+  });
+
   it("geçersiz girdiler reddedilir", async () => {
     await expect(asUser(db, alice, (tx) => tx.query("select * from route_suggestions($1::jsonb, 50, 10)", [route]))).rejects.toThrow(/invalid_arguments/);
     await expect(asUser(db, alice, (tx) => tx.query("select * from route_suggestions('{\"type\":\"Point\"}'::jsonb)"))).rejects.toThrow(/invalid_route/);
