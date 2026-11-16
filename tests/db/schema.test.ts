@@ -258,3 +258,27 @@ describe("iş kuralları", () => {
     expect(Number(left.rows[0].n)).toBe(0);
   });
 });
+
+describe("API hız sınırlama", () => {
+  it("pencere içinde sınırı aşınca false döner; kullanıcılar birbirini etkilemez", async () => {
+    const consume = (id: string) =>
+      asUser(db, id, async (tx) =>
+        (await tx.query<{ ok: boolean }>("select public.consume_rate_limit('test', 3, 3600) as ok")).rows[0].ok,
+      );
+    expect([await consume(alice), await consume(alice), await consume(alice), await consume(alice)]).toEqual([true, true, true, false]);
+    expect(await consume(bob)).toBe(true);
+  });
+
+  it("sayaç tablosu doğrudan okunamaz; anonim kullanıcı fonksiyonu çağıramaz", async () => {
+    await expect(asUser(db, alice, (tx) => tx.query("select * from api_rate_limits"))).rejects.toThrow(/permission denied/);
+    await expect(
+      asUser(db, null, (tx) => tx.query("select public.consume_rate_limit('x', 1, 60)")),
+    ).rejects.toThrow(/permission denied/);
+  });
+
+  it("geçersiz argümanları reddeder", async () => {
+    await expect(
+      asUser(db, alice, (tx) => tx.query("select public.consume_rate_limit('x', 0, 60)")),
+    ).rejects.toThrow(/invalid_rate_limit_arguments/);
+  });
+});

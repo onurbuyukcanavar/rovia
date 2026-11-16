@@ -29,8 +29,8 @@ async function main() {
     tables.get(c.table_name)!.push(c);
   }
 
-  const fns = await db.query<{ name: string; result: string }>(`
-    select p.proname as name, pg_get_function_result(p.oid) as result
+  const fns = await db.query<{ name: string; result: string; args: string }>(`
+    select p.proname as name, pg_get_function_result(p.oid) as result, pg_get_function_arguments(p.oid) as args
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.proname not in ('set_updated_at','enforce_parent_owner','handle_new_user')
     order by 1`);
@@ -49,7 +49,13 @@ async function main() {
     out += `      ${name}: {\n        Row: {\n${row}\n        };\n        Insert: {\n${ins}\n        };\n        Update: {\n${upd}\n        };\n        Relationships: [];\n      };\n`;
   }
   out += `    };\n    Views: { [_ in never]: never };\n    Functions: {\n`;
-  for (const f of fns.rows) out += `      ${f.name}: { Args: Record<string, never>; Returns: ${f.result === "jsonb" ? "Json" : "unknown"} };\n`;
+  const fnType = (t: string) => (t === "jsonb" ? "Json" : PG_TO_TS[t === "int" ? "integer" : t] ?? "unknown");
+  for (const f of fns.rows) {
+    const args = f.args
+      ? `{ ${f.args.split(",").map((a) => a.trim().split(/\s+/)).map(([n, ...t]) => `${n}: ${fnType(t.join(" "))}`).join("; ")} }`
+      : "Record<string, never>";
+    out += `      ${f.name}: { Args: ${args}; Returns: ${fnType(f.result)} };\n`;
+  }
   out += `    };\n    Enums: { [_ in never]: never };\n    CompositeTypes: { [_ in never]: never };\n  };\n};\n\n`;
   out += `type PublicSchema = Database["public"];\nexport type Tables<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Row"];\n`;
   out += `export type TablesInsert<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Insert"];\n`;

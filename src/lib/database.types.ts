@@ -4,6 +4,27 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      api_rate_limits: {
+        Row: {
+          user_id: string;
+          bucket: string;
+          window_start: string;
+          hits: number;
+        };
+        Insert: {
+          user_id: string;
+          bucket: string;
+          window_start: string;
+          hits?: number;
+        };
+        Update: {
+          user_id?: string;
+          bucket?: string;
+          window_start?: string;
+          hits?: number;
+        };
+        Relationships: [];
+      };
       gps_points: {
         Row: {
           id: number;
@@ -871,6 +892,7 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      consume_rate_limit: { Args: { p_bucket: string; p_limit: number; p_window_seconds: number }; Returns: boolean };
       dashboard_stats: { Args: Record<string, never>; Returns: Json };
     };
     Enums: { [_ in never]: never };
