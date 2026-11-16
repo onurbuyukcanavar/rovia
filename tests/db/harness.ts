@@ -4,6 +4,8 @@
  * migration dosyaları ise değiştirilmeden, olduğu gibi uygulanır.
  */
 import { PGlite } from "@electric-sql/pglite";
+import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm";
+import { postgis } from "@electric-sql/pglite-postgis";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -11,6 +13,9 @@ const SUPABASE_STUB = /* sql */ `
   create role anon nologin;
   create role authenticated nologin;
   create role service_role nologin bypassrls;
+  -- Supabase eklentileri "extensions" şemasına kurar
+  create schema extensions;
+  grant usage on schema extensions to anon, authenticated, service_role;
 
   create schema auth;
   create table auth.users (
@@ -48,7 +53,7 @@ const SUPABASE_STUB = /* sql */ `
 `;
 
 export async function createTestDb() {
-  const db = new PGlite();
+  const db = new PGlite({ extensions: { postgis, pg_trgm } });
   await db.exec(SUPABASE_STUB);
 
   const dir = join(process.cwd(), "supabase", "migrations");

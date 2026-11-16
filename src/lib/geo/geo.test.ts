@@ -76,3 +76,18 @@ describe("rota geometrisi", () => {
     expect(isValidLatLng(null)).toBe(false);
   });
 });
+
+describe("sadeleştirme", () => {
+  it("doğrusal noktaları atar, köşeleri ve uçları korur", async () => {
+    const { simplifyPath, simplifyToMaxPoints } = await import(".");
+    const line = Array.from({ length: 101 }, (_, i) => ({ lat: 40, lng: 30 + i * 0.01 }));
+    const withCorner = [...line, { lat: 40.5, lng: 31 }];
+    const s = simplifyPath(withCorner, 10);
+    expect(s).toEqual([withCorner[0], withCorner[100], withCorner[101]]);
+    const zigzag = Array.from({ length: 5000 }, (_, i) => ({ lat: 40 + (i % 2) * 0.01, lng: 30 + i * 0.001 }));
+    const capped = simplifyToMaxPoints(zigzag, 500);
+    expect(capped.length).toBeLessThanOrEqual(500);
+    expect(capped[0]).toEqual(zigzag[0]);
+    expect(capped.at(-1)).toEqual(zigzag.at(-1));
+  });
+});

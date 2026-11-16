@@ -115,14 +115,7 @@ export function RouteBuilder({ state, dispatch, bias, picking, onPick, onLocate,
         >
           <Plus className="size-4" aria-hidden /> {t.maps.addStop}
         </button>
-        <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-stone-700">
-          <input type="checkbox" className="size-4 accent-amber-600" checked={state.trafficAware}
-            onChange={(e) => dispatch({ type: "setTrafficAware", value: e.target.checked })} />
-          {t.maps.trafficAware}
-        </label>
       </div>
-      {state.trafficAware && <p className="pl-8 text-xs text-stone-600">{t.maps.trafficAwareNote}</p>}
-      {state.waypoints.length > 10 && <p className="pl-8 text-xs text-stone-600">{t.maps.proStopsNote}</p>}
       {state.waypoints.length >= MAX_WAYPOINTS && <p className="pl-8 text-xs text-danger">{t.maps.tooManyStops}</p>}
       {picking && (
         <p className="rounded-lg bg-amber-400/20 px-3 py-2 text-sm font-semibold text-ink-900" role="status">

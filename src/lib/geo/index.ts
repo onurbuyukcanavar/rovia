@@ -151,3 +151,42 @@ export function boundsOf(points: LatLng[]) {
   }
   return { north, south, east, west };
 }
+
+/**
+ * Douglas–Peucker çizgi sadeleştirme (tolerans metre). Uzun rotaları veritabanı
+ * sorgusuna göndermeden önce nokta sayısını düşürmek için. İlk ve son nokta korunur.
+ */
+export function simplifyPath(path: LatLng[], toleranceMeters: number): LatLng[] {
+  if (path.length <= 2) return path.slice();
+  const keep = new Uint8Array(path.length);
+  keep[0] = keep[path.length - 1] = 1;
+  const stack: [number, number][] = [[0, path.length - 1]];
+  while (stack.length) {
+    const [start, end] = stack.pop()!;
+    let maxDist = 0;
+    let index = -1;
+    for (let i = start + 1; i < end; i++) {
+      const d = distanceToSegment(path[i], path[start], path[end]).distance;
+      if (d > maxDist) {
+        maxDist = d;
+        index = i;
+      }
+    }
+    if (index !== -1 && maxDist > toleranceMeters) {
+      keep[index] = 1;
+      stack.push([start, index], [index, end]);
+    }
+  }
+  return path.filter((_, i) => keep[i]);
+}
+
+/** Nokta sayısı `maxPoints` altına inene kadar toleransı artırarak sadeleştirir. */
+export function simplifyToMaxPoints(path: LatLng[], maxPoints: number, startToleranceMeters = 25): LatLng[] {
+  let tolerance = startToleranceMeters;
+  let out = simplifyPath(path, tolerance);
+  while (out.length > maxPoints) {
+    tolerance *= 2;
+    out = simplifyPath(path, tolerance);
+  }
+  return out;
+}

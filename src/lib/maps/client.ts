@@ -1,6 +1,6 @@
 "use client";
 import type { LatLng } from "@/lib/geo";
-import type { FoundPlace, PlaceDetails, RouteResult, Stop, Suggestion } from "./types";
+import type { FoundPlace, RouteResult, Stop, Suggestion } from "./types";
 import { t } from "@/i18n";
 
 /** Sunucunun döndürdüğü Türkçe hata mesajını taşır. */
@@ -32,25 +32,18 @@ async function post<T>(path: string, body: unknown, signal?: AbortSignal): Promi
   return json as T;
 }
 
-const toWaypoint = (s: Stop) => (s.placeId ? { placeId: s.placeId } : { location: s.location });
-
 export const mapsApi = {
-  autocomplete: (text: string, sessionToken: string, bias: LatLng | undefined, signal?: AbortSignal) =>
-    post<{ suggestions: Suggestion[] }>("autocomplete", { text, sessionToken, bias }, signal).then((r) => r.suggestions),
+  autocomplete: (text: string, bias: LatLng | undefined, signal?: AbortSignal) =>
+    post<{ suggestions: Suggestion[] }>("autocomplete", { text, bias }, signal).then((r) => r.suggestions),
 
-  place: (placeId: string, sessionToken?: string) =>
-    post<{ id: string; name: string; address: string | null; location: LatLng }>("place", { placeId, sessionToken }),
-
-  details: (placeId: string, signal?: AbortSignal) => post<PlaceDetails>("place-details", { placeId }, signal),
-
-  route: (stops: { origin: Stop; destination: Stop; waypoints: Stop[] }, opts: { alternatives: boolean; trafficAware: boolean }, signal?: AbortSignal) =>
+  route: (stops: { origin: Stop; destination: Stop; waypoints: Stop[] }, opts: { alternatives: boolean }, signal?: AbortSignal) =>
     post<RouteResult>(
       "route",
       {
-        origin: toWaypoint(stops.origin),
-        destination: toWaypoint(stops.destination),
-        intermediates: stops.waypoints.map(toWaypoint),
-        ...opts,
+        origin: stops.origin.location,
+        destination: stops.destination.location,
+        intermediates: stops.waypoints.map((w) => w.location),
+        alternatives: opts.alternatives,
       },
       signal,
     ),
@@ -61,7 +54,5 @@ export const mapsApi = {
   searchNearby: (category: string, center: LatLng, radiusMeters: number, signal?: AbortSignal) =>
     post<{ places: FoundPlace[] }>("search", { mode: "nearby", category, center, radiusMeters }, signal).then((r) => r.places),
 
-  reverseGeocode: (point: LatLng) => post<{ label: string; address: string; placeId: string | null }>("reverse-geocode", point),
+  reverseGeocode: (point: LatLng) => post<{ label: string }>("reverse-geocode", point),
 };
-
-export const photoUrl = (name: string, width = 800) => `/api/maps/photo?name=${encodeURIComponent(name)}&w=${width}`;

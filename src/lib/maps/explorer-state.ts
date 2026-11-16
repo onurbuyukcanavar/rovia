@@ -1,6 +1,7 @@
 import type { Stop } from "./types";
 
-export const MAX_WAYPOINTS = 25;
+/** Valhalla herkese açık sunucusu en fazla 20 konum kabul eder (başlangıç + 18 + varış). */
+export const MAX_WAYPOINTS = 18;
 
 /** Rota kurucusundaki bir satır: dolu (Stop) veya henüz seçilmemiş (null). */
 export type Slot = { key: string; stop: Stop | null };
@@ -10,7 +11,6 @@ export type ExplorerState = {
   destination: Slot;
   waypoints: Slot[];
   selectedRoute: number;
-  trafficAware: boolean;
 };
 
 export type SlotRef = { kind: "origin" } | { kind: "destination" } | { kind: "waypoint"; key: string };
@@ -22,7 +22,6 @@ export type ExplorerAction =
   | { type: "moveWaypoint"; key: string; delta: -1 | 1 }
   | { type: "swapEnds" }
   | { type: "selectRoute"; index: number }
-  | { type: "setTrafficAware"; value: boolean }
   | { type: "reset" };
 
 let counter = 0;
@@ -33,7 +32,6 @@ export const initialExplorerState = (): ExplorerState => ({
   destination: { key: "destination", stop: null },
   waypoints: [],
   selectedRoute: 0,
-  trafficAware: false,
 });
 
 export function explorerReducer(state: ExplorerState, action: ExplorerAction): ExplorerState {
@@ -77,8 +75,6 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
       });
     case "selectRoute":
       return { ...state, selectedRoute: action.index };
-    case "setTrafficAware":
-      return routeChanged({ ...state, trafficAware: action.value });
     case "reset":
       return initialExplorerState();
   }
@@ -96,6 +92,6 @@ export function routeRequest(state: ExplorerState) {
 export function routeRequestKey(state: ExplorerState): string | null {
   const req = routeRequest(state);
   if (!req) return null;
-  const id = (s: Stop) => s.placeId ?? `${s.location.lat.toFixed(6)},${s.location.lng.toFixed(6)}`;
-  return [id(req.origin), ...req.waypoints.map(id), id(req.destination), state.trafficAware ? "T" : "U"].join("|");
+  const id = (s: Stop) => `${s.location.lat.toFixed(6)},${s.location.lng.toFixed(6)}`;
+  return [id(req.origin), ...req.waypoints.map(id), id(req.destination)].join("|");
 }

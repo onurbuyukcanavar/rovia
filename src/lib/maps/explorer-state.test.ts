@@ -4,14 +4,14 @@ import {
 } from "./explorer-state";
 import type { Stop } from "./types";
 
-const stop = (label: string, lat = 40, lng = 30, placeId: string | null = null): Stop => ({
-  id: label, label, address: null, placeId, location: { lat, lng },
+const stop = (label: string, lat = 40, lng = 30, ref: string | null = null): Stop => ({
+  id: label, label, address: null, ref, location: { lat, lng },
 });
 
-const ist = stop("İstanbul", 41.0, 28.97, "ChIJ_istanbul_0");
+const ist = stop("İstanbul", 41.0, 28.97, "r223474");
 const bolu = stop("Bolu", 40.73, 31.6);
-const ank = stop("Ankara", 39.93, 32.85, "ChIJ_ankara_000");
-const gor = stop("Göreme", 38.64, 34.83, "ChIJ_goreme_000");
+const ank = stop("Ankara", 39.93, 32.85, "n2");
+const gor = stop("Göreme", 38.64, 34.83);
 
 function build(): ExplorerState {
   let s = initialExplorerState();
@@ -54,19 +54,19 @@ describe("rota kurucusu durumu", () => {
     expect([req.origin, ...req.waypoints, req.destination].map((x) => x.label)).toEqual(["Göreme", "Ankara", "Bolu", "İstanbul"]);
   });
 
-  it("en fazla 25 ara durak", () => {
+  it("en fazla 18 ara durak (Valhalla konum sınırı)", () => {
     let s = initialExplorerState();
     for (let i = 0; i < MAX_WAYPOINTS + 3; i++) s = explorerReducer(s, { type: "addWaypoint", key: `k${i}`, stop: bolu });
     expect(s.waypoints).toHaveLength(MAX_WAYPOINTS);
   });
 
-  it("durak değişince seçili alternatif sıfırlanır; istek anahtarı trafik tercihini içerir", () => {
+  it("durak değişince seçili alternatif sıfırlanır; istek anahtarı koordinatlardan oluşur", () => {
     let s = explorerReducer(build(), { type: "selectRoute", index: 2 });
     expect(s.selectedRoute).toBe(2);
     const k1 = routeRequestKey(s);
-    s = explorerReducer(s, { type: "setTrafficAware", value: true });
+    s = explorerReducer(s, { type: "moveWaypoint", key: "w2", delta: -1 });
     expect(s.selectedRoute).toBe(0);
     expect(routeRequestKey(s)).not.toBe(k1);
-    expect(routeRequestKey(s)).toContain("ChIJ_istanbul_0");
+    expect(routeRequestKey(s)).toMatch(/^41\.000000,28\.970000\|/);
   });
 });

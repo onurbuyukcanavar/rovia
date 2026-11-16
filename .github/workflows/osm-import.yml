@@ -1,0 +1,52 @@
+name: OSM verisi içe aktarma (Türkiye)
+
+# OpenStreetMap Türkiye verisini (Geofabrik) indirir, ROVIA kategorilerine göre süzer
+# ve Supabase'deki geo_features / geo_admin_areas tablolarına yükler.
+# Veri: © OpenStreetMap katkıda bulunanlar, ODbL 1.0 — https://www.openstreetmap.org/copyright
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 2 3 * *" # her ayın 3'ü, 02:17 UTC
+
+concurrency:
+  group: osm-import
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PBF_URL: https://download.geofabrik.de/europe/turkey-latest.osm.pbf
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - name: Secret kontrolü
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::SUPABASE_DB_URL secret'ı tanımlı değil (docs/SETUP.md §4)"; exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install osmium==4.* && sudo apt-get update -q && sudo apt-get install -yq postgresql-client
+      - name: Türkiye verisini indir ve doğrula
+        run: |
+          curl -fsSL --retry 3 -o turkey.osm.pbf "$PBF_URL"
+          curl -fsSL --retry 3 -o turkey.osm.pbf.md5 "$PBF_URL.md5"
+          echo "$(cut -d' ' -f1 turkey.osm.pbf.md5)  turkey.osm.pbf" | md5sum -c -
+          echo "DATA_TS=$(curl -fsSI "$PBF_URL" | grep -i '^last-modified:' | cut -d' ' -f2- | tr -d '\r' | xargs -I{} date -u -d '{}' +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+          ls -lh turkey.osm.pbf
+      - name: Çıkarım (yerleşimler, ilgi noktaları, il/ilçe sınırları)
+        run: |
+          python3 scripts/osm/extract.py turkey.osm.pbf out
+          ls -lh out/ && wc -l out/*.csv
+      - name: Supabase'e yükle
+        run: |
+          cp -r out scripts/osm/out
+          cd scripts/osm
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -v source="geofabrik turkey-latest" -v data_ts="$DATA_TS" -f load.sql

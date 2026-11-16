@@ -191,22 +191,28 @@ describe("iş kuralları", () => {
     });
   });
 
-  it("aynı Google yeri favorilere iki kez eklenemez; kaynak bilgisi korunur", async () => {
+  it("aynı OSM yeri favorilere iki kez eklenemez; kaynak bilgisi korunur; koordinat zorunlu", async () => {
     await asUser(db, alice, (tx) =>
       tx.query(
-        "insert into saved_places (user_id, name, google_place_id, source) values ($1, 'Tuz Gölü', 'ChIJ-tuz', 'google_takeout')",
+        "insert into saved_places (user_id, name, osm_ref, latitude, longitude, source) values ($1, 'Tuz Gölü', 'r123', 38.8, 33.4, 'google_takeout')",
         [alice],
       ),
     );
     await expect(
       asUser(db, alice, (tx) =>
-        tx.query("insert into saved_places (user_id, name, google_place_id) values ($1, 'Tuz Gölü', 'ChIJ-tuz')", [alice]),
+        tx.query("insert into saved_places (user_id, name, osm_ref, latitude, longitude) values ($1, 'Tuz Gölü', 'r123', 38.8, 33.4)", [alice]),
       ),
-    ).rejects.toThrow(/saved_places_user_google_place_key/);
+    ).rejects.toThrow(/saved_places_user_osm_ref_key/);
     // Başka kullanıcı aynı yeri kaydedebilir
     await asUser(db, bob, (tx) =>
-      tx.query("insert into saved_places (user_id, name, google_place_id) values ($1, 'Tuz Gölü', 'ChIJ-tuz')", [bob]),
+      tx.query("insert into saved_places (user_id, name, osm_ref, latitude, longitude) values ($1, 'Tuz Gölü', 'r123', 38.8, 33.4)", [bob]),
     );
+    await expect(
+      asUser(db, bob, (tx) => tx.query("insert into saved_places (user_id, name) values ($1, 'Konumsuz')", [bob])),
+    ).rejects.toThrow(/null value in column "latitude"/);
+    await expect(
+      asUser(db, bob, (tx) => tx.query("insert into saved_places (user_id, name, osm_ref, latitude, longitude) values ($1, 'x', 'ChIJ-google', 1, 1)", [bob])),
+    ).rejects.toThrow(/saved_places_osm_ref_check/);
   });
 
   it("paylaşım yalnızca tek bir hedefe bağlanır ve tahmin edilemez token üretir", async () => {

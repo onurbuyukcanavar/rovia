@@ -49,10 +49,25 @@ async function main() {
     out += `      ${name}: {\n        Row: {\n${row}\n        };\n        Insert: {\n${ins}\n        };\n        Update: {\n${upd}\n        };\n        Relationships: [];\n      };\n`;
   }
   out += `    };\n    Views: { [_ in never]: never };\n    Functions: {\n`;
-  const fnType = (t: string) => (t === "jsonb" ? "Json" : PG_TO_TS[t === "int" ? "integer" : t] ?? "unknown");
+  const fnType = (t: string): string => {
+    const table = t.match(/^TABLE\(([\s\S]*)\)$/);
+    if (table) {
+      const cols = table[1].split(",").map((c) => c.trim().split(/\s+/)).map(([n, ...ty]) => `${n}: ${fnType(ty.join(" "))} | null`);
+      return `{ ${cols.join("; ")} }[]`;
+    }
+    if (t.endsWith("[]")) return `${fnType(t.slice(0, -2))}[]`;
+    if (t === "jsonb" || t === "json") return "Json";
+    if (t === "int") return "number";
+    if (t.startsWith("extensions.")) return "unknown";
+    return PG_TO_TS[t] ?? "unknown";
+  };
   for (const f of fns.rows) {
     const args = f.args
-      ? `{ ${f.args.split(",").map((a) => a.trim().split(/\s+/)).map(([n, ...t]) => `${n}: ${fnType(t.join(" "))}`).join("; ")} }`
+      ? `{ ${f.args.split(",").map((a) => a.trim().split(/\s+/)).map(([n, ...t]) => {
+          const decl = t.join(" ");
+          const optional = /\bDEFAULT\b/i.test(decl);
+          return `${n}${optional ? "?" : ""}: ${fnType(decl.replace(/\s+DEFAULT\s+.*$/i, ""))}`;
+        }).join("; ")} }`
       : "Record<string, never>";
     out += `      ${f.name}: { Args: ${args}; Returns: ${fnType(f.result)} };\n`;
   }

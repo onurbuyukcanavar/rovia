@@ -5,7 +5,8 @@ export type Stop = {
   id: string;
   label: string;
   address: string | null;
-  placeId: string | null;
+  /** OpenStreetMap kaydı (n123/w456/r789) — varsa; favori ve seyahatname bağlantıları için */
+  ref: string | null;
   location: LatLng;
 };
 
@@ -14,38 +15,31 @@ export type RouteLeg = { distanceMeters: number; durationSeconds: number };
 export type RouteOption = {
   distanceMeters: number;
   durationSeconds: number;
-  staticDurationSeconds: number;
   encodedPolyline: string;
-  description: string | null;
-  labels: string[];
-  warnings: string[];
   legs: RouteLeg[];
-  viewport: { low: LatLng; high: LatLng } | null;
+  hasToll: boolean;
+  hasFerry: boolean;
+  hasHighway: boolean;
 };
 
-export type RouteResult = { routes: RouteOption[]; sku: "essentials" | "pro"; alternativesSupported: boolean };
+export type RouteResult = { routes: RouteOption[]; alternativesSupported: boolean };
 
-export type Suggestion = { placeId: string; mainText: string; secondaryText: string | null };
+export type Suggestion = {
+  id: string;
+  kind: "settlement" | "poi" | "address";
+  name: string;
+  secondary: string | null;
+  location: LatLng;
+};
 
 export type FoundPlace = {
   id: string;
   name: string;
   address: string | null;
   location: LatLng;
+  category: string;
   typeLabel: string | null;
+  tags: Record<string, string>;
   distanceFromRoute: number;
   alongRoute: number | null;
-};
-
-/** Detay yanıtı; rotaya uzaklık istemcide hesaplanır, burada yoktur. */
-export type PlaceDetails = Omit<FoundPlace, "distanceFromRoute" | "alongRoute"> & {
-  rating: number | null;
-  ratingCount: number | null;
-  openNow: boolean | null;
-  openingHours: string[];
-  phone: string | null;
-  phoneInternational: string | null;
-  website: string | null;
-  googleMapsUri: string | null;
-  photo: { name: string; attributions: { name: string; uri: string | null }[] } | null;
 };

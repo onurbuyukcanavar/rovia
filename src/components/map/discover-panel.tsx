@@ -3,7 +3,7 @@ import {
   BedDouble, Camera, Coffee, Cross, Fuel, Landmark, Library, LoaderCircle, Mountain, PlugZap, ShoppingBag, Tent, Utensils,
   type LucideIcon,
 } from "lucide-react";
-import { RADIUS_OPTIONS, ROUTE_CATEGORIES } from "@/lib/google/categories";
+import { RADIUS_OPTIONS, ROUTE_CATEGORIES } from "@/lib/places/categories";
 import type { FoundPlace } from "@/lib/maps/types";
 import { formatDistance } from "@/lib/format";
 import { Alert } from "@/components/ui/alert";
@@ -42,7 +42,7 @@ export function DiscoverPanel({ hasRoute, category, onCategory, radius, onRadius
         </label>
       </div>
 
-      <div role="group" aria-label="Kategoriler" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
+      <div role="group" aria-label={t.maps.categories} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
         {ROUTE_CATEGORIES.map((c) => {
           const Icon = ICONS[c.icon] ?? Landmark;
           const active = category === c.key;
@@ -87,7 +87,7 @@ export function DiscoverPanel({ hasRoute, category, onCategory, radius, onRadius
               ))}
             </ul>
           )}
-          <p className="text-right text-[0.65rem] text-stone-500">Veriler: Google Haritalar</p>
+          <p className="text-right text-[0.65rem] text-stone-500">{t.maps.dataNote}</p>
         </>
       )}
     </section>

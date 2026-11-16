@@ -1,5 +1,6 @@
 "use client";
-import { APIProvider, Map, useApiLoadingStatus, APILoadingStatus, type MapMouseEvent } from "@vis.gl/react-google-maps";
+import "maplibre-gl/dist/maplibre-gl.css";
+import MapView, { NavigationControl, ScaleControl, type MapLayerMouseEvent } from "react-map-gl/maplibre";
 import { useCallback, useMemo, useReducer, useState } from "react";
 import { decodePolyline, type LatLng } from "@/lib/geo";
 import { mapsApi } from "@/lib/maps/client";
@@ -11,7 +12,7 @@ import { useGeolocation } from "@/lib/maps/use-geolocation";
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import { Alert } from "@/components/ui/alert";
 import { DiscoverPanel } from "./discover-panel";
-import { FitBounds, MyLocationMarker, PanTo, ResultMarkers, RouteLines, StopMarkers } from "./map-layers";
+import { ALT_ROUTE_LAYER, FitBounds, MyLocationMarker, PanTo, ResultMarkers, RouteLines, StopMarkers } from "./map-layers";
 import { PlaceDetail } from "./place-detail";
 import { RouteBuilder } from "./route-builder";
 import { RouteSummary } from "./route-summary";
@@ -19,44 +20,31 @@ import { t } from "@/i18n";
 
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
 
-export function MapExplorer({ apiKey, mapId }: { apiKey: string; mapId: string }) {
-  return (
-    <APIProvider apiKey={apiKey} language="tr" region="TR">
-      <Explorer mapId={mapId} />
-    </APIProvider>
-  );
-}
-
-function MapLoadError() {
-  const status = useApiLoadingStatus();
-  if (status !== APILoadingStatus.FAILED && status !== APILoadingStatus.AUTH_FAILURE) return null;
-  return (
-    <div className="absolute inset-x-3 top-3 z-10">
-      <Alert tone="error">{t.maps.loadError}</Alert>
-    </div>
-  );
-}
-
-function Explorer({ mapId }: { mapId: string }) {
+/**
+ * Haritayı Keşfet — tamamen açık kaynak altyapı:
+ * MapLibre GL JS (çizim) + OpenFreeMap (karolar, OSM) + Valhalla (rota) + ROVIA PostGIS (arama).
+ */
+export function MapExplorer({ styleUrl }: { styleUrl: string }) {
   const [state, dispatch] = useReducer(explorerReducer, undefined, initialExplorerState);
   const [picking, setPicking] = useState<SlotRef | null>(null);
   const [mapCenter, setMapCenter] = useState<LatLng>(TURKEY_CENTER);
   const [category, setCategory] = useState<string | null>(null);
   const [radius, setRadius] = useState(5_000);
   const [selectedPlace, setSelectedPlace] = useState<FoundPlace | null>(null);
+  const [mapError, setMapError] = useState(false);
   const geo = useGeolocation();
 
   // ---------------------------------------------------------------- Rota hesaplama
-  // reqKey isteğin tüm girdilerini (duraklar + trafik tercihi) kapsar; aynı anahtar için tekrar istek atılmaz
+  // reqKey isteğin tüm girdilerini kapsar; aynı duraklar için tekrar istek atılmaz
   const reqKey = routeRequestKey(state);
   const route = useKeyedRequest<RouteResult>(
     reqKey,
-    (signal) => mapsApi.route(routeRequest(state)!, { alternatives: true, trafficAware: state.trafficAware }, signal),
+    (signal) => mapsApi.route(routeRequest(state)!, { alternatives: true }, signal),
     { delayMs: 500, keepPrevious: true },
   );
-  const routeResult = route.data ?? null;
+  const routeResult = route.error ? null : (route.data ?? null);
   const selectedRoute = routeResult?.routes[state.selectedRoute] ?? routeResult?.routes[0] ?? null;
-  const polyline = !route.error ? (selectedRoute?.encodedPolyline ?? null) : null;
+  const polyline = selectedRoute?.encodedPolyline ?? null;
 
   // ---------------------------------------------------------------- Kategori araması
   // Rota varsa rota boyunca; yoksa kategori seçildiği andaki harita merkezi çevresinde
@@ -82,20 +70,27 @@ function Explorer({ mapId }: { mapId: string }) {
 
   // ---------------------------------------------------------------- Haritadan seçim / konum
   const stopFromPoint = useCallback(async (point: LatLng, fallbackLabel: string): Promise<Stop> => {
+    const base = { id: newKey(), address: null, ref: null, location: point };
     try {
       const g = await mapsApi.reverseGeocode(point);
-      return { id: newKey(), label: g.label, address: g.address, placeId: null, location: point };
+      return { ...base, label: g.label };
     } catch {
-      return { id: newKey(), label: fallbackLabel, address: null, placeId: null, location: point };
+      return { ...base, label: fallbackLabel };
     }
   }, []);
 
   const onMapClick = useCallback(
-    async (e: MapMouseEvent) => {
-      if (!picking || !e.detail.latLng) return;
+    async (e: MapLayerMouseEvent) => {
+      // Alternatif rotaya tıklama → o rotayı seç
+      const alt = e.features?.find((f) => f.layer.id === ALT_ROUTE_LAYER);
+      if (alt && !picking) {
+        dispatch({ type: "selectRoute", index: Number(alt.properties?.index ?? 0) });
+        return;
+      }
+      if (!picking) return;
       const slot = picking;
       setPicking(null);
-      const point = e.detail.latLng;
+      const point = { lat: e.lngLat.lat, lng: e.lngLat.lng };
       const stop = await stopFromPoint(point, `${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}`);
       dispatch({ type: "set", slot, stop });
     },
@@ -120,38 +115,41 @@ function Explorer({ mapId }: { mapId: string }) {
   const routeContext = useMemo(() => {
     const req = routeRequest(state);
     if (!selectedRoute || !req) return null;
-    return { route: selectedRoute, origin: req.origin, destination: req.destination, waypoints: req.waypoints, trafficAware: state.trafficAware };
+    return { route: selectedRoute, origin: req.origin, destination: req.destination, waypoints: req.waypoints };
   }, [selectedRoute, state]);
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem-4.5rem-env(safe-area-inset-bottom))] flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
       <div className="relative order-1 h-[42%] shrink-0 lg:order-2 lg:h-full" data-testid="map">
-        <Map
-          mapId={mapId}
-          defaultCenter={TURKEY_CENTER}
-          defaultZoom={6}
-          gestureHandling="greedy"
-          disableDefaultUI={false}
-          mapTypeControl={false}
-          streetViewControl={false}
-          fullscreenControl={false}
-          clickableIcons={false}
-          draggableCursor={picking ? "crosshair" : undefined}
+        <MapView
+          initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
+          mapStyle={styleUrl}
+          style={{ width: "100%", height: "100%" }}
+          cursor={picking ? "crosshair" : undefined}
+          interactiveLayerIds={routeResult && routeResult.routes.length > 1 ? [ALT_ROUTE_LAYER] : []}
           onClick={onMapClick}
-          onIdle={(e) => {
-            const c = e.map.getCenter();
-            if (c) setMapCenter({ lat: c.lat(), lng: c.lng() });
+          onMoveEnd={(e) => setMapCenter({ lat: e.viewState.latitude, lng: e.viewState.longitude })}
+          onError={(e) => {
+            console.error("[rovia] harita:", e.error?.message);
+            setMapError(true);
           }}
-          className="size-full"
+          attributionControl={{ compact: true }}
+          dragRotate={false}
         >
-          {routeResult && !route.error && <RouteLines routes={routeResult.routes} selected={state.selectedRoute} onSelect={(i) => dispatch({ type: "selectRoute", index: i })} />}
+          <NavigationControl position="top-right" showCompass={false} />
+          <ScaleControl position="bottom-left" unit="metric" />
+          {routeResult && <RouteLines routes={routeResult.routes} selected={state.selectedRoute} />}
           <StopMarkers origin={state.origin.stop} waypoints={state.waypoints.map((w) => w.stop)} destination={state.destination.stop} />
           {results && <ResultMarkers places={results} selectedId={selectedPlace?.id ?? null} onSelect={setSelectedPlace} />}
           <MyLocationMarker position={geo.position} />
           <FitBounds points={fitPoints} deps={fitKey} />
           <PanTo position={selectedPlace?.location ?? null} />
-        </Map>
-        <MapLoadError />
+        </MapView>
+        {mapError && (
+          <div className="absolute inset-x-3 top-3 z-10">
+            <Alert tone="error">{t.maps.loadError}</Alert>
+          </div>
+        )}
       </div>
 
       <aside className="order-2 min-h-0 flex-1 overflow-y-auto border-t border-sand-200 bg-paper px-4 py-4 lg:order-1 lg:border-t-0 lg:border-r lg:px-5 lg:py-6">
@@ -179,7 +177,7 @@ function Explorer({ mapId }: { mapId: string }) {
             {geo.error && <Alert tone="error">{geo.error}</Alert>}
             <RouteBuilder state={state} dispatch={dispatch} bias={geo.position ?? undefined} picking={picking}
               onPick={setPicking} onLocate={onLocate} locating={geo.status === "locating"} />
-            <RouteSummary result={route.error ? null : routeResult} selected={state.selectedRoute}
+            <RouteSummary result={routeResult} selected={state.selectedRoute}
               onSelect={(i) => dispatch({ type: "selectRoute", index: i })}
               loading={route.loading} error={route.error ?? null} hasWaypoints={state.waypoints.length > 0} />
             <DiscoverPanel hasRoute={!!polyline} category={category} onCategory={chooseCategory} radius={radius} onRadius={setRadius}

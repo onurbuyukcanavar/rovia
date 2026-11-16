@@ -1,8 +1,8 @@
 "use client";
-import { LoaderCircle, MapPin, X } from "lucide-react";
-import { useId, useRef, useState, type ReactNode } from "react";
+import { Building2, Home, LoaderCircle, MapPin, X } from "lucide-react";
+import { useId, useState, type ReactNode } from "react";
 import type { LatLng } from "@/lib/geo";
-import { MapsClientError, mapsApi } from "@/lib/maps/client";
+import { mapsApi } from "@/lib/maps/client";
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import type { Stop, Suggestion } from "@/lib/maps/types";
 import { cn } from "@/lib/cn";
@@ -19,9 +19,8 @@ type Props = {
 };
 
 /**
- * Places Autocomplete (New) ile yer arama kutusu. Erişilebilir combobox (ARIA 1.2).
- * Her arama oturumu bir session token taşır; seçimle birlikte yer detayı aynı token ile
- * istenir (oturum bazlı faturalama) ve token yenilenir.
+ * Yer arama kutusu: ROVIA'nın kendi OSM veritabanı (yerleşim + ilgi noktası) ve
+ * adresler için Photon yedeği. Erişilebilir combobox (ARIA 1.2).
  */
 export function PlaceSearch({ label, value, onSelect, bias, marker, actions, autoFocus }: Props) {
   const id = useId();
@@ -29,9 +28,6 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
   const [editing, setEditing] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const [choosing, setChoosing] = useState(false);
-  const [chooseError, setChooseError] = useState<string | null>(null);
-  const tokenRef = useRef<string | null>(null);
 
   // Dışarıdan değer değişince (haritadan seçim, yer değiştirme) metni eşitle — render sırasında, efektsiz
   const [prevValue, setPrevValue] = useState(value);
@@ -43,35 +39,26 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
   const query = text.trim();
   const suggest = useKeyedRequest<Suggestion[]>(
     editing && query.length >= 2 ? query : null,
-    (signal) => {
-      tokenRef.current ??= crypto.randomUUID();
-      return mapsApi.autocomplete(query, tokenRef.current, bias, signal);
-    },
+    (signal) => mapsApi.autocomplete(query, bias, signal),
     { delayMs: 250 },
   );
   const items = suggest.data ?? [];
-  const loading = suggest.loading || choosing;
-  const error = chooseError ?? suggest.error ?? null;
+  const loading = suggest.loading;
+  const error = suggest.error ?? null;
   const listOpen = open && editing && items.length > 0;
   const activeIndex = Math.min(active, Math.max(0, items.length - 1));
 
-  async function choose(s: Suggestion) {
+  function choose(s: Suggestion) {
     setOpen(false);
     setEditing(false);
-    setChoosing(true);
-    setText(s.mainText);
-    const token = tokenRef.current ?? undefined;
-    tokenRef.current = null; // oturum seçimle biter; sonraki arama yeni token alır
-    try {
-      const place = await mapsApi.place(s.placeId, token);
-      const stop: Stop = { id: place.id, label: s.mainText || place.name, address: place.address, placeId: place.id, location: place.location };
-      setChooseError(null);
-      onSelect(stop);
-    } catch (e) {
-      setChooseError(e instanceof MapsClientError ? e.message : t.maps.errors.upstream);
-    } finally {
-      setChoosing(false);
-    }
+    setText(s.name);
+    onSelect({
+      id: s.id,
+      label: s.name,
+      address: s.secondary,
+      ref: /^[nwr][0-9]+$/.test(s.id) ? s.id : null,
+      location: s.location,
+    });
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -84,7 +71,7 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
       setActive((activeIndex - 1 + items.length) % items.length);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      void choose(items[activeIndex]);
+      choose(items[activeIndex]);
     } else if (e.key === "Escape") {
       setOpen(false);
     }
@@ -112,7 +99,6 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
               setEditing(true);
               setOpen(true);
               setActive(0);
-              setChooseError(null);
               setText(e.target.value);
             }}
             onFocus={() => setOpen(true)}
@@ -133,7 +119,6 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
                 onClick={() => {
                   setEditing(false);
                   setText("");
-                  tokenRef.current = null;
                   onSelect(null);
                 }}
                 className="grid size-7 place-items-center rounded-lg text-stone-500 hover:bg-sand-100"
@@ -152,7 +137,7 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
           className="absolute inset-x-0 top-full z-30 mt-1 ml-8 overflow-hidden rounded-xl border border-sand-200 bg-white shadow-lg">
           {items.map((s, i) => (
             <li
-              key={s.placeId}
+              key={s.id}
               id={`${id}-opt-${i}`}
               role="option"
               aria-selected={i === activeIndex}
@@ -163,14 +148,20 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
               onMouseEnter={() => setActive(i)}
               className={cn("flex cursor-pointer items-start gap-2.5 px-3 py-2.5 text-sm", i === activeIndex && "bg-sand-100")}
             >
-              <MapPin className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+              {s.kind === "settlement" ? (
+                <Building2 className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+              ) : s.kind === "address" ? (
+                <Home className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+              ) : (
+                <MapPin className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+              )}
               <span className="min-w-0">
-                <span className="block truncate font-semibold">{s.mainText}</span>
-                {s.secondaryText && <span className="block truncate text-xs text-stone-600">{s.secondaryText}</span>}
+                <span className="block truncate font-semibold">{s.name}</span>
+                {s.secondary && <span className="block truncate text-xs text-stone-600">{s.secondary}</span>}
               </span>
             </li>
           ))}
-          <li className="border-t border-sand-100 px-3 py-1.5 text-right text-[0.65rem] text-stone-500" aria-hidden>Google</li>
+          <li className="border-t border-sand-100 px-3 py-1.5 text-right text-[0.65rem] text-stone-500" aria-hidden>© OpenStreetMap</li>
         </ul>
       )}
     </div>

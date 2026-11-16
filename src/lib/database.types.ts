@@ -25,6 +25,93 @@ export type Database = {
         };
         Relationships: [];
       };
+      geo_admin_areas: {
+        Row: {
+          osm_ref: string;
+          name: string;
+          admin_level: number;
+          geom: unknown;
+        };
+        Insert: {
+          osm_ref: string;
+          name: string;
+          admin_level: number;
+          geom: unknown;
+        };
+        Update: {
+          osm_ref?: string;
+          name?: string;
+          admin_level?: number;
+          geom?: unknown;
+        };
+        Relationships: [];
+      };
+      geo_features: {
+        Row: {
+          osm_ref: string;
+          kind: string;
+          category: string;
+          subtype: string | null;
+          name: string;
+          name_search: string;
+          admin: string | null;
+          geog: unknown;
+          tags: Json;
+          importance: number;
+        };
+        Insert: {
+          osm_ref: string;
+          kind: string;
+          category: string;
+          subtype?: string | null;
+          name: string;
+          name_search: string;
+          admin?: string | null;
+          geog: unknown;
+          tags?: Json;
+          importance?: number;
+        };
+        Update: {
+          osm_ref?: string;
+          kind?: string;
+          category?: string;
+          subtype?: string | null;
+          name?: string;
+          name_search?: string;
+          admin?: string | null;
+          geog?: unknown;
+          tags?: Json;
+          importance?: number;
+        };
+        Relationships: [];
+      };
+      geo_import_runs: {
+        Row: {
+          id: number;
+          source: string;
+          data_timestamp: string | null;
+          feature_count: number;
+          admin_count: number;
+          finished_at: string;
+        };
+        Insert: {
+          id?: number;
+          source: string;
+          data_timestamp?: string | null;
+          feature_count?: number;
+          admin_count?: number;
+          finished_at?: string;
+        };
+        Update: {
+          id?: number;
+          source?: string;
+          data_timestamp?: string | null;
+          feature_count?: number;
+          admin_count?: number;
+          finished_at?: string;
+        };
+        Relationships: [];
+      };
       gps_points: {
         Row: {
           id: number;
@@ -296,11 +383,10 @@ export type Database = {
           name: string;
           category: string;
           list_type: string;
-          latitude: number | null;
-          longitude: number | null;
-          coords_cached_at: string | null;
+          latitude: number;
+          longitude: number;
           address: string | null;
-          google_place_id: string | null;
+          osm_ref: string | null;
           source: string;
           source_ref: string | null;
           source_list_name: string | null;
@@ -315,11 +401,10 @@ export type Database = {
           name: string;
           category?: string;
           list_type?: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          coords_cached_at?: string | null;
+          latitude: number;
+          longitude: number;
           address?: string | null;
-          google_place_id?: string | null;
+          osm_ref?: string | null;
           source?: string;
           source_ref?: string | null;
           source_list_name?: string | null;
@@ -334,11 +419,10 @@ export type Database = {
           name?: string;
           category?: string;
           list_type?: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          coords_cached_at?: string | null;
+          latitude?: number;
+          longitude?: number;
           address?: string | null;
-          google_place_id?: string | null;
+          osm_ref?: string | null;
           source?: string;
           source_ref?: string | null;
           source_list_name?: string | null;
@@ -408,7 +492,7 @@ export type Database = {
           address: string | null;
           latitude: number | null;
           longitude: number | null;
-          google_place_id: string | null;
+          osm_ref: string | null;
           saved_place_id: string | null;
           visited_at: string | null;
           tags: string[];
@@ -434,7 +518,7 @@ export type Database = {
           address?: string | null;
           latitude?: number | null;
           longitude?: number | null;
-          google_place_id?: string | null;
+          osm_ref?: string | null;
           saved_place_id?: string | null;
           visited_at?: string | null;
           tags?: string[];
@@ -460,7 +544,7 @@ export type Database = {
           address?: string | null;
           latitude?: number | null;
           longitude?: number | null;
-          google_place_id?: string | null;
+          osm_ref?: string | null;
           saved_place_id?: string | null;
           visited_at?: string | null;
           tags?: string[];
@@ -703,10 +787,9 @@ export type Database = {
           stop_order: number;
           name: string;
           address: string | null;
-          latitude: number | null;
-          longitude: number | null;
-          coords_cached_at: string | null;
-          google_place_id: string | null;
+          latitude: number;
+          longitude: number;
+          osm_ref: string | null;
           saved_place_id: string | null;
           category: string | null;
           notes: string | null;
@@ -721,10 +804,9 @@ export type Database = {
           stop_order: number;
           name: string;
           address?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
-          coords_cached_at?: string | null;
-          google_place_id?: string | null;
+          latitude: number;
+          longitude: number;
+          osm_ref?: string | null;
           saved_place_id?: string | null;
           category?: string | null;
           notes?: string | null;
@@ -739,10 +821,9 @@ export type Database = {
           stop_order?: number;
           name?: string;
           address?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
-          coords_cached_at?: string | null;
-          google_place_id?: string | null;
+          latitude?: number;
+          longitude?: number;
+          osm_ref?: string | null;
           saved_place_id?: string | null;
           category?: string | null;
           notes?: string | null;
@@ -894,6 +975,10 @@ export type Database = {
     Functions: {
       consume_rate_limit: { Args: { p_bucket: string }; Returns: boolean };
       dashboard_stats: { Args: Record<string, never>; Returns: Json };
+      reverse_geocode: { Args: { p_lat: number; p_lng: number }; Returns: { label: string | null; settlement: string | null; district: string | null; province: string | null }[] };
+      search_features_along_route: { Args: { p_route: Json; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null; along_m: number | null }[] };
+      search_features_nearby: { Args: { p_lat: number; p_lng: number; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null }[] };
+      search_places: { Args: { p_query: string; p_lat?: number; p_lng?: number; p_limit?: number }; Returns: { osm_ref: string | null; kind: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; lat: number | null; lng: number | null; score: number | null }[] };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

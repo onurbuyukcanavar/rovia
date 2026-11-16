@@ -1,4 +1,4 @@
-import { reverseGeocode } from "@/lib/google/geocoding";
+import { reverseGeocode } from "@/lib/geo-services/features";
 import { latLngSchema, mapsHandler } from "@/lib/api/maps-handler";
 
-export const POST = mapsHandler({ bucket: "geocode" }, latLngSchema, (point) => reverseGeocode(point));
+export const POST = mapsHandler("geocode", latLngSchema, (point, db) => reverseGeocode(db, point));

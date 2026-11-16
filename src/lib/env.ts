@@ -9,8 +9,7 @@ const publicSchema = z.object({
   supabaseUrl: z.url().optional(),
   supabaseKey: z.string().min(20).optional(),
   siteUrl: z.url().optional(),
-  mapsBrowserKey: z.string().min(10).optional(),
-  mapsMapId: z.string().min(4).optional(),
+  mapStyleUrl: z.url().optional(),
 });
 
 const parsed = publicSchema.safeParse({
@@ -18,8 +17,7 @@ const parsed = publicSchema.safeParse({
   supabaseKey:
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || undefined,
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || undefined,
-  mapsBrowserKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY || undefined,
-  mapsMapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || undefined,
+  mapStyleUrl: process.env.NEXT_PUBLIC_MAP_STYLE_URL || undefined,
 });
 
 if (!parsed.success) {
@@ -43,9 +41,8 @@ export const REQUIRED_ENV_VARS = [
   { name: "NEXT_PUBLIC_SITE_URL", example: "http://localhost:3000" },
 ] as const;
 
-/** Haritanın tarayıcıda yüklenebilmesi için gereken ayarlar (Map ID, Advanced Markers için zorunlu). */
-export function getMapsBrowserConfig() {
-  const { mapsBrowserKey, mapsMapId } = publicEnv;
-  if (!mapsBrowserKey || !mapsMapId) return null;
-  return { apiKey: mapsBrowserKey, mapId: mapsMapId };
-}
+/**
+ * Harita stili (MapLibre). Varsayılan: OpenFreeMap "liberty" — anahtarsız, limitsiz, OSM verisi.
+ * Kendi karo sunucumuza geçişte yalnızca NEXT_PUBLIC_MAP_STYLE_URL değişir.
+ */
+export const mapStyleUrl = () => publicEnv.mapStyleUrl ?? "https://tiles.openfreemap.org/styles/liberty";

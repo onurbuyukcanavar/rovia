@@ -3,6 +3,12 @@
 > Sürüm 0.1 · 16 Kasım 2026 · PHASE 1 öncesi analiz
 > Bu doküman "İlk Görev" bölümündeki 12 maddeyi karşılar. Kod tabanıyla birlikte güncellenir.
 
+> **Karar kaydı · 16 Kasım 2026 — Harita altyapısı açık kaynağa taşındı (ADR-001)**
+> Ürün sahibinin kararıyla harita, rota ve yer araması **Google Maps Platform'dan bağımsız**, açık kaynak bir yapıya taşındı.
+> Google yalnızca **giriş/üyelik (OAuth)** için kullanılır. Güncel harita mimarisi §2A'dadır; aşağıdaki Google Maps
+> bölümleri (§0 #2–#4, §4, §12'deki Google tablosu) karar gerekçesinin kaydı olarak tutulmuştur ve artık uygulanmaz.
+> Şema: `google_place_id` → `osm_ref`, 30 günlük koordinat önbelleği kaldırıldı, koordinatlar zorunlu (migration `…000500_osm_refs`).
+
 ---
 
 ## 0. Özet: Ürün vizyonunu etkileyen doğrulanmış teknik sınırlar
@@ -69,6 +75,34 @@ ROVIA üç deneyim etrafında kurulur. Her modül bunlardan birine hizmet eder:
 **Temel ilke:** İş verisine erişim her zaman **kullanıcının JWT'si** ile, yani RLS altında yapılır. `service_role` anahtarı yalnızca hesap silme ve zamanlanmış temizlik gibi dar sunucu işlerinde kullanılır ve hiçbir zaman istemciye gitmez.
 
 **Mobil yol haritası:** UI ve iş mantığı ayrık (`src/lib/*` saf TS). İleride Capacitor ile aynı kod native kabuğa alınarak arka plan GPS eklentisi kullanılabilir.
+
+---
+
+## 2A. Açık kaynak harita mimarisi (ADR-001, geçerli)
+
+| Katman | Bileşen (lisans) | Nerede çalışır | Maliyet | Sınır / not |
+|---|---|---|---|---|
+| Harita çizimi | **MapLibre GL JS** (BSD-3) + `react-map-gl` | Tarayıcı | ₺0 | — |
+| Karolar & stil | **OpenFreeMap** "liberty" (OSM, OpenMapTiles) | openfreemap.org | ₺0 | Anahtar/limit yok; "olduğu gibi" sunulur. `NEXT_PUBLIC_MAP_STYLE_URL` ile kendi karo sunucumuza geçilebilir |
+| Rota | **Valhalla** (MIT) | FOSSGIS herkese açık sunucusu (`VALHALLA_URL`) | ₺0 | En fazla 1 istek/sn, tek sunucu, garanti yok → canlıda kendi sunucumuz (Docker, ~5–10 €/ay VPS) |
+| İlgi noktası, rota boyu arama, yerleşim araması, ters geocoding | **ROVIA PostGIS** — OSM Türkiye verisi `geo_features`, `geo_admin_areas` | Supabase (mevcut) | ₺0 | Kendi verimiz: kota yok, ODbL ile saklanabilir; aylık güncellenir |
+| Sokak/adres araması (yedek) | **Photon** (Apache-2.0) | photon.komoot.io (`PHOTON_URL`) | ₺0 | Adil kullanım; yalnızca kendi verimiz yetersizse çağrılır, kapatılabilir |
+| Veri hattı | **pyosmium** + Geofabrik Türkiye özütü | GitHub Actions (`osm-import.yml`, aylık) | ₺0 | `SUPABASE_DB_URL` secret'ı gerekir |
+
+**Akış:** Tarayıcı → `/api/maps/*` (oturum + kullanıcı başı hız sınırı + zod) → Valhalla (rota) veya Supabase RPC
+(`search_features_along_route`, `search_features_nearby`, `search_places`, `reverse_geocode`; SECURITY INVOKER, RLS).
+
+**Rota boyunca arama:** Valhalla rotası (polyline6 → polyline5) Douglas–Peucker ile ≤2.000 noktaya sadeleştirilir,
+GeoJSON olarak PostGIS'e gönderilir; `ST_DWithin(geography)` ile yarıçap içindeki ilgi noktaları GiST indeksiyle bulunur,
+`ST_LineLocatePoint` ile yolculuk sırasına dizilir.
+
+**Google'a göre farklar:** OSM'de puan, yorum sayısı ve fotoğraf yoktur (brief'te "mevcutsa"); çalışma saati, telefon,
+web sitesi, Vikipedi bağlantısı OSM etiketlerinden gösterilir. Canlı trafik yoktur (rota süreleri yol tipine göre tahmindir).
+Buna karşılık veri **saklanabilir** (ODbL): favoriler ve seyahatname yerin adını/koordinatını kalıcı tutabilir.
+
+**Lisans yükümlülükleri (ODbL):** Haritada ve sonuçlarda "© OpenStreetMap katkıda bulunanlar" atfı gösterilir.
+`geo_features` OSM'den türetilmiş bir veritabanıdır; talep edilirse ODbL altında paylaşılabilir (`scripts/osm/` ile yeniden üretilebilir).
+Kullanıcıya ait veriler (favoriler, notlar) bu tablodan ayrı tutulur.
 
 ---
 

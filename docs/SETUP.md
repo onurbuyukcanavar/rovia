@@ -38,7 +38,7 @@ npm run db:types   # src/lib/database.types.ts yeniden üretilir
 
 **SMTP:** Supabase'in yerleşik e-posta servisi yalnızca organizasyon üyelerinin adreslerine ve düşük hızla gönderim yapar. Gerçek kullanıcılara açılmadan önce özel SMTP (Resend, Postmark vb.) gerekir.
 
-## 4. Google OAuth (giriş ve kayıt için)
+## 4. Google OAuth (yalnızca giriş ve kayıt için)
 
 1. Google Cloud Console → yeni proje "ROVIA".
 2. APIs & Services → OAuth consent screen: External, uygulama adı ROVIA, destek e-postası. Scope'lar: yalnızca `openid`, `email`, `profile`.
@@ -47,15 +47,33 @@ npm run db:types   # src/lib/database.types.ts yeniden üretilir
    - Authorized redirect URI: `https://lbocidoprcqiuxtqhoye.supabase.co/auth/v1/callback`
 4. Client ID ve Secret → Supabase → Auth → Providers → Google.
 
-## 5. Google Maps Platform (PHASE 2'de gerekli)
+## 5. Harita altyapısı (açık kaynak — anahtar gerekmez)
 
-Ayrıntılar `docs/ARCHITECTURE.md` §4'te. Özet:
-- Faturalandırma hesabı, ardından Maps JavaScript, Places (New), Routes, Geocoding ve Maps Static API'leri etkinleştirilir.
-- **Tarayıcı anahtarı** (`NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY`): HTTP referrer kısıtlı, yalnızca Maps JavaScript API.
-- **Sunucu anahtarı** (`GOOGLE_MAPS_SERVER_KEY`): Routes, Places, Geocoding ve Static ile API kısıtlı. Asla `NEXT_PUBLIC_` önekiyle tanımlanmaz.
-- Map ID (Advanced Markers için).
-- Her SKU için günlük kota tavanı ve bütçe alarmı.
+Varsayılan ayarlarla ek kurulum gerekmez: harita OpenFreeMap'ten, rotalar FOSSGIS Valhalla sunucusundan gelir.
+İsteğe bağlı ortam değişkenleri:
+
+| Değişken | Varsayılan | Ne zaman değiştirilir |
+|---|---|---|
+| `NEXT_PUBLIC_MAP_STYLE_URL` | `https://tiles.openfreemap.org/styles/liberty` | Kendi karo sunucusu veya farklı stil |
+| `VALHALLA_URL` | `https://valhalla1.openstreetmap.de` | Kendi Valhalla sunucumuza geçişte (canlı trafik arttığında) |
+| `PHOTON_URL` | `https://photon.komoot.io` | Kendi Photon sunucusu; `""` → adres yedeği kapalı |
+
+**Kendi Valhalla sunucusu (canlıya geçerken):** 8 GB RAM'li bir VPS'te resmî imajla:
+```bash
+docker run -d --name valhalla -p 8002:8002 -v $PWD/valhalla:/custom_files \
+  -e tile_urls=https://download.geofabrik.de/europe/turkey-latest.osm.pbf \
+  ghcr.io/valhalla/valhalla-scripted:latest
+```
+Ardından önüne HTTPS ters vekil koyup `VALHALLA_URL` güncellenir.
+
+### 5.1 OSM verisini yükleme (ilgi noktaları, yerleşimler, il/ilçe)
+
+1. Supabase Dashboard → **Connect** → **Session pooler** bağlantı dizesini kopyala
+   (`postgresql://postgres.<ref>:<ŞİFRE>@aws-…pooler.supabase.com:5432/postgres`). Doğrudan bağlantı IPv6'dır,
+   GitHub Actions IPv6 desteklemediği için pooler kullanılır. Şifreyi bilmiyorsan Database → Settings'ten sıfırla.
+2. GitHub → Settings → Secrets → Actions → `SUPABASE_DB_URL` olarak ekle.
+3. GitHub → Actions → **OSM verisi içe aktarma (Türkiye)** → *Run workflow*. Sonra her ayın 3'ünde kendiliğinden çalışır.
 
 ## 6. Vercel
 
-Ortam değişkenleri: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL` (üretim alan adı). PHASE 2'den itibaren Google anahtarları da eklenir.
+Ortam değişkenleri: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL` (üretim alan adı); isteğe bağlı olarak §5'teki harita değişkenleri.

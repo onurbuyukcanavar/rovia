@@ -33,6 +33,11 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: OSM çıkarım testleri (Python)
+        run: pip install -q osmium==4.* pytest && python -m pytest -q scripts/osm
       - name: Şema ↔ tip senkronu
         run: npm run db:types && git diff --exit-code src/lib/database.types.ts
       - run: npm run build
@@ -74,6 +79,13 @@ jobs:
           if grep -E "\[WebServer\].*(Error:|\[rovia\])" e2e.log; then
             echo "::error::E2E sırasında sunucu hata logladı"; exit 1
           fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-screens
+          path: test-results/screens
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

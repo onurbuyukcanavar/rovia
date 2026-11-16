@@ -12,4 +12,7 @@ npm run check      # typecheck + lint + DB/RLS testleri
 npm run db:types   # migration'lardan Supabase tiplerini üret
 ```
 
-Yığın: Next.js 16 · React 19 · TypeScript · Tailwind 4 · Supabase (Postgres + RLS, Auth, Storage) · Google Maps Platform
+Yığın: Next.js 16 · React 19 · TypeScript · Tailwind 4 · Supabase (Postgres + PostGIS + RLS, Auth, Storage) ·
+MapLibre GL JS · OpenFreeMap · Valhalla · OpenStreetMap
+
+Harita verisi © [OpenStreetMap katkıda bulunanlar](https://www.openstreetmap.org/copyright) (ODbL).

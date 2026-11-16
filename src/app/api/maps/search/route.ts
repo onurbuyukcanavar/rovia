@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { ROUTE_CATEGORY_KEYS } from "@/lib/google/categories";
-import { searchAlongRoute, searchNearby } from "@/lib/google/places";
+import { ROUTE_CATEGORY_KEYS } from "@/lib/places/categories";
+import { searchAlongRoute, searchNearby } from "@/lib/geo-services/features";
 import { latLngSchema, mapsHandler } from "@/lib/api/maps-handler";
 
 const schema = z.discriminatedUnion("mode", [
   z.object({
     mode: z.literal("route"),
     category: z.enum(ROUTE_CATEGORY_KEYS),
-    encodedPolyline: z.string().min(4).max(200_000),
+    encodedPolyline: z.string().min(4).max(400_000),
     radiusMeters: z.number().int().min(250).max(50_000),
   }),
   z.object({
@@ -18,6 +18,6 @@ const schema = z.discriminatedUnion("mode", [
   }),
 ]);
 
-export const POST = mapsHandler({ bucket: "search" }, schema, async (input) => ({
-  places: input.mode === "route" ? await searchAlongRoute(input) : await searchNearby(input),
+export const POST = mapsHandler("search", schema, async (input, db) => ({
+  places: input.mode === "route" ? await searchAlongRoute(db, input) : await searchNearby(db, input),
 }));

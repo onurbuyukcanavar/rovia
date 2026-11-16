@@ -1,28 +1,37 @@
 "use client";
-import { AdvancedMarker, Polyline, useMap } from "@vis.gl/react-google-maps";
+import { Layer, Marker, Source, useMap } from "react-map-gl/maplibre";
 import { useEffect, useMemo } from "react";
 import { boundsOf, decodePolyline, type LatLng } from "@/lib/geo";
 import type { FoundPlace, RouteOption, Stop } from "@/lib/maps/types";
 import { cn } from "@/lib/cn";
 
-/** Rotalar: seçili rota lacivert kontur + amber dolgu; alternatifler gri ve tıklanabilir. */
-export function RouteLines({ routes, selected, onSelect }: { routes: RouteOption[]; selected: number; onSelect: (i: number) => void }) {
-  const paths = useMemo(() => routes.map((r) => decodePolyline(r.encodedPolyline)), [routes]);
+export const ALT_ROUTE_LAYER = "route-alt";
+
+/** Rotalar: seçili rota lacivert kontur + amber dolgu; alternatifler gri ve tıklanabilir (layer id: route-alt). */
+export function RouteLines({ routes, selected }: { routes: RouteOption[]; selected: number }) {
+  const data = useMemo(
+    () => ({
+      type: "FeatureCollection" as const,
+      features: routes.map((r, i) => ({
+        type: "Feature" as const,
+        properties: { index: i, selected: i === selected },
+        geometry: { type: "LineString" as const, coordinates: decodePolyline(r.encodedPolyline).map((p) => [p.lng, p.lat]) },
+      })),
+    }),
+    [routes, selected],
+  );
   return (
-    <>
-      {paths.map((path, i) =>
-        i === selected ? null : (
-          <Polyline key={`alt-${i}`} path={path} strokeColor="#7b879b" strokeOpacity={0.85} strokeWeight={5} zIndex={1}
-            clickable onClick={() => onSelect(i)} />
-        ),
-      )}
-      {paths[selected] && (
-        <>
-          <Polyline key={`sel-o-${selected}`} path={paths[selected]} strokeColor="#0e1726" strokeOpacity={1} strokeWeight={8} zIndex={2} />
-          <Polyline key={`sel-i-${selected}`} path={paths[selected]} strokeColor="#e8912d" strokeOpacity={1} strokeWeight={4} zIndex={3} />
-        </>
-      )}
-    </>
+    <Source id="routes" type="geojson" data={data}>
+      <Layer id={ALT_ROUTE_LAYER} type="line" filter={["==", ["get", "selected"], false]}
+        layout={{ "line-cap": "round", "line-join": "round" }}
+        paint={{ "line-color": "#7b879b", "line-width": 6, "line-opacity": 0.85 }} />
+      <Layer id="route-casing" type="line" filter={["==", ["get", "selected"], true]}
+        layout={{ "line-cap": "round", "line-join": "round" }}
+        paint={{ "line-color": "#0e1726", "line-width": 9 }} />
+      <Layer id="route-main" type="line" filter={["==", ["get", "selected"], true]}
+        layout={{ "line-cap": "round", "line-join": "round" }}
+        paint={{ "line-color": "#e8912d", "line-width": 4.5 }} />
+    </Source>
   );
 }
 
@@ -44,22 +53,22 @@ function StopPin({ label, tone }: { label: string; tone: "origin" | "waypoint" |
 export function StopMarkers({ origin, waypoints, destination }: { origin: Stop | null; waypoints: (Stop | null)[]; destination: Stop | null }) {
   return (
     <>
-      {origin && (
-        <AdvancedMarker position={origin.location} title={origin.label} zIndex={30}>
-          <StopPin label="A" tone="origin" />
-        </AdvancedMarker>
-      )}
       {waypoints.map((w, i) =>
         w ? (
-          <AdvancedMarker key={`${w.id}-${i}`} position={w.location} title={w.label} zIndex={29}>
-            <StopPin label={String(i + 1)} tone="waypoint" />
-          </AdvancedMarker>
+          <Marker key={`${w.id}-${i}`} longitude={w.location.lng} latitude={w.location.lat} anchor="center">
+            <span title={w.label}><StopPin label={String(i + 1)} tone="waypoint" /></span>
+          </Marker>
         ) : null,
       )}
+      {origin && (
+        <Marker longitude={origin.location.lng} latitude={origin.location.lat} anchor="center">
+          <span title={origin.label}><StopPin label="A" tone="origin" /></span>
+        </Marker>
+      )}
       {destination && (
-        <AdvancedMarker position={destination.location} title={destination.label} zIndex={30}>
-          <StopPin label="B" tone="destination" />
-        </AdvancedMarker>
+        <Marker longitude={destination.location.lng} latitude={destination.location.lat} anchor="center">
+          <span title={destination.label}><StopPin label="B" tone="destination" /></span>
+        </Marker>
       )}
     </>
   );
@@ -71,14 +80,17 @@ export function ResultMarkers({ places, selectedId, onSelect }: { places: FoundP
       {places.map((p) => {
         const active = p.id === selectedId;
         return (
-          <AdvancedMarker key={p.id} position={p.location} title={p.name} zIndex={active ? 40 : 20} onClick={() => onSelect(p)}>
-            <span
+          <Marker key={p.id} longitude={p.location.lng} latitude={p.location.lat} anchor="center"
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              onSelect(p);
+            }}>
+            <button type="button" aria-label={p.name} title={p.name}
               className={cn(
-                "block rounded-full border-2 shadow transition-transform",
-                active ? "size-5 scale-110 border-ink-900 bg-amber-500" : "size-3.5 border-ink-900 bg-white",
-              )}
-            />
-          </AdvancedMarker>
+                "block rounded-full border-2 border-ink-900 shadow transition-transform",
+                active ? "size-5 scale-110 bg-amber-500" : "size-3.5 bg-white hover:scale-125",
+              )} />
+          </Marker>
         );
       })}
     </>
@@ -88,36 +100,35 @@ export function ResultMarkers({ places, selectedId, onSelect }: { places: FoundP
 export function MyLocationMarker({ position }: { position: LatLng | null }) {
   if (!position) return null;
   return (
-    <AdvancedMarker position={position} title="Konumum" zIndex={50}>
-      <span className="relative block size-4">
+    <Marker longitude={position.lng} latitude={position.lat} anchor="center">
+      <span className="relative block size-4" title="Konumum">
         <span className="absolute inset-0 animate-ping rounded-full bg-sky-500/40" />
         <span className="absolute inset-0 rounded-full border-2 border-white bg-sky-600 shadow" />
       </span>
-    </AdvancedMarker>
+    </Marker>
   );
 }
 
 /** Rota veya duraklar değişince kamerayı hepsini gösterecek şekilde ayarlar. */
-export function FitBounds({ points, padding = 64, deps }: { points: LatLng[]; padding?: number; deps: unknown }) {
-  const map = useMap();
+export function FitBounds({ points, deps }: { points: LatLng[]; deps: unknown }) {
+  const { current: map } = useMap();
   useEffect(() => {
     if (!map || points.length === 0) return;
     if (points.length === 1) {
-      map.panTo(points[0]);
-      if ((map.getZoom() ?? 0) < 11) map.setZoom(12);
+      map.flyTo({ center: [points[0].lng, points[0].lat], zoom: Math.max(map.getZoom(), 11), duration: 600 });
       return;
     }
     const b = boundsOf(points);
-    if (b) map.fitBounds(b, padding);
+    if (b) map.fitBounds([[b.west, b.south], [b.east, b.north]], { padding: 56, duration: 600, maxZoom: 15 });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- yalnızca anlamlı değişikliklerde (deps) odaklan
   }, [map, deps]);
   return null;
 }
 
 export function PanTo({ position }: { position: LatLng | null }) {
-  const map = useMap();
+  const { current: map } = useMap();
   useEffect(() => {
-    if (map && position) map.panTo(position);
+    if (map && position) map.easeTo({ center: [position.lng, position.lat], duration: 400 });
   }, [map, position]);
   return null;
 }
