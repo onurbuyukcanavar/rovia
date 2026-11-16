@@ -12,18 +12,21 @@ export default function HomePage() {
     <div className="min-h-dvh">
       <section className="relative isolate overflow-hidden bg-ink-900 text-paper">
         <RouteIllustration className="absolute inset-0 -z-10 size-full opacity-40 md:opacity-90" />
-        <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-          <Logo inverted />
-          <nav className="flex items-center gap-2">
-            <Link href="/giris" className="rounded-full px-4 py-2 text-sm font-semibold text-paper/80 hover:text-paper">
-              {t.marketing.ctaSecondary}
-            </Link>
-            <ButtonLink href="/kayit" variant="accent" size="sm">{t.marketing.ctaPrimary}</ButtonLink>
-          </nav>
+        {/* Sabit üst menü: kaydırmada ekranda kalır */}
+        <header className="fixed inset-x-0 top-0 z-30 bg-ink-900/90 pt-[env(safe-area-inset-top)] text-paper backdrop-blur">
+          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:h-20 sm:px-6">
+            <Link href="/" aria-label="ROVIA"><Logo inverted /></Link>
+            <nav className="flex shrink-0 items-center gap-1 sm:gap-2">
+              <Link href="/giris" className="rounded-full px-3 py-2 text-sm font-semibold text-paper/80 hover:text-paper sm:px-4">
+                {t.marketing.ctaSecondary}
+              </Link>
+              <ButtonLink href="/kayit" variant="accent" size="sm">{t.marketing.ctaPrimary}</ButtonLink>
+            </nav>
+          </div>
         </header>
-        <div id="icerik" className="mx-auto max-w-6xl px-6 pt-16 pb-28 sm:pt-24 sm:pb-36">
+        <div id="icerik" className="mx-auto max-w-6xl px-6 pt-[calc(6rem+env(safe-area-inset-top))] pb-28 sm:pt-36 sm:pb-36">
           <p lang="en" className="eyebrow text-amber-400!">{t.brand.slogan}</p>
-          <h1 className="mt-4 max-w-3xl text-5xl leading-[1.02] font-extrabold tracking-tight sm:text-7xl">
+          <h1 className="mt-4 max-w-3xl text-[2.6rem] leading-[1.04] font-extrabold tracking-tight break-words hyphens-auto sm:text-6xl md:text-7xl">
             {t.marketing.heroTitle}
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-paper/75">{t.marketing.heroBody}</p>

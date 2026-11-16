@@ -72,7 +72,7 @@ function MobileTab({ itemKey, pathname, emphasized = false }: { itemKey: string;
   );
 
   const cls = cn(
-    "flex min-h-14 flex-1 items-center justify-center",
+    "flex h-14 flex-1 items-center justify-center",
     active ? "text-ink-900" : available ? "text-stone-600" : "text-stone-500/60",
   );
 
@@ -94,7 +94,7 @@ function MoreTab({ pathname }: { pathname: string | null }) {
   const active = isActive(pathname, "/diger") || isActive(pathname, "/ayarlar");
   return (
     <Link href="/diger" aria-current={active ? "page" : undefined}
-      className={cn("flex min-h-14 flex-1 items-center justify-center", active ? "text-ink-900" : "text-stone-600")}>
+      className={cn("flex h-14 flex-1 items-center justify-center", active ? "text-ink-900" : "text-stone-600")}>
       <span className="flex flex-col items-center gap-1">
         <svg viewBox="0 0 24 24" className={cn("size-[22px]", active && "text-amber-600")} aria-hidden fill="currentColor">
           <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />

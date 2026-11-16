@@ -22,13 +22,15 @@ type Props = {
   /** Ekleme açıkken haritaya dokunmak nokta seçer */
   picking: boolean;
   onPick: (p: LatLng) => void;
+  /** Boş bir yere dokunuldu (telefonda haritayı büyütmek için) */
+  onBackgroundTap?: () => void;
 };
 
 /**
  * Favori yerler haritası. Binlerce yer olabileceği için DOM işaretleri yerine tek GeoJSON katmanı
  * (daire) kullanılır: favoriler amber, "daha sonra gideceğim" lacivert.
  */
-export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate, picking, onPick }: Props) {
+export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate, picking, onPick, onBackgroundTap }: Props) {
   const [mapError, setMapError] = useState(false);
 
   const data = useMemo(
@@ -60,7 +62,8 @@ export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate
       return;
     }
     const id = e.features?.[0]?.properties?.id;
-    onSelect(typeof id === "string" ? id : null);
+    if (typeof id === "string") onSelect(id);
+    else onBackgroundTap?.();
   }
 
   return (
@@ -104,7 +107,7 @@ export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate
         <PanTo position={focus} />
       </MapView>
       {mapError && (
-        <div className="absolute inset-x-3 top-3 z-10">
+        <div className="absolute inset-x-3 top-14 z-10">
           <Alert tone="error">{t.maps.loadError}</Alert>
         </div>
       )}

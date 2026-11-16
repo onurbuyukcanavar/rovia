@@ -24,18 +24,21 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobil: üst çubuk */}
-      <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-sand-200 bg-paper/90 px-4 backdrop-blur lg:hidden">
-        <Link href="/panel" aria-label="ROVIA panel"><Logo /></Link>
-        <Suspense fallback={<span className="size-8 rounded-full bg-sand-200" />}>
-          <MobileHeaderAvatar />
-        </Suspense>
+      {/* Sabit (fixed): kaydırmada ve iOS'ta yerinde kalır; çentik/durum çubuğu payı üstte */}
+      <header className="fixed inset-x-0 top-0 z-30 border-b border-sand-200 bg-paper/95 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
+        <div className="flex h-14 items-center justify-between pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))]">
+          <Link href="/panel" aria-label="ROVIA panel"><Logo /></Link>
+          <Suspense fallback={<span className="size-8 rounded-full bg-sand-200" />}>
+            <MobileHeaderAvatar />
+          </Suspense>
+        </div>
       </header>
 
-      <main id="icerik" className="min-w-0 pb-28 lg:pb-0">{children}</main>
+      <main id="icerik" className="min-w-0 pt-[var(--mobile-header)] pb-[var(--mobile-nav)] lg:pt-0 lg:pb-0">{children}</main>
 
       {/* Mobil: alt navigasyon */}
       <nav aria-label="Alt menü"
-        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-sand-200 bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-sand-200 bg-paper/95 pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] backdrop-blur lg:hidden">
         <Suspense fallback={<MobileNav pathname={null} />}>
           <MobileNavLive />
         </Suspense>

@@ -168,6 +168,8 @@ export const tr = {
     profileSaved: "Profil güncellendi.",
   },
   maps: {
+    expandMap: "Haritayı tam ekran yap",
+    collapseMap: "Küçült",
     title: "Haritayı Keşfet",
     subtitle: "Rotanı oluştur, yol üzerindeki yerleri keşfet.",
     loadError: "Harita yüklenemedi. Bağlantını kontrol edip sayfayı yenile.",

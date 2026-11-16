@@ -33,7 +33,7 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
   const active = trip.status === "active" || rec?.status === "recording" || rec?.status === "paused";
 
   return (
-    <div className="flex min-h-[calc(100dvh-3.5rem-4.5rem)] flex-col lg:grid lg:h-dvh lg:min-h-0 lg:grid-cols-[26rem_1fr]">
+    <div className="flex min-h-app-mobile flex-col lg:grid lg:h-dvh lg:min-h-0 lg:grid-cols-[26rem_1fr]">
       <div className="relative order-1 h-[42vh] shrink-0 lg:order-2 lg:h-full">
         <SummaryMap styleUrl={mapStyleUrl()} polyline={rec?.polyline ?? null} plannedPolyline={trip.routePolyline} />
       </div>

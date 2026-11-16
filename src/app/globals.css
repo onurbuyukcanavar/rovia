@@ -63,3 +63,34 @@
     @apply text-[0.7rem] font-semibold tracking-[0.18em] text-stone-500 uppercase;
   }
 }
+
+/* ---------------------------------------------------------------- Mobil yerleşim
+ * Üst çubuk ve alt menü sabittir; çentik/durum çubuğu ve ana ekran çubuğu (safe area) payı eklenir.
+ * Tam ekran sayfalar (harita, kayıt) ikisinin arasındaki alanı tam olarak doldurur. */
+:root {
+  --mobile-header: calc(3.5rem + env(safe-area-inset-top));
+  --mobile-nav: calc(3.5rem + 1px + env(safe-area-inset-bottom));
+}
+
+@utility h-app-mobile {
+  height: calc(100dvh - var(--mobile-header) - var(--mobile-nav));
+}
+@utility min-h-app-mobile {
+  min-height: calc(100dvh - var(--mobile-header) - var(--mobile-nav));
+}
+
+/* Yatay taşma sayfayı yana kaydırmasın (clip, sticky/fixed davranışını bozmaz) */
+html,
+body {
+  overflow-x: clip;
+}
+
+/* iOS Safari 16px'ten küçük yazılı alana dokununca sayfayı yakınlaştırır ve geri uzaklaştırmaz:
+ * sayfa ekrana sığmaz, sabit menüler kayıyormuş gibi görünür. Katmansız kural yardımcı sınıfları geçer. */
+@media (max-width: 1023px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

@@ -24,7 +24,7 @@ async function FavoritesLoader() {
 
 function FavoritesSkeleton() {
   return (
-    <div className="flex h-[calc(100dvh-3.5rem-4.5rem)] flex-col lg:grid lg:h-dvh lg:grid-cols-[28rem_1fr]" aria-label={t.common.loading}>
+    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[28rem_1fr]" aria-label={t.common.loading}>
       <div className="order-1 h-[40%] animate-pulse bg-sand-100 lg:order-2 lg:h-full" />
       <div className="order-2 space-y-4 p-5 lg:order-1">
         {[0, 1, 2, 3].map((i) => <div key={i} className="h-14 animate-pulse rounded-xl bg-sand-100" />)}

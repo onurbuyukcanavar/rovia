@@ -78,7 +78,7 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
   const showRemote = rec.phase === "idle" && !!serverActive && !rec.session && handledRemote !== serverActive.recordingId;
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem-4.5rem-env(safe-area-inset-bottom))] flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
+    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
       <div className="relative order-1 h-[42%] shrink-0 lg:order-2 lg:h-full">
         <TrackMap styleUrl={styleUrl} paths={rec.stats.paths} position={position}
           plannedPolyline={planned?.routePolyline ?? null} className="relative h-full w-full" />

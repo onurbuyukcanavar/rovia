@@ -26,6 +26,7 @@ import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import { Alert } from "@/components/ui/alert";
 import { DiscoverPanel } from "./discover-panel";
 import { ALT_ROUTE_LAYER, FitBounds, MyLocationMarker, PanTo, ResultMarkers, RouteLines, StopMarkers } from "./map-layers";
+import { MapFrame, isMobileViewport, useMapExpand } from "./map-frame";
 import { PlaceDetail } from "./place-detail";
 import { RouteBuilder } from "./route-builder";
 import { RouteSummary } from "./route-summary";
@@ -68,6 +69,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
   const [radius, setRadius] = useState(5_000);
   const [selectedPlace, setSelectedPlace] = useState<FoundPlace | null>(null);
   const [mapError, setMapError] = useState(false);
+  const mapView = useMapExpand();
   const geo = useGeolocation();
   /** Kullanıcı alternatif rotayı kendisi seçti mi (kaydedilmemiş değişiklik sayılır) */
   const [routeTouched, setRouteTouched] = useState(false);
@@ -142,14 +144,18 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
         setRouteTouched(true);
         return;
       }
-      if (!picking) return;
+      if (!picking) {
+        // Telefonda haritaya dokununca harita tam ekran olur
+        if (!mapView.expanded && isMobileViewport()) mapView.expand();
+        return;
+      }
       const slot = picking;
       setPicking(null);
       const point = { lat: e.lngLat.lat, lng: e.lngLat.lng };
       const stop = await stopFromPoint(point, `${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}`);
       dispatch({ type: "set", slot, stop });
     },
-    [picking, stopFromPoint],
+    [picking, stopFromPoint, mapView],
   );
 
   const onLocate = useCallback(async () => {
@@ -263,8 +269,9 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
   }, [selectedRoute, state]);
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem-4.5rem-env(safe-area-inset-bottom))] flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
-      <div className="relative order-1 h-[42%] shrink-0 lg:order-2 lg:h-full" data-testid="map">
+    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
+      <MapFrame expanded={mapView.expanded} onExpand={mapView.expand} onCollapse={mapView.collapse}
+        className="order-1 h-[45%] shrink-0 lg:order-2 lg:h-full" testId="map">
         <MapView
           initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
           mapStyle={styleUrl}
@@ -284,17 +291,21 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
           <ScaleControl position="bottom-left" unit="metric" />
           {routeResult && <RouteLines routes={routeResult.routes} selected={selectedIndex} />}
           <StopMarkers origin={state.origin.stop} waypoints={state.waypoints.map((w) => w.stop)} destination={state.destination.stop} />
-          {results && <ResultMarkers places={results} selectedId={selectedPlace?.id ?? null} onSelect={setSelectedPlace} />}
+          {results && <ResultMarkers places={results} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
+            setSelectedPlace(p);
+            // Tam ekranda yer seçilince ayrıntısı görünsün
+            if (mapView.expanded) mapView.collapse();
+          }} />}
           <MyLocationMarker position={geo.position} />
           <FitBounds points={fitPoints} deps={fitKey} />
           <PanTo position={selectedPlace?.location ?? null} />
         </MapView>
         {mapError && (
-          <div className="absolute inset-x-3 top-3 z-10">
+          <div className="absolute inset-x-3 top-14 z-10">
             <Alert tone="error">{t.maps.loadError}</Alert>
           </div>
         )}
-      </div>
+      </MapFrame>
 
       <aside className="order-2 min-h-0 flex-1 overflow-y-auto border-t border-sand-200 bg-paper px-4 py-4 lg:order-1 lg:border-t-0 lg:border-r lg:px-5 lg:py-6">
         {selectedPlace ? (

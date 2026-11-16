@@ -1,7 +1,7 @@
 "use client";
 import { Check, Download, LoaderCircle, MapPin, Pencil, Plus, Search, Signpost, Trash2, X } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
 import { AddPlacePanel, candidateFromPoint, inputClass, ListTypeToggle, type Candidate } from "./add-place-panel";
 import { FavoritesMap } from "./favorites-map";
+import { MapFrame, isMobileViewport, useMapExpand } from "@/components/map/map-frame";
 
 type ListFilter = "all" | ListType;
 type SourceFilter = "all" | "rovia" | "google";
@@ -27,6 +28,7 @@ export function FavoritesView({ styleUrl, places }: { styleUrl: string; places: 
   const [adding, setAdding] = useState(false);
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const mapView = useMapExpand();
 
   const filtered = useMemo(() => {
     const q = normalizeForSearch(query);
@@ -51,12 +53,22 @@ export function FavoritesView({ styleUrl, places }: { styleUrl: string; places: 
   }
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem-4.5rem-env(safe-area-inset-bottom))] flex-col lg:grid lg:h-dvh lg:grid-cols-[28rem_1fr]">
-      <div className="relative order-1 h-[40%] shrink-0 lg:order-2 lg:h-full">
-        <FavoritesMap styleUrl={styleUrl} places={filtered} selectedId={selectedId} onSelect={setSelectedId}
+    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[28rem_1fr]">
+      <MapFrame expanded={mapView.expanded} onExpand={mapView.expand} onCollapse={mapView.collapse}
+        className="order-1 h-[45%] shrink-0 lg:order-2 lg:h-full">
+        <FavoritesMap styleUrl={styleUrl} places={filtered} selectedId={selectedId}
+          onSelect={(id) => {
+            setSelectedId(id);
+            // Tam ekranda bir yere dokunulunca listede ayrıntısı açılsın
+            if (id && mapView.expanded) mapView.collapse();
+          }}
+          onBackgroundTap={() => { if (!mapView.expanded && isMobileViewport()) mapView.expand(); }}
           candidate={adding && candidate ? { lat: candidate.lat, lng: candidate.lng } : null}
-          picking={adding} onPick={(p) => setCandidate(candidateFromPoint(p))} />
-      </div>
+          picking={adding} onPick={(p) => {
+            setCandidate(candidateFromPoint(p));
+            if (mapView.expanded) mapView.collapse();
+          }} />
+      </MapFrame>
 
       <aside className="order-2 min-h-0 flex-1 overflow-y-auto border-t border-sand-200 bg-paper px-4 py-4 lg:order-1 lg:border-t-0 lg:border-r lg:px-5 lg:py-6">
         {adding ? (
@@ -143,6 +155,11 @@ function FavoriteRow({ place, selected, onSelect, onDeleted }: { place: Favorite
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const google = isGoogleSource(place.source);
+  const ref = useRef<HTMLLIElement>(null);
+  // Haritadan seçilince listede görünür olsun
+  useEffect(() => {
+    if (selected) ref.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selected]);
 
   function remove() {
     setError(null);
@@ -154,7 +171,7 @@ function FavoriteRow({ place, selected, onSelect, onDeleted }: { place: Favorite
   }
 
   return (
-    <li className={cn("rounded-2xl border bg-white transition", selected ? "border-ink-900 shadow-md" : "border-sand-200")} data-testid="favorite-row">
+    <li ref={ref} className={cn("scroll-mt-4 rounded-2xl border bg-white transition", selected ? "border-ink-900 shadow-md" : "border-sand-200")} data-testid="favorite-row">
       <button type="button" onClick={onSelect} aria-expanded={selected} className="flex w-full items-start gap-3 p-3 text-left">
         <span className={cn("mt-1 size-3 shrink-0 rounded-full border-2 border-white shadow", place.listType === "want_to_go" ? "bg-[#1d3557]" : "bg-amber-500")} aria-hidden />
         <span className="min-w-0 flex-1">
