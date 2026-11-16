@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import type { RouteOption, Stop } from "@/lib/maps/types";
+import type { RouteOption, RouteOptions, Stop } from "@/lib/maps/types";
 
 /** Planlayıcıda düzenlenecek yolculuk (istemci bileşenine aktarılır; yalnızca serileştirilebilir alanlar). */
 export type EditableTrip = {
@@ -15,6 +15,7 @@ export type EditableTrip = {
   stops: Stop[];
   /** Kaydedilmiş rota; rota servisine ulaşılamazsa gösterilir */
   route: RouteOption | null;
+  routeOptions: RouteOptions;
 };
 
 export type TripListItem = {
@@ -40,7 +41,7 @@ export async function getTripForEdit(id: string): Promise<EditableTrip | null> {
   const [trip, stops] = await Promise.all([
     supabase
       .from("trips")
-      .select("id, version, status, title, description, planned_date, route_polyline, route_distance_m, route_duration_s, route_legs, route_has_toll, route_has_ferry")
+      .select("id, version, status, title, description, planned_date, route_polyline, route_distance_m, route_duration_s, route_legs, route_has_toll, route_has_ferry, route_options")
       .eq("id", id)
       .maybeSingle(),
     supabase
@@ -83,6 +84,11 @@ export async function getTripForEdit(id: string): Promise<EditableTrip | null> {
       location: { lat: s.latitude, lng: s.longitude },
     })),
     route,
+    routeOptions: {
+      avoidTolls: Boolean((t.route_options as Record<string, unknown> | null)?.avoid_tolls),
+      avoidHighways: Boolean((t.route_options as Record<string, unknown> | null)?.avoid_highways),
+      avoidFerries: Boolean((t.route_options as Record<string, unknown> | null)?.avoid_ferries),
+    },
   };
 }
 

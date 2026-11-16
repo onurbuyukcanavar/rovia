@@ -1,6 +1,6 @@
 "use client";
 import type { LatLng } from "@/lib/geo";
-import type { FoundPlace, RouteResult, Stop, Suggestion } from "./types";
+import { DEFAULT_ROUTE_OPTIONS, type FoundPlace, type RouteOptions, type RouteResult, type Stop, type Suggestion } from "./types";
 import { t } from "@/i18n";
 
 /** Sunucunun döndürdüğü Türkçe hata mesajını taşır. */
@@ -36,7 +36,7 @@ export const mapsApi = {
   autocomplete: (text: string, bias: LatLng | undefined, signal?: AbortSignal) =>
     post<{ suggestions: Suggestion[] }>("autocomplete", { text, bias }, signal).then((r) => r.suggestions),
 
-  route: (stops: { origin: Stop; destination: Stop; waypoints: Stop[] }, opts: { alternatives: boolean }, signal?: AbortSignal) =>
+  route: (stops: { origin: Stop; destination: Stop; waypoints: Stop[]; options?: RouteOptions }, opts: { alternatives: boolean }, signal?: AbortSignal) =>
     post<RouteResult>(
       "route",
       {
@@ -44,12 +44,16 @@ export const mapsApi = {
         destination: stops.destination.location,
         intermediates: stops.waypoints.map((w) => w.location),
         alternatives: opts.alternatives,
+        options: stops.options ?? DEFAULT_ROUTE_OPTIONS,
       },
       signal,
     ),
 
   searchAlongRoute: (category: string, encodedPolyline: string, radiusMeters: number, signal?: AbortSignal) =>
     post<{ places: FoundPlace[] }>("search", { mode: "route", category, encodedPolyline, radiusMeters }, signal).then((r) => r.places),
+
+  suggestAlongRoute: (encodedPolyline: string, signal?: AbortSignal) =>
+    post<{ places: FoundPlace[] }>("search", { mode: "suggest", encodedPolyline }, signal).then((r) => r.places),
 
   searchNearby: (category: string, center: LatLng, radiusMeters: number, signal?: AbortSignal) =>
     post<{ places: FoundPlace[] }>("search", { mode: "nearby", category, center, radiusMeters }, signal).then((r) => r.places),

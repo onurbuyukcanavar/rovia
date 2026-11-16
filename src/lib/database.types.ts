@@ -863,6 +863,7 @@ export type Database = {
           route_legs: Json | null;
           route_has_toll: boolean;
           route_has_ferry: boolean;
+          route_options: Json;
         };
         Insert: {
           id?: string;
@@ -885,6 +886,7 @@ export type Database = {
           route_legs?: Json | null;
           route_has_toll?: boolean;
           route_has_ferry?: boolean;
+          route_options?: Json;
         };
         Update: {
           id?: string;
@@ -907,6 +909,7 @@ export type Database = {
           route_legs?: Json | null;
           route_has_toll?: boolean;
           route_has_ferry?: boolean;
+          route_options?: Json;
         };
         Relationships: [];
       };
@@ -1001,6 +1004,7 @@ export type Database = {
       media_path_ok: { Args: { p_path: string; p_uid: string }; Returns: boolean };
       media_quota: { Args: Record<string, never>; Returns: Json };
       media_register: { Args: { p_trip_id: string; p_items: Json }; Returns: Json };
+      normalize_route_options: { Args: { p: Json }; Returns: Json };
       place_name_key: { Args: { p: string }; Returns: string };
       purge_expired_gps_points: { Args: { p_batch?: number }; Returns: number };
       recording_add_points: { Args: { p_id: string; p_segment_id: string; p_points: Json }; Returns: number };
@@ -1011,8 +1015,9 @@ export type Database = {
       recording_start: { Args: { p_id: string; p_segment_id: string; p_started_at: string; p_trip_id: string; p_title: string }; Returns: { recording_id: string | null; trip_id: string | null; status: string | null }[] };
       recording_track: { Args: { p_id: string }; Returns: Json };
       reverse_geocode: { Args: { p_lat: number; p_lng: number }; Returns: { label: string | null; settlement: string | null; district: string | null; province: string | null }[] };
+      route_suggestions: { Args: { p_route: Json; p_radius_m?: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null; along_m: number | null; score: number | null }[] };
       save_places: { Args: { p_source: string; p_file_name: string; p_items: Json }; Returns: Json };
-      save_trip_plan: { Args: { p_trip_id: string; p_expected_version: number; p_title: string; p_description: string; p_planned_date: string; p_stops: Json; p_route: Json }; Returns: { trip_id: string | null; trip_version: number | null }[] };
+      save_trip_plan: { Args: { p_trip_id: string; p_expected_version: number; p_title: string; p_description: string; p_planned_date: string; p_stops: Json; p_route: Json; p_route_options?: Json }; Returns: { trip_id: string | null; trip_version: number | null }[] };
       search_features_along_route: { Args: { p_route: Json; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null; along_m: number | null }[] };
       search_features_nearby: { Args: { p_lat: number; p_lng: number; p_categories: string[]; p_radius_m: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; distance_m: number | null }[] };
       search_places: { Args: { p_query: string; p_lat?: number; p_lng?: number; p_limit?: number }; Returns: { osm_ref: string | null; kind: string | null; name: string | null; category: string | null; subtype: string | null; admin: string | null; lat: number | null; lng: number | null; score: number | null }[] };

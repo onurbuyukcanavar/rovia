@@ -4,13 +4,13 @@ import { useMemo, type ReactNode } from "react";
 import { decodePolyline, insertionIndexForLegs, projectOntoPolyline } from "@/lib/geo";
 import { mapsApi } from "@/lib/maps/client";
 import { MAX_WAYPOINTS } from "@/lib/maps/explorer-state";
-import type { FoundPlace, RouteOption, Stop } from "@/lib/maps/types";
+import type { FoundPlace, RouteOption, RouteOptions, Stop } from "@/lib/maps/types";
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import { formatDistance, formatDuration } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
 
-type RouteContext = { route: RouteOption; origin: Stop; destination: Stop; waypoints: Stop[] };
+type RouteContext = { route: RouteOption; origin: Stop; destination: Stop; waypoints: Stop[]; options?: RouteOptions };
 
 type Props = {
   place: FoundPlace;
@@ -66,7 +66,7 @@ export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoin
   const detourReq = useKeyedRequest<Detour>(detourKey, async (signal) => {
     const waypoints = [...routeContext!.waypoints];
     waypoints.splice(insertIndex!, 0, stop);
-    const r = await mapsApi.route({ origin: routeContext!.origin, destination: routeContext!.destination, waypoints }, { alternatives: false }, signal);
+    const r = await mapsApi.route({ origin: routeContext!.origin, destination: routeContext!.destination, waypoints, options: routeContext!.options }, { alternatives: false }, signal);
     return { index: insertIndex!, distanceMeters: r.routes[0].distanceMeters, durationSeconds: r.routes[0].durationSeconds };
   });
   const detour = detourReq.data ?? null;

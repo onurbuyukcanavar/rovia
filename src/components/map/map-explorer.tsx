@@ -25,11 +25,12 @@ import { useGeolocation } from "@/lib/maps/use-geolocation";
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import { Alert } from "@/components/ui/alert";
 import { DiscoverPanel } from "./discover-panel";
-import { ALT_ROUTE_LAYER, FitBounds, MyLocationMarker, PanTo, ResultMarkers, RouteLines, StopMarkers } from "./map-layers";
+import { ALT_ROUTE_LAYER, FitBounds, FocusMarker, MyLocationMarker, PanTo, ResultMarkers, RouteLines, StopMarkers, SuggestionMarkers } from "./map-layers";
 import { MapFrame, isMobileViewport, useMapExpand } from "./map-frame";
 import { PlaceDetail } from "./place-detail";
 import { RouteBuilder } from "./route-builder";
 import { RouteSummary } from "./route-summary";
+import { RouteDirections, RouteOptionsBar, RouteSuggestions } from "./route-extras";
 import { t } from "@/i18n";
 
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
@@ -55,7 +56,7 @@ type Props = {
  */
 export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites = [], initialDestination = null }: Props) {
   const [state, dispatch] = useReducer(explorerReducer, trip, (tr) => {
-    if (tr) return stateFromStops(tr.stops);
+    if (tr) return stateFromStops(tr.stops, tr.routeOptions);
     const init = initialExplorerState();
     return initialDestination ? { ...init, destination: { ...init.destination, stop: initialDestination } } : init;
   });
@@ -119,6 +120,20 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
     { delayMs: 300 },
   );
   const results = search.data ?? null;
+
+  // ---------------------------------------------------------------- Rota üzerindeki öneriler
+  const [suggestionsHidden, setSuggestionsHidden] = useState(false);
+  const [focus, setFocus] = useState<LatLng | null>(null);
+  const sugKey = polyline && !suggestionsHidden ? `sug|${polyline.length}:${polyline.slice(0, 24)}:${polyline.slice(-24)}` : null;
+  const suggestions = useKeyedRequest<FoundPlace[]>(sugKey, (signal) => mapsApi.suggestAlongRoute(polyline!, signal), { delayMs: 700 });
+  const stopRefs = useMemo(
+    () => new Set([state.origin.stop, state.destination.stop, ...state.waypoints.map((w) => w.stop)].map((st) => st?.ref).filter((r): r is string => !!r)),
+    [state],
+  );
+  const suggested = useMemo(
+    () => (suggestionsHidden || !polyline ? [] : (suggestions.data ?? []).filter((p) => !stopRefs.has(p.id))),
+    [suggestions.data, stopRefs, suggestionsHidden, polyline],
+  );
   const chooseCategory = (key: string | null) => {
     setSearchCenter(mapCenter);
     setCategory(key);
@@ -235,6 +250,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
               hasFerry: routeToSave.hasFerry,
             }
           : null,
+        routeOptions: state.options,
       });
       if (res.ok) {
         setFields((f) => (f.title.trim() ? f : { ...f, title }));
@@ -265,7 +281,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
   const routeContext = useMemo(() => {
     const req = routeRequest(state);
     if (!selectedRoute || !req) return null;
-    return { route: selectedRoute, origin: req.origin, destination: req.destination, waypoints: req.waypoints };
+    return { route: selectedRoute, origin: req.origin, destination: req.destination, waypoints: req.waypoints, options: req.options };
   }, [selectedRoute, state]);
 
   return (
@@ -298,7 +314,12 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
           }} />}
           <MyLocationMarker position={geo.position} />
           <FitBounds points={fitPoints} deps={fitKey} />
-          <PanTo position={selectedPlace?.location ?? null} />
+          <SuggestionMarkers places={suggested} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
+            setSelectedPlace(p);
+            if (mapView.expanded) mapView.collapse();
+          }} />
+          <FocusMarker position={focus} />
+          <PanTo position={selectedPlace?.location ?? focus} />
         </MapView>
         {mapError && (
           <div className="absolute inset-x-3 top-14 z-10">
@@ -363,8 +384,16 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
                   }
                 }} />
             )}
+            <RouteOptionsBar options={state.options} onChange={(o) => dispatch({ type: "setOptions", options: o })} />
             <RouteSummary result={routeResult} selected={selectedIndex} onSelect={selectRoute}
               loading={routePending} error={usingSavedRoute ? null : (route.error ?? null)} hasWaypoints={state.waypoints.length > 0} />
+            {selectedRoute?.steps && <RouteDirections steps={selectedRoute.steps} onFocus={setFocus} />}
+            {selectedRoute && (
+              <RouteSuggestions route={selectedRoute} places={suggested} loading={suggestions.loading} error={suggestions.error ?? null}
+                hidden={suggestionsHidden} onHidden={setSuggestionsHidden} waypointCount={state.waypoints.length}
+                onAdd={(stop, index) => dispatch({ type: "addWaypoint", key: newKey(), stop, index })}
+                onDetails={setSelectedPlace} />
+            )}
             {!planOpen && selectedRoute && (
               <Button type="button" variant="secondary" className="w-full" onClick={() => setPlanOpen(true)}>
                 <BookmarkPlus className="size-4" aria-hidden /> {t.trips.saveAsTrip}

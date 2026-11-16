@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { decodePolyline } from "@/lib/geo";
 import { t } from "@/i18n";
+import { routeOptionsSchema } from "./route-options";
 
 const int = (max: number) => z.number().int().min(0).max(max);
 
@@ -57,6 +58,7 @@ export const tripPlanSchema = z
     plannedDate,
     stops: z.array(tripStopSchema).min(2).max(20),
     route: tripRouteSchema.nullable(),
+    routeOptions: routeOptionsSchema.default({ avoidTolls: false, avoidHighways: false, avoidFerries: false }),
   })
   .refine((d) => (d.id === null) === (d.version === null), { path: ["version"] })
   // Rota başka duraklar için hesaplanmışsa kaydedilmez

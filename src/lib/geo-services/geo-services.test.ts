@@ -3,7 +3,7 @@ import { decodePolyline, encodePolyline } from "@/lib/geo";
 import { GeoError } from "./errors";
 import { autocomplete, reverseGeocode, searchAlongRoute } from "./features";
 import { searchAddresses } from "./photon";
-import { buildRouteRequest, computeRoute, MAX_INTERMEDIATES } from "./valhalla";
+import { buildRouteRequest, computeRoute, MAX_INTERMEDIATES, mergeRoutes, stepKind, toRoute } from "./valhalla";
 
 type Call = { url: string; init: RequestInit };
 let calls: Call[];
@@ -29,7 +29,11 @@ const ANK = { lat: 39.9334, lng: 32.8597 };
 describe("Valhalla rota istemcisi", () => {
   it("istek: tüm noktalar 'break', araç, km; alternatif yalnızca iki noktada", () => {
     const two = buildRouteRequest([IST, ANK], true);
-    expect(two).toMatchObject({ costing: "auto", units: "kilometers", directions_type: "none", alternates: 2 });
+    expect(two).toMatchObject({
+      costing: "auto", units: "kilometers", language: "tr-TR", directions_type: "maneuvers", alternates: 2,
+      // Feribotlar cezasız: Eskihisar–Topçular gibi seçenekler rota/alternatif olabilsin
+      costing_options: { auto: { use_ferry: 1 } },
+    });
     expect(two.locations).toEqual([
       { lat: IST.lat, lon: IST.lng, type: "break" },
       { lat: ANK.lat, lon: ANK.lng, type: "break" },
@@ -61,6 +65,73 @@ describe("Valhalla rota istemcisi", () => {
     expect(path).toHaveLength(4); // ortak Bolu noktası bir kez
     expect(path[0]).toEqual({ lat: 41.00820, lng: 28.97840 });
     expect(path.at(-1)).toEqual({ lat: 39.93340, lng: 32.85970 });
+  });
+
+  it("seçenekler: kaçınmalar kesin dışlama; feribottan kaçınınca use_ferry yok", () => {
+    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: false, avoidHighways: true, avoidFerries: true }).costing_options)
+      .toEqual({ auto: { exclude_ferries: true, exclude_highways: true } });
+    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: true, avoidHighways: false, avoidFerries: false }, "exclude").costing_options)
+      .toEqual({ auto: { use_ferry: 1, exclude_tolls: true } });
+    expect(buildRouteRequest([IST, ANK], false, { avoidTolls: true, avoidHighways: false, avoidFerries: false }, "soft").costing_options)
+      .toEqual({ auto: { use_ferry: 1, use_tolls: 0 } });
+  });
+
+  it("manevralar: feribot ücreti 'ücretli yol' sayılmaz; yol tarifi adımları ve konumları", () => {
+    const shape = encodePolyline([{ lat: 40.80, lng: 29.43 }, { lat: 40.77, lng: 29.43 }, { lat: 40.69, lng: 29.40 }, { lat: 40.655, lng: 29.276 }], 6);
+    const r = toRoute({
+      legs: [{ shape, summary: { length: 29.6, time: 3660 }, maneuvers: [
+        { type: 3, instruction: "güney yönüne doğru sürün.", length: 3.5, time: 300, begin_shape_index: 0 },
+        { type: 28, instruction: "Eskihisar - Topçular feribotuna binin.", length: 8.5, time: 2400, begin_shape_index: 1, toll: true, ferry: true },
+        { type: 29, instruction: "Feribottan inin.", length: 17.6, time: 960, begin_shape_index: 2 },
+        { type: 4, instruction: "Varış noktanıza ulaştınız.", length: 0, time: 0, begin_shape_index: 3 },
+      ] }],
+      summary: { length: 29.6, time: 3660, has_toll: true, has_ferry: true, has_highway: false },
+    });
+    expect(r).toMatchObject({ hasToll: false, hasFerry: true, hasHighway: false });
+    expect(r.steps.map((s) => s.kind)).toEqual(["depart", "ferry", "ferry", "arrive"]);
+    expect(r.steps[1]).toMatchObject({ distanceMeters: 8500, durationSeconds: 2400, toll: false, location: { lat: 40.77, lng: 29.43 } });
+
+    const bridge = toRoute({
+      legs: [{ shape, summary: { length: 39.3, time: 2100 }, maneuvers: [
+        { type: 23, instruction: "Osmangazi Köprüsü'ne doğru sağda kalın.", length: 12, time: 500, begin_shape_index: 1, toll: true, highway: true },
+      ] }],
+      summary: { length: 39.3, time: 2100, has_toll: true, has_ferry: false, has_highway: true },
+    });
+    expect(bridge).toMatchObject({ hasToll: true, hasFerry: false });
+    expect(stepKind(15)).toBe("left");
+    expect(stepKind(26)).toBe("roundabout");
+  });
+
+  it("ücretli yollardan kaçın (feribot serbest): kesin ücretsiz + feribotlu rota birleştirilir, köprülü rota elenir", async () => {
+    const shape = encodePolyline([IST, ANK], 6);
+    const trip = (km: number, min: number, maneuvers: object[]) => ({
+      legs: [{ shape, summary: { length: km, time: min * 60 }, maneuvers }],
+      summary: { length: km, time: min * 60, has_toll: maneuvers.length > 0, has_ferry: false, has_highway: false },
+    });
+    // 1. istek (exclude_tolls): 116 km'lik dolambaçlı ücretsiz yol
+    responses.push({ status: 200, body: { trip: trip(116.6, 96, []) } });
+    // 2. istek (use_tolls=0): köprü (ücretli) + feribot
+    responses.push({ status: 200, body: {
+      trip: trip(40.1, 40, [{ type: 23, length: 9, time: 400, begin_shape_index: 0, toll: true }]),
+      alternates: [{ trip: trip(29.6, 61, [{ type: 28, length: 8.5, time: 2400, begin_shape_index: 0, toll: true, ferry: true }]) }],
+    } });
+    const r = await computeRoute([IST, ANK], true, { avoidTolls: true, avoidHighways: false, avoidFerries: false });
+    expect(calls).toHaveLength(2);
+    expect(JSON.parse(String(calls[0].init.body)).costing_options.auto).toMatchObject({ exclude_tolls: true });
+    expect(JSON.parse(String(calls[1].init.body)).costing_options.auto).toMatchObject({ use_tolls: 0, use_ferry: 1 });
+    expect(r.routes.map((x) => [Math.round(x.distanceMeters / 100) / 10, x.hasFerry, x.hasToll])).toEqual([[29.6, true, false], [116.6, false, false]]);
+  }, 10_000);
+
+  it("ücretli yol + feribottan kaçın: tek istek; benzer rotalar tekilleşir", async () => {
+    responses.push({ status: 200, body: { trip: { legs: [{ shape: encodePolyline([IST, ANK], 6), summary: { length: 450, time: 16000 } }], summary: { length: 450, time: 16000 } } } });
+    await computeRoute([IST, ANK], true, { avoidTolls: true, avoidHighways: false, avoidFerries: true });
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(String(calls[0].init.body)).costing_options.auto).toEqual({ exclude_ferries: true, exclude_tolls: true });
+
+    const base = { encodedPolyline: "", legs: [], hasToll: false, hasFerry: false, hasHighway: false, steps: [] };
+    const merged = mergeRoutes([[{ ...base, distanceMeters: 100_000, durationSeconds: 4000 }],
+      [{ ...base, distanceMeters: 100_500, durationSeconds: 4010 }, { ...base, distanceMeters: 90_000, durationSeconds: 5000 }]]);
+    expect(merged.map((m) => m.distanceMeters)).toEqual([100_000, 90_000]);
   });
 
   it("VALHALLA_URL ile kendi sunucumuza yönlenir", async () => {
@@ -172,5 +243,19 @@ describe("ROVIA veritabanı araması", () => {
     expect(await reverseGeocode(ok.db, { lat: 38.64, lng: 34.83 })).toEqual({ label: "Göreme, Nevşehir Merkez, Nevşehir" });
     const none = fakeDb({ reverse_geocode: { data: [{ label: null }] } });
     await expect(reverseGeocode(none.db, { lat: 0, lng: 0 })).rejects.toMatchObject({ code: "zero_results" });
+  });
+});
+
+describe("rota önerilerinin dağıtılması", () => {
+  it("rota parçalarının her birinden en iyisi; kümelenme önlenir; yolculuk sırasında döner", async () => {
+    const { spreadAlongRoute, suggestionRadius } = await import("./features");
+    const c = (id: string, along: number, score: number) => ({ id, alongRoute: along, score });
+    // İstanbul çıkışında 5 güçlü yer, yolun geri kalanında birer tane
+    const cands = [c("a1", 1_000, 0.5), c("a2", 2_000, 0.49), c("a3", 3_000, 0.48), c("a4", 4_000, 0.47), c("a5", 5_000, 0.46),
+      c("b", 150_000, 0.2), c("c", 250_000, 0.25), c("d", 420_000, 0.3)];
+    const picked = spreadAlongRoute(cands, 450_000, 4);
+    expect(picked.map((p) => p.id)).toEqual(["a1", "b", "c", "d"]);
+    expect(spreadAlongRoute(cands.slice(0, 3), 450_000, 4).map((p) => p.id)).toEqual(["a1", "a2", "a3"]);
+    expect([suggestionRadius(20_000), suggestionRadius(120_000), suggestionRadius(800_000)]).toEqual([1_500, 3_000, 5_000]);
   });
 });

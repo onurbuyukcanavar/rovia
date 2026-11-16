@@ -1,10 +1,10 @@
 import { routeRequest, type ExplorerState } from "./explorer-state";
-import type { RouteOption, Stop } from "./types";
+import { DEFAULT_ROUTE_OPTIONS, type RouteOption, type RouteOptions, type Stop } from "./types";
 
 export type TripFields = { title: string; description: string; plannedDate: string };
 
 /** Kaydedilmiş duraklardan (başlangıç…varış) planlayıcı durumu. */
-export function stateFromStops(stops: Stop[]): ExplorerState {
+export function stateFromStops(stops: Stop[], options: RouteOptions = DEFAULT_ROUTE_OPTIONS): ExplorerState {
   const origin = stops[0] ?? null;
   const destination = stops.length > 1 ? stops[stops.length - 1] : null;
   return {
@@ -12,6 +12,7 @@ export function stateFromStops(stops: Stop[]): ExplorerState {
     destination: { key: "destination", stop: destination },
     waypoints: stops.slice(1, -1).map((s, i) => ({ key: `w${i}-${s.id}`, stop: s })),
     selectedRoute: 0,
+    options,
   };
 }
 
@@ -29,7 +30,9 @@ export function planFingerprint(fields: TripFields, state: ExplorerState, routeD
   const stops = [state.origin.stop, ...state.waypoints.map((w) => w.stop), state.destination.stop].map((s) =>
     s ? `${s.location.lat.toFixed(6)},${s.location.lng.toFixed(6)},${s.label}` : "-",
   );
-  return JSON.stringify([fields.title.trim(), fields.description.trim(), fields.plannedDate, stops, routeDistance]);
+  const o = state.options;
+  return JSON.stringify([fields.title.trim(), fields.description.trim(), fields.plannedDate, stops, routeDistance,
+    [o.avoidTolls, o.avoidHighways, o.avoidFerries]]);
 }
 
 /** Kaydedilmiş rotaya en yakın alternatif (yeniden açılan planda kullanıcının seçtiği rota korunur). */

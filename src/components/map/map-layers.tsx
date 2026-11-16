@@ -132,3 +132,38 @@ export function PanTo({ position }: { position: LatLng | null }) {
   }, [map, position]);
   return null;
 }
+
+/** Rota üzerinde önerilen yerler: amber yıldız işaretler. */
+export function SuggestionMarkers({ places, selectedId, onSelect }: { places: FoundPlace[]; selectedId: string | null; onSelect: (p: FoundPlace) => void }) {
+  return (
+    <>
+      {places.map((p) => (
+        <Marker key={`sug-${p.id}`} longitude={p.location.lng} latitude={p.location.lat} anchor="center"
+          onClick={(e) => {
+            e.originalEvent.stopPropagation();
+            onSelect(p);
+          }}>
+          <button type="button" aria-label={p.name} title={p.name} data-testid="suggestion-marker"
+            className={cn(
+              "grid place-items-center rounded-full border-2 border-ink-900 bg-amber-400 text-ink-950 shadow-md transition-transform hover:scale-110",
+              p.id === selectedId ? "size-8 scale-110" : "size-6",
+            )}>
+            <svg viewBox="0 0 24 24" className="size-3.5" fill="currentColor" aria-hidden>
+              <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" />
+            </svg>
+          </button>
+        </Marker>
+      ))}
+    </>
+  );
+}
+
+/** Yol tarifinden seçilen adımın konumu. */
+export function FocusMarker({ position }: { position: LatLng | null }) {
+  if (!position) return null;
+  return (
+    <Marker longitude={position.lng} latitude={position.lat} anchor="center">
+      <span className="block size-4 rounded-full border-[3px] border-white bg-ink-900 shadow-md ring-4 ring-amber-400/60" aria-hidden />
+    </Marker>
+  );
+}

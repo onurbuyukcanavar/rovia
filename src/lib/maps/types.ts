@@ -12,14 +12,32 @@ export type Stop = {
 
 export type RouteLeg = { distanceMeters: number; durationSeconds: number };
 
+/** Google Maps'teki rota seçenekleriyle aynı üçlü. */
+export type RouteOptions = { avoidTolls: boolean; avoidHighways: boolean; avoidFerries: boolean };
+export const DEFAULT_ROUTE_OPTIONS: RouteOptions = { avoidTolls: false, avoidHighways: false, avoidFerries: false };
+
+export type StepKind = "depart" | "arrive" | "left" | "right" | "straight" | "uturn" | "roundabout" | "ferry" | "merge" | "ramp";
+
+/** Yol tarifi adımı (Valhalla manevrası, Türkçe). */
+export type RouteStep = {
+  instruction: string;
+  kind: StepKind;
+  distanceMeters: number;
+  durationSeconds: number;
+  location: LatLng;
+  toll: boolean;
+};
+
 export type RouteOption = {
   distanceMeters: number;
   durationSeconds: number;
   encodedPolyline: string;
   legs: RouteLeg[];
+  /** Ücretli yol/köprü (feribot ücreti hariç) */
   hasToll: boolean;
   hasFerry: boolean;
   hasHighway: boolean;
+  steps?: RouteStep[];
 };
 
 export type RouteResult = { routes: RouteOption[]; alternativesSupported: boolean };

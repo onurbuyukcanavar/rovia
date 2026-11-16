@@ -56,6 +56,11 @@ export async function saveTripPlan(input: TripPlanInput): Promise<SaveTripResult
     p_planned_date: plan.plannedDate,
     p_stops: plan.stops,
     p_route: route,
+    p_route_options: {
+      avoid_tolls: plan.routeOptions.avoidTolls,
+      avoid_highways: plan.routeOptions.avoidHighways,
+      avoid_ferries: plan.routeOptions.avoidFerries,
+    },
   };
   // Ağ/veritabanı askıda kalırsa kullanıcı "Kaydediliyor…" durumunda takılı kalmaz
   const { data, error } = await supabase

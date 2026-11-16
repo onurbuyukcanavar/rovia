@@ -5,6 +5,7 @@ import { formatDistance, formatDuration } from "@/lib/format";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
+import { RouteFlags } from "./route-extras";
 import { t } from "@/i18n";
 
 type Props = {
@@ -52,13 +53,16 @@ export function RouteSummary({ result, selected, onSelect, loading, error, hasWa
           <h3 className="eyebrow">{t.maps.alternatives}</h3>
           <ul className="mt-2 space-y-1.5">
             {result.routes.map((r, i) => (
-              <li key={`${i}-${r.distanceMeters}`}>
+              <li key={`${i}-${r.distanceMeters}`} data-testid="route-alternative">
                 <button type="button" onClick={() => onSelect(i)} aria-pressed={i === selected}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left text-sm transition",
+                    "flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition",
                     i === selected ? "border-ink-900 bg-ink-900/5 font-semibold" : "border-sand-200 hover:border-stone-500",
                   )}>
-                  <span>{t.maps.routeN(i + 1)}</span>
+                  <span className="space-y-1">
+                    <span className="block">{t.maps.routeN(i + 1)}</span>
+                    <RouteFlags route={r} fastest={i === 0} />
+                  </span>
                   <span className="shrink-0 tabular-nums text-stone-700">{formatDistance(r.distanceMeters)} · {formatDuration(r.durationSeconds)}</span>
                 </button>
               </li>

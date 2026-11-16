@@ -1,4 +1,4 @@
-import type { Stop } from "./types";
+import { DEFAULT_ROUTE_OPTIONS, type RouteOptions, type Stop } from "./types";
 
 /** Valhalla herkese açık sunucusu en fazla 20 konum kabul eder (başlangıç + 18 + varış). */
 export const MAX_WAYPOINTS = 18;
@@ -11,6 +11,8 @@ export type ExplorerState = {
   destination: Slot;
   waypoints: Slot[];
   selectedRoute: number;
+  /** Ücretli yol / otoyol / feribot kaçınma (Google Maps'teki rota seçenekleri) */
+  options: RouteOptions;
 };
 
 export type SlotRef = { kind: "origin" } | { kind: "destination" } | { kind: "waypoint"; key: string };
@@ -22,6 +24,7 @@ export type ExplorerAction =
   | { type: "moveWaypoint"; key: string; delta: -1 | 1 }
   | { type: "swapEnds" }
   | { type: "selectRoute"; index: number }
+  | { type: "setOptions"; options: Partial<RouteOptions> }
   | { type: "reset" };
 
 let counter = 0;
@@ -32,6 +35,7 @@ export const initialExplorerState = (): ExplorerState => ({
   destination: { key: "destination", stop: null },
   waypoints: [],
   selectedRoute: 0,
+  options: DEFAULT_ROUTE_OPTIONS,
 });
 
 export function explorerReducer(state: ExplorerState, action: ExplorerAction): ExplorerState {
@@ -75,6 +79,8 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
       });
     case "selectRoute":
       return { ...state, selectedRoute: action.index };
+    case "setOptions":
+      return routeChanged({ ...state, options: { ...state.options, ...action.options } });
     case "reset":
       return initialExplorerState();
   }
@@ -85,7 +91,7 @@ export function routeRequest(state: ExplorerState) {
   const { origin, destination, waypoints } = state;
   if (!origin.stop || !destination.stop) return null;
   if (waypoints.some((w) => !w.stop)) return null;
-  return { origin: origin.stop, destination: destination.stop, waypoints: waypoints.map((w) => w.stop!) };
+  return { origin: origin.stop, destination: destination.stop, waypoints: waypoints.map((w) => w.stop!), options: state.options };
 }
 
 /** İstek parmak izi: aynı duraklar için tekrar istek atılmasını önler. */
@@ -93,5 +99,7 @@ export function routeRequestKey(state: ExplorerState): string | null {
   const req = routeRequest(state);
   if (!req) return null;
   const id = (s: Stop) => `${s.location.lat.toFixed(6)},${s.location.lng.toFixed(6)}`;
-  return [id(req.origin), ...req.waypoints.map(id), id(req.destination)].join("|");
+  const o = req.options;
+  const flags = `${o.avoidTolls ? "T" : ""}${o.avoidHighways ? "H" : ""}${o.avoidFerries ? "F" : ""}`;
+  return [id(req.origin), ...req.waypoints.map(id), id(req.destination), flags].join("|");
 }
