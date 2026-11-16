@@ -30,4 +30,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test e2e/prod-diagnose.spec.ts e2e/map.spec.ts --project=desktop --retries=0
+      - run: npx playwright test e2e/prod-diagnose.spec.ts e2e/map.spec.ts e2e/favorites.spec.ts --project=desktop --retries=0
