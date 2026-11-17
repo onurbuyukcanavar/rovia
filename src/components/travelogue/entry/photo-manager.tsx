@@ -109,7 +109,7 @@ export function PhotoManager({ entryId, initial, media, userId, tripId }: {
         <Button type="button" size="sm" variant="secondary" onClick={() => setPicking(true)}>
           <Images className="size-4" aria-hidden /> {T.photoPick}
         </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={() => setUploading((v) => !v)} aria-expanded={uploading}>{T.photoUpload}</Button>
+        <Button type="button" size="sm" variant="ghost" onClick={() => setUploading((v) => !v)} aria-expanded={uploading} data-testid="entry-photo-upload">{T.photoUpload}</Button>
       </div>
       {uploading && (
         <PhotoUploader userId={userId} tripId={tripId} compact onUploaded={(ids) => {

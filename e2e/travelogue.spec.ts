@@ -102,6 +102,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     // Konum: küçük haritaya tıkla (kitapta harita ve "Keşfedilen noktalar" için)
     await editor.getByTestId("location-map").click();
     // Fotoğraf: yazıya yükle (PDF'te görsel dönüştürmeyi de sınar)
+    await editor.getByTestId("entry-photo-upload").click();
     await editor.getByTestId("entry-photos").getByTestId("photo-input").setInputFiles(path.join(__dirname, "fixtures", "kapadokya.jpg"));
     await expect(editor.getByTestId("entry-photo")).toHaveCount(1, { timeout: 30_000 });
 
