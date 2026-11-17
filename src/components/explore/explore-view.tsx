@@ -1,7 +1,7 @@
 "use client";
 import "maplibre-gl/dist/maplibre-gl.css";
-import "@/lib/maps/maplibre-setup";
-import MapView, { NavigationControl, ScaleControl, type MapRef, type ViewStateChangeEvent } from "react-map-gl/maplibre";
+import { NavigationControl, ScaleControl, type MapRef, type ViewStateChangeEvent } from "react-map-gl/maplibre";
+import { MapView } from "@/lib/maps/maplibre-setup";
 import { useMemo, useRef, useState } from "react";
 import { LoaderCircle, LocateFixed, ZoomIn } from "lucide-react";
 import { decodePolyline, haversine, type LatLng } from "@/lib/geo";

@@ -158,7 +158,13 @@ export default function PrivacyPageTr() {
           <li>kanuna aykırı işleme sebebiyle zarara uğraman hâlinde zararın giderilmesini talep etme.</li>
         </ul>
         <p>
-          Başvurunu <Mail /> adresine, hesabında kayıtlı e-posta adresinden gönderebilirsin. Başvurular en geç 30 gün içinde
+          Verilerine erişim ve verilerinin bir kopyasını alma hakkını uygulama içinden de kullanabilirsin:{" "}
+          <strong>Ayarlar → Hesap ve veriler → Verilerimi indir</strong> ile hesabına ait tüm kayıtları (profil, yolculuklar,
+          GPS kayıtları, favoriler, notlar, seyahatnameler, paylaşımlar ve fotoğraf bilgileri) makinece okunabilir bir JSON
+          dosyası olarak hemen indirebilirsin.
+        </p>
+        <p>
+          Başvurunu ayrıca <Mail /> adresine, hesabında kayıtlı e-posta adresinden gönderebilirsin. Başvurular en geç 30 gün içinde
           ücretsiz olarak yanıtlanır. Başvurunun reddedilmesi veya yanıtı yetersiz bulman hâlinde Kişisel Verileri Koruma
           Kurulu’na şikâyette bulunabilirsin.
         </p>
@@ -167,8 +173,15 @@ export default function PrivacyPageTr() {
       <Section title="10. Hesabının ve verilerinin silinmesi">
         <p>
           Planlarını, yolculuklarını, favorilerini, fotoğraflarını ve notlarını uygulama içinden istediğin zaman silebilirsin.
-          Hesabının tamamen silinmesini istersen <Mail /> adresine yazman yeterlidir; hesabın ve ona bağlı tüm veriler ile
-          dosyalar silinir. Uygulama içinden hesap silme özelliği yakında eklenecektir.
+          Hesabını tamamen silmek için <strong>Ayarlar → Hesap ve veriler → Hesabımı sil</strong> adımını kullanabilirsin.
+          Güvenliğin için son 15 dakika içinde giriş yapmış olman ve onay ifadesini yazman istenir. Silme işleminde önce
+          yüklediğin tüm fotoğraflar depodan, ardından hesabın ve ona bağlı tüm veriler (yolculuklar, GPS kayıtları,
+          favoriler, notlar, seyahatnameler, paylaşım bağlantıları, ayarlar) kalıcı olarak silinir; paylaşım bağlantıların
+          çalışmaz hâle gelir. Bu işlem geri alınamaz; öncesinde verilerini indirmen önerilir.
+        </p>
+        <p>
+          Uygulamaya erişemiyorsan silme talebini <Mail /> adresine, hesabında kayıtlı e-posta adresinden de iletebilirsin.
+          Yasal saklama yükümlülükleri saklıdır.
         </p>
       </Section>
 

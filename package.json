@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "perf:budget": "node scripts/perf-budget.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

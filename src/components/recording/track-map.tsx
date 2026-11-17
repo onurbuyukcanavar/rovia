@@ -1,9 +1,9 @@
 "use client";
 import "maplibre-gl/dist/maplibre-gl.css";
-import "@/lib/maps/maplibre-setup";
 import { useMemo, useState } from "react";
 import { Camera, NotebookPen } from "lucide-react";
-import MapView, { Layer, Marker, NavigationControl, ScaleControl, Source } from "react-map-gl/maplibre";
+import { Layer, Marker, NavigationControl, ScaleControl, Source } from "react-map-gl/maplibre";
+import { MapView } from "@/lib/maps/maplibre-setup";
 import { Alert } from "@/components/ui/alert";
 import { FitBounds, MyLocationMarker, PanTo, StopPin } from "@/components/map/map-layers";
 import { decodePolyline, type LatLng } from "@/lib/geo";

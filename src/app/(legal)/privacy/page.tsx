@@ -124,14 +124,18 @@ export default function PrivacyPageEn() {
       <Section title="9. Your rights">
         <p>
           You may request access to, correction or deletion of your data, information about recipients, and object to processing,
-          as provided by KVKK Art. 11 and, where applicable, the GDPR (including data portability and restriction). Send requests to
+          as provided by KVKK Art. 11 and, where applicable, the GDPR (including data portability and restriction). You can obtain
+          a copy of your data in the app at any time via <strong>Settings → Account and data → Download my data</strong>, which
+          produces a machine-readable JSON file with all records of your account (profile, trips, GPS recordings, favourites,
+          notes, travelogues, shares and photo metadata). You can also send requests to
           <> </><Mail /> from the email address registered to your account; we respond free of charge within 30 days. You may also
           lodge a complaint with the Turkish Personal Data Protection Board or your local supervisory authority.
         </p>
       </Section>
 
       <Section title="10. Deleting your account">
-        <p>You can delete plans, trips, favourites, photos and notes in the app at any time. To delete your account entirely, email <Mail />; your account and all associated data and files will be deleted. In-app account deletion is coming soon.</p>
+        <p>You can delete plans, trips, favourites, photos and notes in the app at any time. To delete your account entirely, use <strong>Settings → Account and data → Delete my account</strong>. For your security you must have signed in within the last 15 minutes and type the confirmation phrase. All your uploaded photos are removed from storage first, then your account and all associated data (trips, GPS recordings, favourites, notes, travelogues, share links, settings) are permanently deleted and your share links stop working. This cannot be undone, so we recommend downloading your data first.</p>
+        <p>If you cannot access the app, you can also request deletion by emailing <Mail /> from the email address registered to your account. Legal retention obligations remain unaffected.</p>
       </Section>
 
       <Section title="11. Children">

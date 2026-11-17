@@ -1015,6 +1015,7 @@ export type Database = {
       _share_hidden: { Args: { p_mask: unknown; p_lat: number; p_lng: number }; Returns: boolean };
       _share_media_json: { Args: { m: unknown; p_caption?: string }; Returns: Json };
       _share_trip_line: { Args: { p_trip_id: string }; Returns: unknown };
+      account_delete: { Args: { p_confirm: string }; Returns: unknown };
       assert_recording_time: { Args: { p_at: string }; Returns: unknown };
       consume_rate_limit: { Args: { p_bucket: string }; Returns: boolean };
       dashboard_stats: { Args: Record<string, never>; Returns: Json };

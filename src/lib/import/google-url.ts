@@ -56,6 +56,8 @@ export function nameFromGoogleUrl(url: string | null | undefined): string | null
 export function isGoogleMapsHost(url: URL): boolean {
   const host = url.hostname.toLowerCase();
   if (url.protocol !== "https:" && url.protocol !== "http:") return false;
+  // Standart dışı port ya da kullanıcı bilgisi (user@host) içeren adreslere istek atılmaz (SSRF)
+  if (url.port !== "" || url.username || url.password) return false;
   if (host === "maps.app.goo.gl") return true;
   if (host === "goo.gl" && url.pathname.startsWith("/maps")) return true;
   if (host === "maps.google.com" || /^maps\.google\.[a-z]{2,3}(\.[a-z]{2})?$/.test(host)) return true;

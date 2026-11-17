@@ -1,15 +1,13 @@
 import type { NextConfig } from "next";
 
-/** Tüm yanıtlara uygulanan güvenlik başlıkları. CSP, Google Maps entegrasyonuyla (Faz 2) birlikte sıkılaştırılacak. */
-const securityHeaders = [
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "X-Frame-Options", value: "DENY" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-  // Konum yalnızca kendi kaynağımızda; kamera/mikrofon kapalı
-  { key: "Permissions-Policy", value: "geolocation=(self), camera=(), microphone=(), payment=(), usb=()" },
-  { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
-];
+import { PUBLIC_EMBEDDABLE_SOURCES, securityHeaders } from "./src/lib/security/headers";
+
+/** Tüm yanıtlara uygulanan güvenlik başlıkları + CSP (gerekçeler: src/lib/security/headers.ts). */
+const headers = securityHeaders({
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  mapStyleUrl: process.env.NEXT_PUBLIC_MAP_STYLE_URL,
+  isDev: process.env.NODE_ENV === "development",
+});
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -24,7 +22,19 @@ const nextConfig: NextConfig = {
     },
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers },
+      // Paylaşım önizleme görselleri ve simgeler başka sitelerde gösterilebilir
+      ...PUBLIC_EMBEDDABLE_SOURCES.map((source) => ({
+        source,
+        headers: [{ key: "Cross-Origin-Resource-Policy", value: "cross-origin" }],
+      })),
+      // Kişiye özel API yanıtları önbelleğe alınmaz (route handler'lar ayrıca kendi başlığını koyar)
+      { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "private, no-store" }] },
+      // Sürümlü statik dosyalar (yazı tipleri, MapLibre işçisi ?v=sürüm): 1 yıl, değişmez
+      { source: "/fonts/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      { source: "/maplibre/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+    ];
   },
 };
 

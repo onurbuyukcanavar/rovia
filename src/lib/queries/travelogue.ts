@@ -74,11 +74,16 @@ export async function getTravelogue(id: string): Promise<Travelogue | null> {
   if (error) throw new Error(`TRAVELOGUE_QUERY_FAILED: ${error.message}`);
   if (!v) return null;
 
-  const [sections, entries, trip] = await Promise.all([
+  // Yolculuk fotoğrafları da bu turda: yalnızca v.trip_id'ye bağlı (ayrı bir sıralı gidiş-dönüş yok)
+  const [sections, entries, trip, tripMedia] = await Promise.all([
     supabase.from("travelogue_sections").select("id, kind, title, content, is_visible, sort_order, version")
       .eq("travelogue_id", id).order("sort_order"),
     supabase.from("travelogue_entries").select(ENTRY_COLS).eq("travelogue_id", id).limit(500),
     v.trip_id ? tripSummary(supabase, v.trip_id) : Promise.resolve(null),
+    v.trip_id
+      ? supabase.from("media_assets").select(MEDIA_COLS).eq("trip_id", v.trip_id)
+        .order("taken_at", { ascending: true, nullsFirst: false }).order("created_at", { ascending: true }).limit(1000)
+      : Promise.resolve({ data: [] as MediaRow[] }),
   ]);
   if (sections.error) throw new Error(`TRAVELOGUE_SECTIONS_FAILED: ${sections.error.message}`);
   if (entries.error) throw new Error(`TRAVELOGUE_ENTRIES_FAILED: ${entries.error.message}`);
@@ -98,18 +103,14 @@ export async function getTravelogue(id: string): Promise<Travelogue | null> {
   }
   for (const s of sectionList) for (const m of docMediaIds(s.content)) wanted.add(m);
 
-  const rows: MediaRow[] = [];
-  if (v.trip_id) {
-    const { data } = await supabase.from("media_assets").select(MEDIA_COLS).eq("trip_id", v.trip_id)
-      .order("taken_at", { ascending: true, nullsFirst: false }).order("created_at", { ascending: true }).limit(1000);
-    rows.push(...((data ?? []) as MediaRow[]));
-  }
+  const rows: MediaRow[] = [...((tripMedia.data ?? []) as MediaRow[])];
   const have = new Set(rows.map((r) => r.id));
   const missing = [...wanted].filter((m) => !have.has(m));
-  for (let i = 0; i < missing.length; i += 200) {
-    const { data } = await supabase.from("media_assets").select(MEDIA_COLS).in("id", missing.slice(i, i + 200));
-    rows.push(...((data ?? []) as MediaRow[]));
-  }
+  // Eksik parçalar paralel (önceden sırayla)
+  const chunks: string[][] = [];
+  for (let i = 0; i < missing.length; i += 200) chunks.push(missing.slice(i, i + 200));
+  const extra = await Promise.all(chunks.map((c) => supabase.from("media_assets").select(MEDIA_COLS).in("id", c)));
+  for (const { data } of extra) rows.push(...((data ?? []) as MediaRow[]));
 
   return {
     id: v.id, title: v.title, subtitle: v.subtitle, purpose: v.purpose, summary: v.summary, coverMediaId: v.cover_media_id,

@@ -1,14 +1,13 @@
 @import "tailwindcss";
-@import "@fontsource-variable/manrope";
-@import "@fontsource-variable/newsreader";
 
 /*
  * ROVIA tasarım token'ları
  * Koyu lacivert/antrasit · kırık beyaz · sıcak gri · kontrollü amber vurgu
  */
 @theme {
-  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Newsreader Variable", ui-serif, Georgia, serif;
+  /* next/font/local değişkenleri (src/app/fonts.ts); latin-ext önce: latin yedeği (Arial) ğ/ş/İ karakterlerini gölgelemesin */
+  --font-sans: var(--font-manrope-latin-ext), var(--font-manrope-latin), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader-latin-ext), var(--font-newsreader-latin), ui-serif, Georgia, serif;
 
   --color-ink-950: #0a111d;
   --color-ink-900: #0e1726;
@@ -325,4 +324,11 @@ label:has(> input.sr-only) {
   .prose-rovia.ProseMirror .ProseMirror-gapcursor::after {
     border-top-color: var(--color-amber-600);
   }
+}
+
+/* Uzun listeler: ekran dışındaki satırların yerleşim/boyaması atlanır (kaydırma ve ilk boyama hızlanır).
+ * contain-intrinsic-size "auto" → bir kez ölçülen gerçek yükseklik hatırlanır, kaydırma çubuğu zıplamaz. */
+@utility cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 5.5rem;
 }

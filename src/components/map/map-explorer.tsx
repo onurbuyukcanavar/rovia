@@ -1,7 +1,7 @@
 "use client";
 import "maplibre-gl/dist/maplibre-gl.css";
-import "@/lib/maps/maplibre-setup";
-import MapView, { NavigationControl, ScaleControl, type MapLayerMouseEvent } from "react-map-gl/maplibre";
+import { NavigationControl, ScaleControl, type MapLayerMouseEvent } from "react-map-gl/maplibre";
+import { MapView } from "@/lib/maps/maplibre-setup";
 import { useCallback, useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, BookmarkPlus, Compass } from "lucide-react";

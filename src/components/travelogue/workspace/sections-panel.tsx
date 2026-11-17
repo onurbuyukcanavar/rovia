@@ -4,7 +4,7 @@ import { useOptimistic, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { fieldClass } from "@/components/journal/note-editor";
-import { RichEditor } from "@/components/travelogue/editor/rich-editor";
+import { RichEditor } from "@/components/travelogue/editor/rich-editor-lazy";
 import { SaveStatus } from "@/components/travelogue/save-status";
 import { addSection, deleteSection, reorderTravelogue, saveSection } from "@/lib/actions/travelogue";
 import { useAutosave } from "@/lib/travelogue/use-autosave";

@@ -7,7 +7,8 @@ import { requireUser } from "@/lib/dal";
 import { normalizeForSearch } from "@/lib/places/normalize";
 import { coordsFromGoogleUrl, nameFromGoogleUrl } from "@/lib/import/google-url";
 import { resolveGoogleMapsLink } from "@/lib/import/resolve-google-link";
-import { FAVORITE_CATEGORIES, placeInputSchema, type PlaceInput, type SaveResult } from "@/lib/favorites/types";
+import { FAVORITE_CATEGORIES, type SaveResult } from "@/lib/favorites/types";
+import { placeInputSchema, type PlaceInput } from "@/lib/favorites/schema";
 import { t } from "@/i18n";
 
 type Fail = { ok: false; message: string };

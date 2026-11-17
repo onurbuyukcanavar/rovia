@@ -1,31 +1,35 @@
-import { z } from "zod";
-
 /**
- * Ortam değişkenleri. Eksik değerler uygulamayı çökertmez; ilgili özellik
- * "kurulum gerekiyor" durumuna düşer ve kullanıcıya açıkça gösterilir.
- * NEXT_PUBLIC_ değişkenleri derleme zamanında gömülür; bu yüzden tek tek okunur.
+ * Not: zod burada bilinçli olarak kullanılmıyor — bu modül istemci paketine de girer (≈30 KB gzip tasarruf).
  */
-const publicSchema = z.object({
-  supabaseUrl: z.url().optional(),
-  supabaseKey: z.string().min(20).optional(),
-  siteUrl: z.url().optional(),
-  mapStyleUrl: z.url().optional(),
-});
+type PublicEnv = { supabaseUrl?: string; supabaseKey?: string; siteUrl?: string; mapStyleUrl?: string };
 
-const parsed = publicSchema.safeParse({
+const isUrl = (v: string) => {
+  try {
+    return Boolean(new URL(v).protocol);
+  } catch {
+    return false;
+  }
+};
+
+const raw: PublicEnv = {
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || undefined,
   supabaseKey:
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || undefined,
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || undefined,
   mapStyleUrl: process.env.NEXT_PUBLIC_MAP_STYLE_URL || undefined,
-});
+};
 
-if (!parsed.success) {
+const issues = [
+  ...(["supabaseUrl", "siteUrl", "mapStyleUrl"] as const).filter((k) => raw[k] !== undefined && !isUrl(raw[k]!)).map((k) => `${k}: geçersiz URL`),
+  ...(raw.supabaseKey !== undefined && raw.supabaseKey.length < 20 ? ["supabaseKey: en az 20 karakter olmalı"] : []),
+];
+
+if (issues.length) {
   // Hatalı (eksik değil, biçimsiz) değerler geliştiriciye net bildirilmeli
-  console.error("[rovia] Geçersiz ortam değişkeni:", z.prettifyError(parsed.error));
+  console.error("[rovia] Geçersiz ortam değişkeni:", issues.join("; "));
 }
 
-export const publicEnv = parsed.success ? parsed.data : {};
+export const publicEnv: PublicEnv = issues.length ? {} : raw;
 
 export function getSupabaseConfig() {
   const { supabaseUrl, supabaseKey } = publicEnv;

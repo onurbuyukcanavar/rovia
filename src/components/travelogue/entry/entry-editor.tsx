@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { fieldClass } from "@/components/journal/note-editor";
-import { RichEditor } from "@/components/travelogue/editor/rich-editor";
+import { RichEditor } from "@/components/travelogue/editor/rich-editor-lazy";
 import { SaveStatus } from "@/components/travelogue/save-status";
 import { statusView } from "@/components/travelogue/workspace/autosave-view";
 import { useServerReload } from "@/components/travelogue/workspace/use-server-reload";

@@ -1,9 +1,9 @@
 "use client";
 import "maplibre-gl/dist/maplibre-gl.css";
-import "@/lib/maps/maplibre-setup";
 import { MapPin, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import MapView, { Marker, NavigationControl, useMap } from "react-map-gl/maplibre";
+import { Marker, NavigationControl, useMap } from "react-map-gl/maplibre";
+import { MapView } from "@/lib/maps/maplibre-setup";
 import { PlaceSearch } from "@/components/map/place-search";
 import { fieldClass } from "@/components/journal/note-editor";
 import { mapsApi } from "@/lib/maps/client";
