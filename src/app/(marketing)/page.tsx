@@ -5,12 +5,14 @@ import { RouteIllustration } from "@/components/brand/route-illustration";
 import { ButtonLink } from "@/components/ui/button";
 import { t } from "@/i18n";
 import { LegalLinks } from "@/components/legal/legal-page";
+import { AccountDeletedBanner } from "@/components/account/deleted-banner";
 
 const ICONS = { discover: Compass, journey: Route, remember: BookOpenText } as const;
 
 export default function HomePage() {
   return (
     <div className="min-h-dvh">
+      <AccountDeletedBanner />
       <section className="relative isolate overflow-hidden bg-ink-900 text-paper">
         <RouteIllustration className="absolute inset-0 -z-10 size-full opacity-40 md:opacity-90" />
         {/* Sabit üst menü: kaydırmada ekranda kalır */}

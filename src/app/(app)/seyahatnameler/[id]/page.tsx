@@ -22,8 +22,8 @@ export default function TravelogueWorkspacePage({ params }: { params: Promise<{ 
 async function WorkspaceLoader({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!UUID.test(id)) notFound();
-  const user = await requireUser();
-  const travelogue = await getTravelogue(id);
+  // Oturum doğrulama ve ana sorgu paralel (yetki RLS ile korunur)
+  const [user, travelogue] = await Promise.all([requireUser(), getTravelogue(id)]);
   if (!travelogue) notFound();
   return <Workspace travelogue={travelogue} userId={user.id} styleUrl={mapStyleUrl()} />;
 }

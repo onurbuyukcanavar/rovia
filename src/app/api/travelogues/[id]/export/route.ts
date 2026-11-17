@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const format = req.nextUrl.searchParams.get("format") ?? "html";
   if (format !== "html" && format !== "gpx" && format !== "kml") return jsonError(400, t.tools.export.errors.format);
   try {
-    const denied = await exportGuard(id);
+    const denied = await exportGuard(req, id);
     if (denied) return denied;
     if (format === "html") {
       const out = await buildTravelogueHtml(id);

@@ -41,6 +41,8 @@ jobs:
       - name: Şema ↔ tip senkronu
         run: npm run db:types && git diff --exit-code src/lib/database.types.ts
       - run: npm run build
+      - name: Performans bütçesi (First Load JS)
+        run: npm run perf:budget
       - uses: actions/upload-artifact@v4
         with:
           name: next-build

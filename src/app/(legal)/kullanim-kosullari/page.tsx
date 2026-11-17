@@ -104,7 +104,8 @@ export default function TermsPageTr() {
 
       <Section title="9. Hesabın sona ermesi">
         <p>
-          Hesabını istediğin zaman kapatabilirsin (<Mail /> adresine yazarak; uygulama içi silme yakında). Bu koşulları ciddi
+          Hesabını istediğin zaman Ayarlar → Hesap ve veriler bölümünden kalıcı olarak silebilir, öncesinde verilerini
+          indirebilirsin; dilersen <Mail /> adresine yazarak da talepte bulunabilirsin. Bu koşulları ciddi
           biçimde veya tekrar tekrar ihlal eden hesaplar, mümkünse önceden bildirilerek askıya alınabilir veya kapatılabilir.
         </p>
       </Section>

@@ -50,15 +50,13 @@ export default function TripsPage() {
 }
 
 async function TripList() {
-  await requireUser();
-  const trips = await listPlannedTrips();
+  const [, trips] = await Promise.all([requireUser(), listPlannedTrips()]);
   if (!trips.length) return <EmptyState icon={Route}>{t.trips.empty}</EmptyState>;
   return <TripCards trips={trips} />;
 }
 
 async function ActiveBanner() {
-  await requireUser();
-  const active = await getActiveRecording();
+  const [, active] = await Promise.all([requireUser(), getActiveRecording()]);
   if (!active) return null;
   return (
     <Link href="/kayit-modu" className="flex items-center gap-3 rounded-2xl bg-danger px-5 py-4 font-semibold text-white shadow-md hover:opacity-95" data-testid="active-recording-banner">
@@ -70,8 +68,7 @@ async function ActiveBanner() {
 }
 
 async function CompletedList() {
-  await requireUser();
-  const trips = await listArchive();
+  const [, trips] = await Promise.all([requireUser(), listArchive()]);
   if (!trips.length) return <EmptyState icon={Flag}>{t.tripSummary.emptyCompleted}</EmptyState>;
   return <ArchiveList trips={trips} />;
 }

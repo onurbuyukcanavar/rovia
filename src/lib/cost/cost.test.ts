@@ -3,7 +3,7 @@ import type { RouteStep } from "@/lib/maps/types";
 import { estimateRangeKm, estimateTripCost } from "./estimate";
 import { formatDecimalTR, parseDecimalTR } from "./parse";
 import { detectRouteTolls, ferryName, motorwayNames, tollsForSavedTrip } from "./tolls";
-import { readAssumptions, readFuelPrices } from "./types";
+import { readAssumptions, readFuelPrices } from "./schema";
 
 const base = { distanceM: 100_000, consumptionPer100: 6.4, fuelType: "gasoline" as const, fuelPrice: 50, tollItems: [] };
 

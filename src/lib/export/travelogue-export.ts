@@ -5,6 +5,8 @@ import { decodeTrack } from "@/lib/gps/track";
 import { renderTravelogueHtml, type HtmlImage } from "./travelogue-html";
 import type { ExportDoc } from "./xml";
 import { t } from "@/i18n";
+import { getSupabaseConfig } from "@/lib/env";
+import { isProjectSignedStorageUrl } from "@/lib/security/storage-url";
 
 /** Gömülü görsellerin toplam üst sınırı; aşılınca küçük görsel, o da sığmazsa atlanır. */
 export const HTML_IMAGE_BUDGET = 40 * 1024 * 1024;
@@ -13,8 +15,10 @@ const IMAGE_TYPES = /^image\/(jpeg|png|webp|gif|avif)$/;
 const CONCURRENCY = 4;
 
 async function fetchImage(url: string, maxBytes: number): Promise<{ type: string; bytes: Buffer } | null> {
+  // Yalnızca kendi Supabase projemizin imzalı bağlantıları (SSRF koruması); yönlendirme izlenmez
+  if (!isProjectSignedStorageUrl(url, getSupabaseConfig()?.url)) return null;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(20_000), cache: "no-store" });
+    const res = await fetch(url, { signal: AbortSignal.timeout(20_000), cache: "no-store", redirect: "error" });
     if (!res.ok) return null;
     const type = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
     if (!IMAGE_TYPES.test(type)) return null;

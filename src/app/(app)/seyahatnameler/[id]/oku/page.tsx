@@ -24,8 +24,7 @@ export default function TravelogueBookPage({ params }: { params: Promise<{ id: s
 
 async function TravelogueBook({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await requireUser();
-  const travelogue = await getTravelogue(id);
+  const [, travelogue] = await Promise.all([requireUser(), getTravelogue(id)]);
   if (!travelogue) notFound();
 
   return (

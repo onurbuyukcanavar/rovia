@@ -23,8 +23,8 @@ export default function EntryPage({ params }: { params: Params }) {
 async function EntryLoader({ params }: { params: Params }) {
   const { id, entryId } = await params;
   if (!UUID.test(id) || !UUID.test(entryId)) notFound();
-  const user = await requireUser();
-  const travelogue = await getTravelogue(id);
+  // Oturum doğrulama ve ana sorgu paralel (yetki RLS ile korunur)
+  const [user, travelogue] = await Promise.all([requireUser(), getTravelogue(id)]);
   const index = travelogue?.entries.findIndex((e) => e.id === entryId) ?? -1;
   if (!travelogue || index < 0) notFound();
   const entries = travelogue.entries;

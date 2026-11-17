@@ -8,6 +8,7 @@ import { garage } from "./garage";
 import { explore } from "./explore";
 import { tools } from "./tools";
 import { share } from "./share";
+import { account } from "./account";
 
 export const tr = {
   brand: {
@@ -27,6 +28,9 @@ export const tr = {
     or: "veya",
     back: "Geri",
     unexpectedError: "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+    apiNotFound: "İstenen API adresi bulunamadı.",
+    unauthorized: "Oturumun sona ermiş. Lütfen tekrar giriş yap.",
+    forbidden: "Bu istek güvenlik nedeniyle reddedildi.",
   },
   marketing: {
     heroTitle: "Yolculuğunu planla, kaydet, anlat.",
@@ -263,6 +267,8 @@ export const tr = {
     insecureContext: "Konum yalnızca güvenli (HTTPS) bağlantıda kullanılabilir.",
     errors: {
       unauthorized: "Oturumun sona ermiş. Lütfen tekrar giriş yap.",
+      forbidden: "Bu istek güvenlik nedeniyle reddedildi. Sayfayı yenileyip tekrar dene.",
+      payload_too_large: "Gönderilen veri çok büyük. Daha küçük parçalar hâlinde tekrar dene.",
       rate_limited: "Kısa sürede çok fazla istek yapıldı. Biraz bekleyip tekrar dene.",
       invalid_request: "İstek geçersiz. Seçimlerini kontrol edip tekrar dene.",
       busy: "Rota servisi şu anda yoğun. Birkaç saniye sonra tekrar dene.",
@@ -649,6 +655,7 @@ export const tr = {
   garage,
   share,
   tools,
+  account,
 } as const;
 
 export type Dictionary = typeof tr;

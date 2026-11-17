@@ -3,7 +3,8 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/dal";
-import { costAssumptionsSchema, FUEL_TYPES, LIMITS, readFuelPrices, type CostAssumptions, type FuelPrices, type FuelType, type Vehicle } from "@/lib/cost/types";
+import { FUEL_TYPES, LIMITS, type CostAssumptions, type FuelPrices, type FuelType, type Vehicle } from "@/lib/cost/types";
+import { costAssumptionsSchema, readFuelPrices } from "@/lib/cost/schema";
 import { getFuelPrices, listVehicles } from "@/lib/queries/vehicles";
 import { t } from "@/i18n";
 

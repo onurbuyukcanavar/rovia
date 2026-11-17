@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { loadShare, TOKEN_RE } from "@/lib/share/server";
 import { buildShareView, projectRoute } from "@/lib/share/view";
 import { t } from "@/i18n";
+import { getSupabaseConfig } from "@/lib/env";
+import { isProjectSignedStorageUrl } from "@/lib/security/storage-url";
 
 export const alt = t.share.page.ogAlt;
 export const size = { width: 1200, height: 630 };
@@ -20,9 +22,10 @@ const fonts = Promise.all([
 /** Kapak fotoğrafını data URL olarak gömer; 2 MB'tan büyükse ya da alınamazsa atlanır. */
 async function backgroundDataUrl(urls: (string | null | undefined)[]): Promise<string | null> {
   for (const url of urls) {
-    if (!url) continue;
+    // Yalnızca kendi Supabase projemizin imzalı bağlantıları (SSRF koruması); yönlendirme izlenmez
+    if (!url || !isProjectSignedStorageUrl(url, getSupabaseConfig()?.url)) continue;
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: AbortSignal.timeout(10_000), redirect: "error" });
       if (!res.ok) continue;
       const len = Number(res.headers.get("content-length") ?? 0);
       if (len > MAX_BG_BYTES) continue;

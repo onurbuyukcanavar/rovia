@@ -32,8 +32,8 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
 
 async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await requireUser();
-  const trip = await getTripDetail(id);
+  // Oturum doğrulama ve ana sorgu paralel: bir veritabanı gidiş-dönüşü kazanılır (yetki RLS ile korunur)
+  const [user, trip] = await Promise.all([requireUser(), getTripDetail(id)]);
   if (!trip) notFound();
   if (trip.status === "planned") redirect(`/planla/${trip.id}`);
   const [journal, travelogueId] = await Promise.all([getTripJournal(trip.id), getTravelogueIdForTrip(trip.id)]);

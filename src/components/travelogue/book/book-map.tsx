@@ -1,8 +1,8 @@
 "use client";
 import "maplibre-gl/dist/maplibre-gl.css";
-import "@/lib/maps/maplibre-setup";
 import { useMemo, useState } from "react";
-import MapView, { Layer, Marker, Source } from "react-map-gl/maplibre";
+import { Layer, Marker, Source } from "react-map-gl/maplibre";
+import { MapView } from "@/lib/maps/maplibre-setup";
 import { boundsOf, type LatLng } from "@/lib/geo";
 import type { BookMarker } from "@/lib/travelogue/pdf/model";
 import { t } from "@/i18n";

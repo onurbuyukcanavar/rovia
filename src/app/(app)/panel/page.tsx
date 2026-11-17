@@ -30,8 +30,7 @@ async function Greeting() {
 }
 
 async function DashboardData() {
-  await requireUser();
-  const data = await getDashboardData();
+  const [, data] = await Promise.all([requireUser(), getDashboardData()]);
   return (
     <>
       <StatsGrid stats={data.stats} />

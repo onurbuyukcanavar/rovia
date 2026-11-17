@@ -80,7 +80,7 @@ export default function TermsPageEn() {
       </Section>
 
       <Section title="9. Termination">
-        <p>You may close your account at any time by emailing <Mail /> (in-app deletion coming soon). Accounts that seriously or repeatedly breach these terms may be suspended or closed, with prior notice where possible.</p>
+        <p>You may delete your account permanently at any time under Settings → Account and data, and download your data beforehand; you can also request this by emailing <Mail />. Accounts that seriously or repeatedly breach these terms may be suspended or closed, with prior notice where possible.</p>
       </Section>
 
       <Section title="10. Changes">

@@ -4,6 +4,7 @@ import { CarFront, KeyRound, Mail, MapPinned, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ProfileForm } from "@/components/settings/profile-form";
 import { GpsRetentionForm } from "@/components/settings/gps-retention-form";
+import { AccountSection } from "@/components/account/account-section";
 import { NewPasswordForm } from "@/components/auth/reset-forms";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -126,6 +127,8 @@ async function SettingsBody({ searchParams }: Props) {
         <p className="mt-2 text-sm text-stone-600">{t.settings.defaultsPrivate}</p>
         <p className="mt-2 text-sm text-stone-600">{t.settings.privacyBody}</p>
       </section>
+
+      <AccountSection />
 
       <form action={signOut}>
         <SubmitButton variant="danger">{t.nav.signOut}</SubmitButton>

@@ -21,7 +21,12 @@ export function safeNextPath(next: string | null | undefined, fallback = "/panel
   try {
     const url = new URL(next, "http://rovia.local");
     if (url.origin !== "http://rovia.local") return fallback;
-    return url.pathname + url.search + url.hash;
+    const out = url.pathname + url.search + url.hash;
+    // Nokta bölümleri normalleştirilince ("/./\\x", "/..//x", "/%2e//x") yol "//x" olabilir: tarayıcı bunu
+    // protokole göreli dış adres (https://x) olarak yorumlar. Sonuç yeniden doğrulanır.
+    if (out.startsWith("//") || out.startsWith("/\\")) return fallback;
+    if (new URL(out, "http://rovia.local").origin !== "http://rovia.local") return fallback;
+    return out;
   } catch {
     return fallback;
   }

@@ -1,6 +1,5 @@
 "use client";
 import { useRef, useState } from "react";
-import { getBrowserClient } from "@/lib/supabase/client";
 import { registerMedia } from "@/lib/actions/journal";
 import { MEDIA_LIMITS, MediaError, processImage, type ProcessedImage } from "./process";
 import { t } from "@/i18n";
@@ -13,6 +12,8 @@ export type UploadItem = {
   error?: string;
   mediaId?: string;
 };
+
+const browserClient = () => import("@/lib/supabase/client").then((m) => m.getBrowserClient());
 
 const GROUP = 10;
 const PARALLEL = 3;
@@ -49,7 +50,8 @@ export function useUploader({ userId, tripId, onUploaded }: { userId: string; tr
     const path = `${userId}/${id}.${img.ext}`;
     const thumbPath = `${userId}/${id}_t.${img.ext}`;
     const contentType = img.ext === "webp" ? "image/webp" : "image/jpeg";
-    const storage = getBrowserClient().storage.from("media");
+    // Supabase JS (≈75 KB gzip) yalnızca ilk yüklemede indirilir; sayfanın ilk paketine girmez
+    const storage = (await browserClient()).storage.from("media");
     const opts = { contentType, upsert: false, cacheControl: "31536000" };
     const [a, b] = await Promise.all([storage.upload(path, img.main, opts), storage.upload(thumbPath, img.thumb, opts)]);
     if (a.error || b.error) {
@@ -79,7 +81,7 @@ export function useUploader({ userId, tripId, onUploaded }: { userId: string; tr
           items: done.map(({ path, thumbPath, width, height, takenAt, lat, lng }) => ({ path, thumbPath, width, height, takenAt, lat, lng })),
         });
         if (!r.ok) {
-          await getBrowserClient().storage.from("media").remove(done.flatMap((d) => [d.path, d.thumbPath])).catch(() => {});
+          await (await browserClient()).storage.from("media").remove(done.flatMap((d) => [d.path, d.thumbPath])).catch(() => {});
           for (const d of done) patch(d.key, { status: "error", error: r.message });
           continue;
         }

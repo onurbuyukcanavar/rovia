@@ -1,7 +1,7 @@
 "use client";
 import { Check, Download, LoaderCircle, MapPin, Pencil, Plus, Search, Signpost, Trash2, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -31,8 +31,10 @@ export function FavoritesView({ styleUrl, places }: { styleUrl: string; places: 
   const [notice, setNotice] = useState<string | null>(null);
   const mapView = useMapExpand();
 
+  // Yazarken giriş kutusu akıcı kalsın: liste ve harita (GeoJSON) süzmesi düşük öncelikli render'da
+  const deferredQuery = useDeferredValue(query);
   const filtered = useMemo(() => {
-    const q = normalizeForSearch(query);
+    const q = normalizeForSearch(deferredQuery);
     return places.filter(
       (p) =>
         (list === "all" || p.listType === list) &&
@@ -40,7 +42,7 @@ export function FavoritesView({ styleUrl, places }: { styleUrl: string; places: 
         (source === "all" || (source === "google") === isGoogleSource(p.source)) &&
         (!q || normalizeForSearch(`${p.name} ${p.address ?? ""} ${p.listName ?? ""} ${p.notes ?? ""}`).includes(q)),
     );
-  }, [places, list, category, source, query]);
+  }, [places, list, category, source, deferredQuery]);
 
   const counts = useMemo(() => ({
     all: places.length,
@@ -172,7 +174,7 @@ function FavoriteRow({ place, selected, onSelect, onDeleted }: { place: Favorite
   }
 
   return (
-    <li ref={ref} className={cn("scroll-mt-4 rounded-2xl border bg-white transition", selected ? "border-ink-900 shadow-md" : "border-sand-200")} data-testid="favorite-row">
+    <li ref={ref} className={cn("cv-auto scroll-mt-4 rounded-2xl border bg-white transition", selected ? "border-ink-900 shadow-md" : "border-sand-200")} data-testid="favorite-row">
       <button type="button" onClick={onSelect} aria-expanded={selected} className="flex w-full items-start gap-3 p-3 text-left">
         <span className={cn("mt-1 size-3 shrink-0 rounded-full border-2 border-white shadow", place.listType === "want_to_go" ? "bg-[#1d3557]" : "bg-amber-500")} aria-hidden />
         <span className="min-w-0 flex-1">

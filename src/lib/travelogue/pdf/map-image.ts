@@ -18,8 +18,8 @@ export async function renderMapImage(
   const points = mapPoints(sec);
   if (!points.length) return null;
 
-  await import("@/lib/maps/maplibre-setup");
-  const maplibre = await import("maplibre-gl");
+  const { loadMapLib } = await import("@/lib/maps/maplibre-setup");
+  const maplibre = await loadMapLib();
 
   const container = document.createElement("div");
   Object.assign(container.style, { position: "fixed", left: "-10000px", top: "0", width: `${width}px`, height: `${height}px`, pointerEvents: "none" });

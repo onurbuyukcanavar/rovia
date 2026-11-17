@@ -1,7 +1,8 @@
 import "server-only";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { isFuelType, readAssumptions, readFuelPrices, type CostAssumptions, type FuelPrices, type Vehicle } from "@/lib/cost/types";
+import { isFuelType, type CostAssumptions, type FuelPrices, type Vehicle } from "@/lib/cost/types";
+import { readAssumptions, readFuelPrices } from "@/lib/cost/schema";
 
 const COLUMNS = "id, name, make, model, model_year, fuel_type, consumption_per_100km, tank_capacity, is_default";
 

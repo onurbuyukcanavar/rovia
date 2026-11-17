@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
 
-export const LEGAL_UPDATED = { tr: "17 Kasım 2026", en: "17 November 2026" };
+export const LEGAL_UPDATED = { tr: "18 Kasım 2026", en: "18 November 2026" };
 export const CONTACT_EMAIL = "onurbuyukcanavar@gmail.com";
 
 type Props = {
