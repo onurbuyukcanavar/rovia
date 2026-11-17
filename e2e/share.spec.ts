@@ -63,7 +63,7 @@ test.describe("Paylaşım (PHASE 9)", () => {
       await page.goto(`/p/${token}`);
       await expect(page).toHaveURL(new RegExp(`/p/${token}$`));
       await expect(page.getByTestId("share-unavailable")).toBeVisible();
-      await expect(page.getByText("Bu paylaşım artık kullanılamıyor")).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Bu paylaşım artık kullanılamıyor" })).toBeVisible();
     }
     await ctx.close();
   });
