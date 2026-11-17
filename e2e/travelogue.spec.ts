@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { hasCredentials, login, users } from "./helpers";
@@ -12,6 +14,18 @@ async function cleanup() {
   const sb = createClient(url, key, { auth: { persistSession: false } });
   const { error } = await sb.auth.signInWithPassword(users.alice);
   if (error) return;
+  // Yazılara yüklenen test fotoğrafları (seyahatname silinince fotoğraflar kalır; testte temizlenir)
+  const { data: tvs } = await sb.from("travelogues").select("id").like("title", `${PREFIX}%`);
+  const tvIds = (tvs ?? []).map((v) => v.id);
+  if (tvIds.length) {
+    const { data: links } = await sb.from("travelogue_entry_media").select("media_id, travelogue_entries!inner(travelogue_id)")
+      .in("travelogue_entries.travelogue_id", tvIds);
+    const ids = [...new Set((links ?? []).map((l) => l.media_id))];
+    if (ids.length) {
+      const { data: paths } = await sb.rpc("media_delete", { p_ids: ids });
+      if (paths?.length) await sb.storage.from("media").remove(paths as string[]);
+    }
+  }
   await sb.from("travelogues").delete().like("title", `${PREFIX}%`);
 }
 
@@ -85,6 +99,12 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     await editor.getByTestId("entry-custom-tag-add").click();
     await expect(editor.getByTestId("entry-tag").filter({ hasText: "balon" })).toHaveAttribute("aria-pressed", "true");
 
+    // Konum: küçük haritaya tıkla (kitapta harita ve "Keşfedilen noktalar" için)
+    await editor.getByTestId("location-map").click();
+    // Fotoğraf: yazıya yükle (PDF'te görsel dönüştürmeyi de sınar)
+    await editor.getByTestId("entry-photos").getByTestId("photo-input").setInputFiles(path.join(__dirname, "fixtures", "kapadokya.jpg"));
+    await expect(editor.getByTestId("entry-photo")).toHaveCount(1, { timeout: 30_000 });
+
     const entryStatus = editor.locator("header").getByTestId("save-status");
     await expect(entryStatus).toHaveAttribute("data-status", "saved", { timeout: 15_000 });
     await expect(entryStatus).toContainText("Kaydedildi");
@@ -109,6 +129,17 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     await expect(book).toContainText(renamed);
     await expect(book).toContainText(sectionName);
     await expect(book).toContainText(entryTitle);
+
+    // PDF: tarayıcıda oluşturulur (fotoğraf JPEG'e çevrilir, harita çizilir) ve indirilir
+    const [download] = await Promise.all([
+      page.waitForEvent("download", { timeout: 90_000 }),
+      page.getByTestId("pdf-export").click(),
+    ]);
+    const file = await download.path();
+    const bytes = fs.readFileSync(file);
+    expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
+    expect(bytes.length).toBeGreaterThan(50_000);
+    console.log("[pdf]", download.suggestedFilename(), bytes.length, "bayt");
 
     // Sil
     await page.goto(workspaceUrl);
