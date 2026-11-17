@@ -19,6 +19,11 @@ export function Modal({ open, onClose, title, children, className, testId }: {
     if (!d) return;
     if (open && !d.open) d.showModal();
     else if (!open && d.open) d.close();
+    // Next 16 önceki sayfayı gizli (Activity) tutar: açık kalan modal <dialog> yeni sayfayı
+    // etkileşimsiz (inert) bırakır. Gizlenince/ayrılınca kapat .
+    return () => {
+      if (d.open) d.close();
+    };
   }, [open]);
 
   return (

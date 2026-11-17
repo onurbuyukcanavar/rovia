@@ -27,7 +27,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     const title = `${PREFIX} Kapadokya ${stamp}`;
     const renamed = `${PREFIX} Kapadokya Günlüğü ${stamp}`;
     const entryTitle = `Göreme ${stamp}`;
-    page.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") console.log(`[tarayıcı ${m.type()}]`, m.text()); });
+    page.on("console", (m) => { if (m.type() === "error") console.log("[tarayıcı hatası]", m.text()); });
     page.on("pageerror", (e) => console.log("[sayfa hatası]", e.message));
     await login(page, "alice");
 
@@ -46,19 +46,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
 
     // Kapak: başlığı değiştir → otomatik kayıt
     const headerStatus = workspace.locator("header").getByTestId("save-status");
-    const titleInput = workspace.getByTestId("tl-title");
-    console.log("[önce]", await titleInput.evaluate((el) => {
-      el.setAttribute("data-mark", "1");
-      const k = Object.keys(el).filter((x) => x.startsWith("__react"));
-      const props = k.find((x) => x.startsWith("__reactProps")) as string | undefined;
-      return JSON.stringify({ keys: k.map((x) => x.split("$")[0]), onChange: props ? typeof (el as unknown as Record<string, { onChange?: unknown }>)[props]?.onChange : null });
-    }));
-    await titleInput.fill(renamed);
-    console.log("[durum]", await headerStatus.getAttribute("data-status"), await titleInput.inputValue(), await titleInput.getAttribute("data-mark"));
-    await page.waitForTimeout(1500);
-    console.log("[durum2]", await headerStatus.getAttribute("data-status"), await titleInput.inputValue(), await titleInput.getAttribute("data-mark"));
-    await titleInput.pressSequentially("x");
-    console.log("[durum3]", await headerStatus.getAttribute("data-status"), await titleInput.inputValue());
+    await workspace.getByTestId("tl-title").fill(renamed);
     await expect(headerStatus).toHaveAttribute("data-status", "saved", { timeout: 15_000 });
     await expect(headerStatus).toContainText("Kaydedildi");
 
