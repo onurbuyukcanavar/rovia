@@ -41,6 +41,7 @@ def test_classify():
     assert classify({"amenity": "place_of_worship", "religion": "muslim"}) == ("poi", "worship", "muslim")
     assert classify({"natural": "water", "water": "lake", "name": "Tuz Gölü"}) == ("poi", "nature", "lake")
     assert classify({"natural": "spring"}) is None
+    assert classify({"waterway": "waterfall", "name": "Düden Şelalesi"}) == ("poi", "nature", "waterfall")
     assert classify({"amenity": "bench"}) is None
 
 

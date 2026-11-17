@@ -59,6 +59,7 @@ POI_RULES: list[tuple[str, str, set[str] | None]] = [
     ("historic", "historic", {"castle", "ruins", "archaeological_site", "monument", "fort", "city_gate",
                               "aqueduct", "tomb", "caravanserai", "citywalls", "bridge", "church", "mosque"}),
     ("nature", "natural", {"peak", "waterfall", "cave_entrance", "beach", "spring", "volcano", "gorge", "canyon"}),
+    ("nature", "waterway", {"waterfall"}),  # şelaleler OSM'de çoğunlukla waterway=waterfall
     ("nature", "tourism", {"viewpoint"}),
     ("nature", "leisure", {"nature_reserve"}),
     ("nature", "boundary", {"national_park"}),

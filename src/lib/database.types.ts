@@ -58,6 +58,7 @@ export type Database = {
           geog: unknown;
           tags: Json;
           importance: number;
+          explore: string[] | null;
         };
         Insert: {
           osm_ref: string;
@@ -70,6 +71,7 @@ export type Database = {
           geog: unknown;
           tags?: Json;
           importance?: number;
+          explore?: string[] | null;
         };
         Update: {
           osm_ref?: string;
@@ -82,6 +84,7 @@ export type Database = {
           geog?: unknown;
           tags?: Json;
           importance?: number;
+          explore?: string[] | null;
         };
         Relationships: [];
       };
@@ -870,6 +873,7 @@ export type Database = {
           route_has_toll: boolean;
           route_has_ferry: boolean;
           route_options: Json;
+          cost_assumptions: Json | null;
         };
         Insert: {
           id?: string;
@@ -893,6 +897,7 @@ export type Database = {
           route_has_toll?: boolean;
           route_has_ferry?: boolean;
           route_options?: Json;
+          cost_assumptions?: Json | null;
         };
         Update: {
           id?: string;
@@ -916,6 +921,7 @@ export type Database = {
           route_has_toll?: boolean;
           route_has_ferry?: boolean;
           route_options?: Json;
+          cost_assumptions?: Json | null;
         };
         Relationships: [];
       };
@@ -929,6 +935,7 @@ export type Database = {
           share_privacy_radius_m: number;
           created_at: string;
           updated_at: string;
+          cost_defaults: Json | null;
         };
         Insert: {
           user_id: string;
@@ -939,6 +946,7 @@ export type Database = {
           share_privacy_radius_m?: number;
           created_at?: string;
           updated_at?: string;
+          cost_defaults?: Json | null;
         };
         Update: {
           user_id?: string;
@@ -949,6 +957,7 @@ export type Database = {
           share_privacy_radius_m?: number;
           created_at?: string;
           updated_at?: string;
+          cost_defaults?: Json | null;
         };
         Relationships: [];
       };
@@ -1003,6 +1012,9 @@ export type Database = {
       assert_recording_time: { Args: { p_at: string }; Returns: unknown };
       consume_rate_limit: { Args: { p_bucket: string }; Returns: boolean };
       dashboard_stats: { Args: Record<string, never>; Returns: Json };
+      explore_categories: { Args: { p_kind: string; p_cat: string; p_subtype: string; p_tags: Json }; Returns: string[] };
+      explore_features: { Args: { p_category: string; p_bbox?: number[]; p_route?: Json; p_radius_m?: number; p_limit?: number }; Returns: { osm_ref: string | null; name: string | null; kind: string | null; category: string | null; subtype: string | null; admin: string | null; tags: Json | null; lat: number | null; lng: number | null; importance: number | null; distance_m: number | null; along_m: number | null }[] };
+      explore_match: { Args: { p_category: string; p_kind: string; p_cat: string; p_subtype: string; p_tags: Json }; Returns: boolean };
       favorite_category_for: { Args: { p_osm_category: string }; Returns: string };
       journal_note_save: { Args: { p_id: string; p_trip_id: string; p_kind: string; p_title: string; p_body: string; p_noted_at: string; p_location_name: string; p_lat: number; p_lng: number; p_saved_place_id: string; p_media_ids: string[] }; Returns: string };
       match_place_names: { Args: { p_queries: string[] }; Returns: { i: number | null; osm_ref: string | null; name: string | null; admin: string | null; category: string | null; lat: number | null; lng: number | null; score: number | null }[] };
@@ -1039,6 +1051,7 @@ export type Database = {
       travelogue_section_save: { Args: { p_id: string; p_version: number; p_patch: Json; p_force?: boolean }; Returns: Json };
       trip_archive: { Args: Record<string, never>; Returns: { id: string | null; title: string | null; description: string | null; started_at: string | null; ended_at: string | null; distance_m: number | null; elapsed_s: number | null; moving_s: number | null; start_label: string | null; end_label: string | null; polyline: string | null; photo_count: number | null; note_count: number | null; cover_thumb: string | null }[] };
       trip_delete: { Args: { p_id: string; p_with_journal: boolean }; Returns: string[] };
+      vehicle_set_default: { Args: { p_id: string }; Returns: unknown };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
