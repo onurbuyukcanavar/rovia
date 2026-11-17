@@ -8,6 +8,16 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
 const PREFIX = "E2E tl";
 
+/** Sayfanın sonuna kaydırıp altta içerik dışı boşluk kalmadığını doğrular. */
+async function expectNoBottomGap(page: import("@playwright/test").Page, label: string) {
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.waitForTimeout(400);
+  const gap = await bottomGapReport(page);
+  console.log(`[boşluk ${label}] belge=${gap.doc} içerik=${gap.contentBottom} ekran=${gap.innerHeight}`, gap.lowest.slice(0, 6));
+  expect(gap.doc - Math.max(gap.contentBottom, gap.innerHeight), `${label}: altta boşluk`).toBeLessThan(120);
+  await page.evaluate(() => window.scrollTo(0, 0));
+}
+
 /** Testin oluşturduğu seyahatnameleri (bölüm ve yazılarıyla) siler. */
 async function cleanup() {
   if (!url || !key) return;
@@ -57,6 +67,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     const workspace = page.getByTestId("travelogue-workspace");
     await expect(workspace).toHaveAttribute("data-ready", "true");
     await expect(workspace.getByTestId("workspace-title")).toHaveText(title);
+    await expectNoBottomGap(page, "çalışma alanı");
 
     // Kapak: başlığı değiştir → otomatik kayıt
     const headerStatus = workspace.locator("header").getByTestId("save-status");
@@ -109,6 +120,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     const entryStatus = editor.locator("header").getByTestId("save-status");
     await expect(entryStatus).toHaveAttribute("data-status", "saved", { timeout: 15_000 });
     await expect(entryStatus).toContainText("Kaydedildi");
+    await expectNoBottomGap(page, "yazı düzenleyici");
 
     // Yeniden yükle: metin, kalın biçim ve etiket korunmuş olmalı
     await page.reload();
@@ -121,6 +133,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     await editor.getByTestId("entry-back").click();
     await expect(page).toHaveURL(workspaceUrl);
     await expect(workspace.getByTestId("entry-row").filter({ hasText: entryTitle })).toBeVisible();
+    await expectNoBottomGap(page, "çalışma alanı (yazılı)");
 
     // Okuma görünümü: kapak başlığı ve bölüm başlıkları
     await workspace.getByTestId("read-link").click();
@@ -130,6 +143,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     await expect(book).toContainText(renamed);
     await expect(book).toContainText(sectionName);
     await expect(book).toContainText(entryTitle);
+    await expectNoBottomGap(page, "kitap");
 
     // PDF: tarayıcıda oluşturulur (fotoğraf JPEG'e çevrilir, harita çizilir) ve indirilir
     const [download] = await Promise.all([
