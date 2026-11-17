@@ -1,6 +1,8 @@
 "use client";
 import type { LatLng } from "@/lib/geo";
 import { DEFAULT_ROUTE_OPTIONS, type FoundPlace, type RouteOptions, type RouteResult, type Stop, type Suggestion } from "./types";
+import type { BBox } from "@/lib/explore/geo";
+import type { ExploreResponse } from "@/lib/explore/types";
 import { t } from "@/i18n";
 
 /** Sunucunun döndürdüğü Türkçe hata mesajını taşır. */
@@ -57,6 +59,12 @@ export const mapsApi = {
 
   searchNearby: (category: string, center: LatLng, radiusMeters: number, signal?: AbortSignal) =>
     post<{ places: FoundPlace[] }>("search", { mode: "nearby", category, center, radiusMeters }, signal).then((r) => r.places),
+
+  /** Keşfet: harita alanında (bbox) ya da rota boyunca (polyline + yarıçap) kategori araması. */
+  explore: (
+    input: { category: string; bbox?: BBox; encodedPolyline?: string; radiusMeters?: number; limit?: number },
+    signal?: AbortSignal,
+  ) => post<ExploreResponse>("explore", input, signal),
 
   reverseGeocode: (point: LatLng) => post<{ label: string }>("reverse-geocode", point),
 };

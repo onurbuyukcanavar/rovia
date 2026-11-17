@@ -4,7 +4,7 @@ import "@/lib/maps/maplibre-setup";
 import MapView, { NavigationControl, ScaleControl, type MapLayerMouseEvent } from "react-map-gl/maplibre";
 import { useCallback, useMemo, useReducer, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, BookmarkPlus } from "lucide-react";
+import { ArrowLeft, BookmarkPlus, Compass } from "lucide-react";
 import { decodePolyline, type LatLng } from "@/lib/geo";
 import { mapsApi } from "@/lib/maps/client";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/lib/maps/explorer-state";
 import type { FoundPlace, RouteOption, RouteResult, Stop } from "@/lib/maps/types";
 import {
-  closestRouteIndex, orderedStops, planFingerprint, shortPlaceName, stateFromStops, type TripFields,
+  closestRouteIndex, orderedStops, planFingerprint, shortPlaceName, stateFromStops, withInsertedStop, type TripFields,
 } from "@/lib/maps/trip-draft";
 import { useLeaveGuard } from "@/lib/maps/use-leave-guard";
 import { FavoriteActions, FavoritePicker, favoriteToStop } from "@/components/favorites/favorite-actions";
@@ -48,15 +48,22 @@ type Props = {
   favorites?: FavoriteStopItem[];
   /** /planla?hedef=<favori> ile açılınca varış noktası */
   initialDestination?: Stop | null;
+  /** /planla/<id>?yer=…: Keşfet'ten "Yolculuğa ekle" ile gelen durak (kayıtlı plana eklenir, kaydetmek kullanıcıda) */
+  insertStop?: Stop | null;
 };
 
 /**
  * Haritayı Keşfet ve Yolculuk Planla — tamamen açık kaynak altyapı:
  * MapLibre GL JS (çizim) + OpenFreeMap (karolar, OSM) + Valhalla (rota) + ROVIA PostGIS (arama).
  */
-export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites = [], initialDestination = null }: Props) {
+export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites = [], initialDestination = null, insertStop = null }: Props) {
+  // Kayıtlı planın kendisi (kaydedilmemiş değişiklik ve kayıtlı rota karşılaştırmaları bununla yapılır)
+  const [savedState] = useState(() => (trip ? stateFromStops(trip.stops, trip.routeOptions) : null));
+  const [insertResult] = useState(() =>
+    savedState && insertStop ? { name: insertStop.label, ...withInsertedStop(savedState, insertStop, trip?.route ?? null) } : null,
+  );
   const [state, dispatch] = useReducer(explorerReducer, trip, (tr) => {
-    if (tr) return stateFromStops(tr.stops, tr.routeOptions);
+    if (tr) return insertResult?.state ?? savedState ?? stateFromStops(tr.stops, tr.routeOptions);
     const init = initialExplorerState();
     return initialDestination ? { ...init, destination: { ...init.destination, stop: initialDestination } } : init;
   });
@@ -85,7 +92,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
   );
 
   // Kayıtlı plan açıldığında: kullanıcının seçtiği alternatif korunur (kayıtlı mesafeye en yakın rota)
-  const [initialKey] = useState(() => routeRequestKey(state));
+  const [initialKey] = useState(() => routeRequestKey(savedState ?? state));
   const [preferSaved, setPreferSaved] = useState(!!trip?.route);
   if (preferSaved && !route.loading) {
     setPreferSaved(false);
@@ -188,7 +195,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
   const [saved, setSaved] = useState(() => ({
     id: trip?.id ?? null,
     version: trip?.version ?? null,
-    fingerprint: planFingerprint(fields, state, null),
+    fingerprint: planFingerprint(fields, savedState ?? state, null),
     savedAt: null as string | null,
   }));
   const [saving, setSaving] = useState(false);
@@ -364,6 +371,12 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
                 <p className="text-sm text-stone-600">{t.maps.subtitle}</p>
               </header>
             )}
+            {insertResult && (
+              <Alert tone={insertResult.reason === "full" ? "error" : "info"}>
+                {insertResult.inserted ? t.explore.planner.inserted(insertResult.name)
+                  : insertResult.reason === "full" ? t.explore.planner.full(insertResult.name) : t.explore.planner.already(insertResult.name)}
+              </Alert>
+            )}
             {geo.error && <Alert tone="error">{geo.error}</Alert>}
             {planOpen && (
               <TripDetailsForm fields={fields} onChange={setFields} titleSuggestion={titleSuggestion} fieldErrors={fieldErrors} />
@@ -393,6 +406,12 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
                 hidden={suggestionsHidden} onHidden={setSuggestionsHidden} waypointCount={state.waypoints.length}
                 onAdd={(stop, index) => dispatch({ type: "addWaypoint", key: newKey(), stop, index })}
                 onDetails={setSelectedPlace} />
+            )}
+            {saved.id && selectedRoute && (
+              <Link href={`/kesfet?yolculuk=${saved.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:underline"
+                data-testid="explore-along">
+                <Compass className="size-4" aria-hidden /> {t.explore.planner.exploreAlong}
+              </Link>
             )}
             {!planOpen && selectedRoute && (
               <Button type="button" variant="secondary" className="w-full" onClick={() => setPlanOpen(true)}>

@@ -7,21 +7,26 @@ import { ButtonLink } from "@/components/ui/button";
 import { requireUser } from "@/lib/dal";
 import { mapStyleUrl } from "@/lib/env";
 import { getTripForEdit } from "@/lib/queries/trips";
+import { stopFromSearchParams } from "@/lib/explore/place-param";
 import { listFavoriteStops } from "@/lib/queries/favorites";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.trips.editTitle };
 
-export default function EditTripPage({ params }: { params: Promise<{ id: string }> }) {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default function EditTripPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
   return (
     <Suspense fallback={<PlannerSkeleton />}>
-      <TripPlanner params={params} />
+      <TripPlanner params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function TripPlanner({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+async function TripPlanner({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SearchParams }) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  // Keşfet → "Yolculuğa ekle": ?yer=<osm>&ad=…&konum=lat,lng
+  const insertStop = stopFromSearchParams(query);
   await requireUser();
   const [trip, favorites] = await Promise.all([getTripForEdit(id), listFavoriteStops()]);
   if (!trip) notFound();
@@ -38,7 +43,7 @@ async function TripPlanner({ params }: { params: Promise<{ id: string }> }) {
       </div>
     );
   }
-  return <MapExplorer key={trip.id} styleUrl={mapStyleUrl()} mode="plan" trip={trip} favorites={favorites} />;
+  return <MapExplorer key={`${trip.id}:${insertStop?.id ?? ""}`} styleUrl={mapStyleUrl()} mode="plan" trip={trip} favorites={favorites} insertStop={insertStop} />;
 }
 
 function PlannerSkeleton() {

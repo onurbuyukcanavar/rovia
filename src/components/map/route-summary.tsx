@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
 import { RouteFlags } from "./route-extras";
+import { PlannerCost } from "@/components/cost/planner-cost";
 import { t } from "@/i18n";
 
 type Props = {
@@ -52,6 +53,8 @@ export function RouteSummary({ result, selected, onSelect, loading, error, hasWa
           <Landmark className="mt-0.5 size-3.5 shrink-0" aria-hidden /> {t.maps.bridgeNote(route.tollBridges.join(" ve "))}
         </p>
       )}
+
+      <PlannerCost route={route} />
 
       {result.routes.length > 1 && (
         <div>

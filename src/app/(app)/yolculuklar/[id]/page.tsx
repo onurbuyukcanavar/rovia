@@ -14,6 +14,7 @@ import { getTravelogueIdForTrip } from "@/lib/queries/travelogue";
 import { CreateFromTrip } from "@/components/travelogue/workspace/create-from-trip";
 import { TripJournal } from "@/components/journal/trip-journal";
 import { TripInfo } from "@/components/journal/trip-info";
+import { TripCostSection } from "@/components/cost/trip-cost-section";
 import { formatDate, formatDistance, formatDuration, formatSpeed, formatTime } from "@/lib/format";
 import { t } from "@/i18n";
 
@@ -99,6 +100,7 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
         {!active && (
           <TripJournal userId={user.id} tripId={trip.id} notes={journal.notes} media={journal.media} startedAt={rec?.startedAt ?? null} />
         )}
+        {!active && <Suspense fallback={null}><TripCostSection tripId={trip.id} recordedM={rec?.status === "completed" ? rec.distanceM : null} /></Suspense>}
         {!active && <TravelogueCard tripId={trip.id} travelogueId={travelogueId} />}
 
         {!active && <SummaryActions tripId={trip.id} recordingId={rec?.recordingId ?? null} hasRawPoints={(rec?.rawPointCount ?? 0) > 0} />}

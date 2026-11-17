@@ -4,6 +4,8 @@
  * src/i18n/index.ts içindeki `dictionaries` nesnesine eklemek yeterlidir.
  */
 import { travelogue } from "./travelogue";
+import { garage } from "./garage";
+import { explore } from "./explore";
 
 export const tr = {
   brand: {
@@ -641,6 +643,8 @@ export const tr = {
     username: "Kullanıcı adı 3–30 karakter olmalı; yalnızca küçük harf, rakam, nokta ve alt çizgi.",
   },
   travelogue,
+  explore,
+  garage,
 } as const;
 
 export type Dictionary = typeof tr;

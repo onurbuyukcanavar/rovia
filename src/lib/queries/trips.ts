@@ -133,3 +133,17 @@ export async function listPlannedTrips(): Promise<TripListItem[]> {
     updatedAt: t.updated_at,
   }));
 }
+
+/** Keşfet: rotası kaydedilmiş planlanmış / süren yolculuklar (RLS altında yalnızca kullanıcınınkiler). */
+export async function listRouteTrips(): Promise<{ id: string; title: string; status: string; polyline: string }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("trips")
+    .select("id, title, status, route_polyline")
+    .in("status", ["planned", "active"])
+    .not("route_polyline", "is", null)
+    .order("updated_at", { ascending: false })
+    .limit(50);
+  if (error) throw new Error(`TRIPS_QUERY_FAILED: ${error.message}`);
+  return (data ?? []).filter((t) => t.route_polyline).map((t) => ({ id: t.id, title: t.title, status: t.status, polyline: t.route_polyline! }));
+}

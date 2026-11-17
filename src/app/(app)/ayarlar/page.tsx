@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { KeyRound, Mail, MapPinned, ShieldCheck } from "lucide-react";
+import { CarFront, KeyRound, Mail, MapPinned, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ProfileForm } from "@/components/settings/profile-form";
 import { GpsRetentionForm } from "@/components/settings/gps-retention-form";
 import { NewPasswordForm } from "@/components/auth/reset-forms";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireUser } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
@@ -112,6 +113,12 @@ async function SettingsBody({ searchParams }: Props) {
         <p className="mt-2 text-sm leading-relaxed text-stone-600">{t.gpsSettings.body}</p>
         <div className="mt-5"><GpsRetentionForm days={settings ? settings.gps_raw_retention_days : 90} /></div>
         <p className="mt-4 text-xs text-stone-500">{t.gpsSettings.perTrip}</p>
+      </section>
+
+      <section className="card p-6" data-testid="settings-garage">
+        <h2 className="flex items-center gap-2 text-lg font-bold"><CarFront className="size-5" aria-hidden /> {t.garage.settings.title}</h2>
+        <p className="mt-2 text-sm text-stone-600">{t.garage.settings.body}</p>
+        <ButtonLink href="/garaj" variant="secondary" size="sm" className="mt-4">{t.garage.settings.open}</ButtonLink>
       </section>
 
       <section className="card p-6">

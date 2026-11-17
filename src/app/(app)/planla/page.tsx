@@ -5,7 +5,7 @@ import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.trips.planTitle };
 
-export default function NewTripPage({ searchParams }: { searchParams: Promise<{ hedef?: string | string[] }> }) {
+export default function NewTripPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
     <Suspense fallback={<ExplorerSkeleton />}>
       <ExplorerLoader mode="plan" searchParams={searchParams} />

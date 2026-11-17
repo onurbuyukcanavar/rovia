@@ -1,4 +1,5 @@
-import { routeRequest, type ExplorerState } from "./explorer-state";
+import { decodePolyline, insertionIndexForLegs, projectOntoPolyline } from "@/lib/geo";
+import { MAX_WAYPOINTS, routeRequest, type ExplorerState } from "./explorer-state";
 import { DEFAULT_ROUTE_OPTIONS, type RouteOption, type RouteOptions, type Stop } from "./types";
 
 export type TripFields = { title: string; description: string; plannedDate: string };
@@ -49,4 +50,33 @@ export function closestRouteIndex(routes: RouteOption[], distanceMeters: number 
 export function shortPlaceName(label: string): string {
   const withoutPrefix = label.includes(" · ") ? label.slice(label.indexOf(" · ") + 3) : label;
   return withoutPrefix.split(",")[0].trim() || label.trim();
+}
+
+/**
+ * Kayıtlı plana dışarıdan (Keşfet → "Yolculuğa ekle") bir durak ekler: kayıtlı rota varsa yerin rota
+ * boyunca konumuna göre doğru bacağa, yoksa varıştan önceye. Durak sınırı doluysa ya da yer zaten
+ * planda varsa durum değişmez (inserted: false).
+ */
+export function withInsertedStop(state: ExplorerState, stop: Stop, route: RouteOption | null): { state: ExplorerState; inserted: boolean; reason?: "duplicate" | "full" } {
+  const all = [state.origin.stop, ...state.waypoints.map((w) => w.stop), state.destination.stop];
+  const same = (s: Stop | null) =>
+    !!s && ((!!stop.ref && s.ref === stop.ref) || (Math.abs(s.location.lat - stop.location.lat) < 1e-5 && Math.abs(s.location.lng - stop.location.lng) < 1e-5));
+  if (all.some(same)) return { state, inserted: false, reason: "duplicate" };
+  if (!state.origin.stop || !state.destination.stop) {
+    const slot = !state.origin.stop ? "origin" : "destination";
+    return { state: { ...state, [slot]: { ...state[slot], stop }, selectedRoute: 0 }, inserted: true };
+  }
+  if (state.waypoints.length >= MAX_WAYPOINTS) return { state, inserted: false, reason: "full" };
+  let index = state.waypoints.length;
+  if (route && route.legs.length === state.waypoints.length + 1) {
+    try {
+      const proj = projectOntoPolyline(stop.location, decodePolyline(route.encodedPolyline));
+      index = insertionIndexForLegs(proj.alongDistance, route.legs.map((l) => l.distanceMeters));
+    } catch {
+      // bozuk polyline: varıştan önceye ekle
+    }
+  }
+  const waypoints = [...state.waypoints];
+  waypoints.splice(Math.max(0, Math.min(index, waypoints.length)), 0, { key: `ins-${stop.id}`, stop });
+  return { state: { ...state, waypoints, selectedRoute: 0 }, inserted: true };
 }
