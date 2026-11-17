@@ -7,6 +7,7 @@ import { useMemo, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { MapFrame, isMobileViewport, useMapExpand } from "@/components/map/map-frame";
+import { ShareButton } from "@/components/share/share-button";
 import { SaveStatus } from "@/components/travelogue/save-status";
 import { deleteTravelogue, reorderTravelogue, saveTravelogue } from "@/lib/actions/travelogue";
 import { useAutosave } from "@/lib/travelogue/use-autosave";
@@ -109,9 +110,12 @@ function WorkspaceInner({ travelogue: tv, userId, styleUrl, onReload }: Props & 
             <p className="eyebrow">{t.nav.travelogues}</p>
             <h1 className="truncate font-serif text-2xl font-bold" data-testid="workspace-title">{tv.title}</h1>
           </div>
-          <ButtonLink href={`/seyahatnameler/${tv.id}/oku`} size="sm" variant="primary" data-testid="read-link">
-            <BookOpen className="size-4" aria-hidden /> {T.read}
-          </ButtonLink>
+          <div className="flex flex-wrap gap-2">
+            <ShareButton kind="travelogue" targetId={tv.id} />
+            <ButtonLink href={`/seyahatnameler/${tv.id}/oku`} size="sm" variant="primary" data-testid="read-link">
+              <BookOpen className="size-4" aria-hidden /> {T.read}
+            </ButtonLink>
+          </div>
         </div>
         <button type="button" onClick={() => setMapOpen((v) => !v)} aria-expanded={mapOpen} aria-controls="tl-map"
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-800 underline underline-offset-2 lg:hidden">

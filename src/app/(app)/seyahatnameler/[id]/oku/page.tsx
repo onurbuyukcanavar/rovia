@@ -4,10 +4,12 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { BookView } from "@/components/travelogue/book/book-view";
+import { HtmlExportButton } from "@/components/tools/html-export-button";
 import { PdfExportButton } from "@/components/travelogue/book/pdf-export-button";
 import { requireUser } from "@/lib/dal";
 import { mapStyleUrl } from "@/lib/env";
 import { getTravelogue } from "@/lib/queries/travelogue";
+import { ShareButton } from "@/components/share/share-button";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.travelogue.book.metaTitle };
@@ -33,7 +35,11 @@ async function TravelogueBook({ params }: { params: Promise<{ id: string }> }) {
           <Link href={`/seyahatnameler/${travelogue.id}`} className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
             <ArrowLeft className="size-4" aria-hidden /> {t.travelogue.book.backToEdit}
           </Link>
-          <PdfExportButton travelogue={travelogue} styleUrl={mapStyleUrl()} />
+          <div className="flex flex-wrap items-start justify-end gap-2">
+            <ShareButton kind="travelogue" targetId={travelogue.id} />
+            <HtmlExportButton travelogueId={travelogue.id} />
+            <PdfExportButton travelogue={travelogue} styleUrl={mapStyleUrl()} />
+          </div>
         </div>
       </div>
       <BookView travelogue={travelogue} />

@@ -743,6 +743,7 @@ export type Database = {
           client_id: string;
           created_at: string;
           updated_at: string;
+          source: string;
         };
         Insert: {
           id?: string;
@@ -768,6 +769,7 @@ export type Database = {
           client_id?: string;
           created_at?: string;
           updated_at?: string;
+          source?: string;
         };
         Update: {
           id?: string;
@@ -793,6 +795,7 @@ export type Database = {
           client_id?: string;
           created_at?: string;
           updated_at?: string;
+          source?: string;
         };
         Relationships: [];
       };
@@ -1060,6 +1063,7 @@ export type Database = {
       trip_archive: { Args: Record<string, never>; Returns: { id: string | null; title: string | null; description: string | null; started_at: string | null; ended_at: string | null; distance_m: number | null; elapsed_s: number | null; moving_s: number | null; start_label: string | null; end_label: string | null; polyline: string | null; photo_count: number | null; note_count: number | null; cover_thumb: string | null }[] };
       trip_copy: { Args: { p_trip_id: string; p_title?: string }; Returns: string };
       trip_delete: { Args: { p_id: string; p_with_journal: boolean }; Returns: string[] };
+      trip_import_track: { Args: { p_trip_id: string; p_title: string; p_mode: string; p_polyline: string; p_distance_m: number; p_started_at: string; p_ended_at: string; p_moving_s: number; p_point_count: number; p_stops: Json; p_legs: Json; p_source: string }; Returns: string };
       vehicle_set_default: { Args: { p_id: string }; Returns: unknown };
     };
     Enums: { [_ in never]: never };

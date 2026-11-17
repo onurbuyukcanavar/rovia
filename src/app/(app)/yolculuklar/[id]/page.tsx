@@ -12,10 +12,12 @@ import { getTripDetail } from "@/lib/queries/recordings";
 import { getTripJournal } from "@/lib/queries/journal";
 import { getTravelogueIdForTrip } from "@/lib/queries/travelogue";
 import { CreateFromTrip } from "@/components/travelogue/workspace/create-from-trip";
+import { TripTools } from "@/components/tools/trip-tools";
 import { TripJournal } from "@/components/journal/trip-journal";
 import { TripInfo } from "@/components/journal/trip-info";
 import { TripCostSection } from "@/components/cost/trip-cost-section";
 import { formatDate, formatDistance, formatDuration, formatSpeed, formatTime } from "@/lib/format";
+import { ShareButton } from "@/components/share/share-button";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.tripSummary.title };
@@ -62,6 +64,9 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
               {formatDate(rec.startedAt)} · {formatTime(rec.startedAt)}{rec.endedAt ? ` – ${formatTime(rec.endedAt)}` : ""}
             </p>
           )}
+          <div className="pt-2">
+            <ShareButton kind="trip" targetId={trip.id} disabledReason={active ? `${t.share.activeDisabled}. ${t.share.activeDisabledBody}` : undefined} />
+          </div>
         </header>
 
         {active ? (
@@ -101,6 +106,7 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
           <TripJournal userId={user.id} tripId={trip.id} notes={journal.notes} media={journal.media} startedAt={rec?.startedAt ?? null} />
         )}
         {!active && <Suspense fallback={null}><TripCostSection tripId={trip.id} recordedM={rec?.status === "completed" ? rec.distanceM : null} /></Suspense>}
+        {!active && <TripTools tripId={trip.id} title={trip.title} />}
         {!active && <TravelogueCard tripId={trip.id} travelogueId={travelogueId} />}
 
         {!active && <SummaryActions tripId={trip.id} recordingId={rec?.recordingId ?? null} hasRawPoints={(rec?.rawPointCount ?? 0) > 0} />}

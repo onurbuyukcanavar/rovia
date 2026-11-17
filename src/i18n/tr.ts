@@ -6,6 +6,8 @@
 import { travelogue } from "./travelogue";
 import { garage } from "./garage";
 import { explore } from "./explore";
+import { tools } from "./tools";
+import { share } from "./share";
 
 export const tr = {
   brand: {
@@ -645,6 +647,8 @@ export const tr = {
   travelogue,
   explore,
   garage,
+  share,
+  tools,
 } as const;
 
 export type Dictionary = typeof tr;

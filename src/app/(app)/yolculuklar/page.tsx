@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
-import { CircleDot, Flag, Plus, Route } from "lucide-react";
+import { CircleDot, FileUp, Flag, Plus, Route } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/dashboard/sections";
@@ -23,9 +23,14 @@ export default function TripsPage() {
         title={t.trips.listTitle}
         description={t.trips.listSubtitle}
         actions={
-          <ButtonLink href="/planla" variant="accent">
-            <Plus className="size-4" aria-hidden /> {t.trips.newTrip}
-          </ButtonLink>
+          <div className="flex flex-wrap gap-2">
+            <ButtonLink href="/yolculuklar/ice-aktar" variant="secondary" data-testid="import-track-link">
+              <FileUp className="size-4" aria-hidden /> {t.tools.import.link}
+            </ButtonLink>
+            <ButtonLink href="/planla" variant="accent">
+              <Plus className="size-4" aria-hidden /> {t.trips.newTrip}
+            </ButtonLink>
+          </div>
         }
       />
       <Suspense fallback={<ListSkeleton />}>
