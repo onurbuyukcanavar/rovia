@@ -116,6 +116,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     await workspace.getByTestId("travelogue-delete").click();
     await workspace.getByTestId("travelogue-delete-confirm").click();
     await expect(page).toHaveURL(/\/seyahatnameler$/, { timeout: 20_000 });
-    await expect(page.getByText(renamed)).toHaveCount(0);
+    // Önceki sayfalar gizli tutulabilir (Activity); yalnızca görünen listeye bak
+    await expect(page.locator("[data-testid=travelogue-card]:visible").filter({ hasText: renamed })).toHaveCount(0);
   });
 });
