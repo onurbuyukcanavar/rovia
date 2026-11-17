@@ -86,3 +86,24 @@ async function canvasOnlyScreenshot(page: Page, selector: string) {
     await style.evaluate((el) => (el as Element).remove());
   }
 }
+
+/** Sayfanın altındaki boşluk: belge yüksekliği ile görünen içeriğin en alt noktası arasındaki fark ve en alttaki öğeler. */
+export async function bottomGapReport(page: Page) {
+  return page.evaluate(() => {
+    const doc = document.documentElement.scrollHeight;
+    const items: { b: number; d: string }[] = [];
+    let contentBottom = 0;
+    for (const el of Array.from(document.querySelectorAll("body *"))) {
+      const cs = getComputedStyle(el);
+      if (cs.position === "fixed" || cs.display === "none" || cs.visibility === "hidden") continue;
+      const r = el.getBoundingClientRect();
+      if (r.height === 0 && r.width === 0) continue;
+      const b = r.bottom + window.scrollY;
+      items.push({ b, d: `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 70)} pos=${cs.position} h=${Math.round(r.height)} bottom=${Math.round(b)}` });
+      const hasText = (el.textContent ?? "").trim().length > 0 || ["IMG", "svg", "INPUT", "BUTTON", "CANVAS"].includes(el.tagName);
+      if (hasText && !["MAIN", "DIV", "BODY"].includes(el.tagName)) contentBottom = Math.max(contentBottom, b);
+    }
+    items.sort((a, z) => z.b - a.b);
+    return { doc, contentBottom: Math.round(contentBottom), innerHeight: window.innerHeight, lowest: items.slice(0, 8).map((i) => i.d) };
+  });
+}

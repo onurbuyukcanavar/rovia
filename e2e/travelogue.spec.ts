@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
-import { hasCredentials, login, users } from "./helpers";
+import { bottomGapReport, hasCredentials, login, users } from "./helpers";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
@@ -143,6 +143,17 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     console.log("[pdf]", download.suggestedFilename(), bytes.length, "bayt");
 
     // Sil
+    // Liste sayfası (masaüstü): altta boş alan kalmamalı
+    await page.goto("/seyahatnameler");
+    await expect(page.getByTestId("travelogue-card").first()).toBeVisible({ timeout: 20_000 });
+    for (const y of [0, 5000]) {
+      await page.evaluate((v) => window.scrollTo(0, v), y);
+      await page.waitForTimeout(300);
+      const gap = await bottomGapReport(page);
+      console.log(`[liste boşluk] kaydırma=${y} belge=${gap.doc} içerik=${gap.contentBottom}`, gap.lowest.slice(0, 5));
+      expect(gap.doc - Math.max(gap.contentBottom, gap.innerHeight)).toBeLessThan(120);
+    }
+
     await page.goto(workspaceUrl);
     await expect(workspace).toHaveAttribute("data-ready", "true", { timeout: 20_000 });
     await workspace.getByTestId("travelogue-delete").click();

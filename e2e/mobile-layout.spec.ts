@@ -1,10 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { hasCredentials, login } from "./helpers";
+import { bottomGapReport, hasCredentials, login } from "./helpers";
 
 /** Telefon ekranı: iPhone 13/14 boyutu */
 test.use({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
 
-const PAGES = ["/panel", "/harita", "/yolculuklar", "/planla", "/kayit-modu", "/favoriler", "/favoriler/ice-aktar", "/gunluk", "/ayarlar", "/diger"];
+const PAGES = ["/panel", "/harita", "/yolculuklar", "/planla", "/kayit-modu", "/favoriler", "/favoriler/ice-aktar", "/gunluk", "/seyahatnameler", "/ayarlar", "/diger"];
 
 /** Ekran genişliğini aşan en derin öğeler (yatay kaydırmanın kaynağı). */
 async function overflowReport(page: Page) {
@@ -45,6 +45,11 @@ test.describe("mobil yerleşim", () => {
       console.log(`\n=== ${path} clientWidth=${rep.clientWidth} scrollWidth=${rep.scrollWidth}`);
       for (const i of rep.items) console.log("  taşan:", i);
       if (rep.scrollWidth > rep.clientWidth) problems.push(`${path}: yatay taşma ${rep.scrollWidth}>${rep.clientWidth}`);
+      const gap = await bottomGapReport(page);
+      console.log(`  alt boşluk: belge=${gap.doc} içerik=${gap.contentBottom}`);
+      for (const l of gap.lowest) console.log("  en alt:", l);
+      // Alt menü (sabit) payı ~ 4.5rem; bundan fazla boşluk kalmamalı
+      if (gap.doc > gap.innerHeight && gap.doc - gap.contentBottom > 140) problems.push(`${path}: altta ${gap.doc - gap.contentBottom}px boşluk`);
 
       const name = path.replace(/\//g, "_");
       await page.screenshot({ path: `test-results/screens/mobil${name}.png` });
