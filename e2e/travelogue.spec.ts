@@ -27,6 +27,8 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     const title = `${PREFIX} Kapadokya ${stamp}`;
     const renamed = `${PREFIX} Kapadokya Günlüğü ${stamp}`;
     const entryTitle = `Göreme ${stamp}`;
+    page.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") console.log(`[tarayıcı ${m.type()}]`, m.text()); });
+    page.on("pageerror", (e) => console.log("[sayfa hatası]", e.message));
     await login(page, "alice");
 
     // Yolculuksuz yeni seyahatname
@@ -45,6 +47,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     // Kapak: başlığı değiştir → otomatik kayıt
     const headerStatus = workspace.locator("header").getByTestId("save-status");
     await workspace.getByTestId("tl-title").fill(renamed);
+    console.log("[durum]", await headerStatus.getAttribute("data-status"), await workspace.getByTestId("tl-title").inputValue());
     await expect(headerStatus).toHaveAttribute("data-status", "saved", { timeout: 15_000 });
     await expect(headerStatus).toContainText("Kaydedildi");
 
