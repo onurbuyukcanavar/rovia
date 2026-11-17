@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(new URL(type === "recovery" ? "/sifre-yenile" : next, origin));
     }
-    console.error("[rovia] E-posta doğrulaması başarısız:", error.code);
+    console.warn("[rovia:uyarı] E-posta doğrulaması başarısız (geçersiz ya da süresi dolmuş bağlantı):", error.code);
   } else if (code) {
     // Varsayılan Supabase şablonlarıyla (PKCE) gelen bağlantılar
     const { error } = await supabase.auth.exchangeCodeForSession(code);

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(new URL(next, origin));
-    console.error("[rovia] OAuth kod değişimi başarısız:", error.code);
+    console.warn("[rovia:uyarı] OAuth kod değişimi başarısız (geçersiz ya da süresi dolmuş kod):", error.code);
   }
 
   return NextResponse.redirect(new URL("/giris?error=callback", origin));
