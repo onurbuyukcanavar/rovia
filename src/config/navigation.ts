@@ -15,7 +15,7 @@ export type NavItem = {
 };
 
 /** Şu an yayında olan geliştirme fazı. Bir faz tamamlanıp test edildiğinde artırılır. */
-export const CURRENT_PHASE = 8;
+export const CURRENT_PHASE = 9;
 
 export const NAV_ITEMS: NavItem[] = [
   { key: "overview", label: t.nav.overview, shortLabel: t.nav.overviewShort, href: "/panel", icon: LayoutDashboard, phase: 1 },
