@@ -96,7 +96,7 @@ function WorkspaceInner({ travelogue: tv, userId, styleUrl, onReload }: Props & 
   const ctx = { media: tv.media, userId, tripId: tv.trip?.id ?? null, onReload, onMediaUploaded: () => router.refresh() };
 
   return (
-    <div className="flex flex-col lg:grid lg:h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(22rem,42%)] lg:grid-rows-[auto_minmax(0,1fr)]" data-testid="travelogue-workspace" data-ready={hydrated || undefined}>
+    <div className="relative flex flex-col lg:grid lg:h-dvh lg:overflow-hidden lg:grid-cols-[minmax(0,1fr)_minmax(22rem,42%)] lg:grid-rows-[auto_minmax(0,1fr)]" data-testid="travelogue-workspace" data-ready={hydrated || undefined}>
       <header className="space-y-2 border-b border-sand-200 bg-paper px-4 py-4 sm:px-6 lg:col-start-1 lg:row-start-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Link href="/seyahatnameler" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
@@ -130,7 +130,7 @@ function WorkspaceInner({ travelogue: tv, userId, styleUrl, onReload }: Props & 
         </MapFrame>
       </div>
 
-      <div className="space-y-8 bg-paper px-4 py-6 sm:px-6 lg:col-start-1 lg:row-start-2 lg:overflow-y-auto">
+      <div className="relative space-y-8 bg-paper px-4 py-6 sm:px-6 lg:col-start-1 lg:row-start-2 lg:overflow-y-auto">
         <section aria-labelledby="cover-title" className="space-y-3">
           <h2 id="cover-title" className="text-lg font-extrabold tracking-tight">{T.cover}</h2>
           {tv.trip && (

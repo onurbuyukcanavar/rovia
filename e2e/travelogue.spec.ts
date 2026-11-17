@@ -15,6 +15,8 @@ async function expectNoBottomGap(page: import("@playwright/test").Page, label: s
   const gap = await bottomGapReport(page);
   console.log(`[boşluk ${label}] belge=${gap.doc} içerik=${gap.contentBottom} ekran=${gap.innerHeight}`, gap.lowest.slice(0, 6));
   expect(gap.doc - Math.max(gap.contentBottom, gap.innerHeight), `${label}: altta boşluk`).toBeLessThan(120);
+  // Masaüstü çalışma alanı ekran yüksekliğinde; içerik kendi sütununda kayar, sayfa kaymamalı
+  if (label.startsWith("çalışma alanı")) expect(gap.doc, `${label}: sayfa ekrandan uzun`).toBeLessThanOrEqual(gap.innerHeight + 1);
   await page.evaluate(() => window.scrollTo(0, 0));
 }
 
