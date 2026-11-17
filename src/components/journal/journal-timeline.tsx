@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { AddToTravelogue } from "@/components/travelogue/add-to-travelogue";
 import { deleteJournalNote } from "@/lib/actions/journal";
 import type { JournalNote, MediaItem, NoteKind, TripOption } from "@/lib/journal/types";
 import { formatDate, formatTime } from "@/lib/format";
@@ -141,9 +142,15 @@ function NoteCard({ note, media, showTrip, onEdit, onDeleted }: {
           </div>
         </div>
       ) : (
-        <div className="mt-3 flex gap-1">
+        <div className="mt-3 flex flex-wrap gap-1">
           <Button type="button" size="sm" variant="ghost" onClick={onEdit}><Pencil className="size-4" aria-hidden /> {t.journal.edit}</Button>
           <Button type="button" size="sm" variant="ghost" onClick={() => setConfirming(true)}><Trash2 className="size-4" aria-hidden /> {t.journal.delete}</Button>
+          {note.lat !== null && note.lng !== null && (
+            <AddToTravelogue variant="ghost" place={{
+              name: note.locationName ?? note.title ?? t.journal.kinds[note.kind], lat: note.lat, lng: note.lng,
+              savedPlaceId: note.savedPlaceId, visitedAt: note.notedAt,
+            }} />
+          )}
         </div>
       )}
       {error && <Alert tone="error" className="mt-2">{error}</Alert>}

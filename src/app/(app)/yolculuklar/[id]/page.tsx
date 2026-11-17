@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BookOpenText } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { ButtonLink } from "@/components/ui/button";
 import { SummaryActions, SummaryMap } from "@/components/recording/summary-parts";
@@ -10,6 +10,8 @@ import { requireUser } from "@/lib/dal";
 import { mapStyleUrl } from "@/lib/env";
 import { getTripDetail } from "@/lib/queries/recordings";
 import { getTripJournal } from "@/lib/queries/journal";
+import { getTravelogueIdForTrip } from "@/lib/queries/travelogue";
+import { CreateFromTrip } from "@/components/travelogue/workspace/create-from-trip";
 import { TripJournal } from "@/components/journal/trip-journal";
 import { TripInfo } from "@/components/journal/trip-info";
 import { formatDate, formatDistance, formatDuration, formatSpeed, formatTime } from "@/lib/format";
@@ -31,7 +33,7 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
   const trip = await getTripDetail(id);
   if (!trip) notFound();
   if (trip.status === "planned") redirect(`/planla/${trip.id}`);
-  const journal = await getTripJournal(trip.id);
+  const [journal, travelogueId] = await Promise.all([getTripJournal(trip.id), getTravelogueIdForTrip(trip.id)]);
   const pins = [
     ...journal.media.filter((m) => m.lat !== null && m.lng !== null)
       .map((m) => ({ id: `m${m.id}`, lat: m.lat!, lng: m.lng!, kind: "photo" as const, label: m.caption ?? t.journal.tabs.gallery })),
@@ -97,11 +99,26 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
         {!active && (
           <TripJournal userId={user.id} tripId={trip.id} notes={journal.notes} media={journal.media} startedAt={rec?.startedAt ?? null} />
         )}
-        {!active && <p className="text-xs text-stone-500">{t.archive.travelogueSoon}</p>}
+        {!active && <TravelogueCard tripId={trip.id} travelogueId={travelogueId} />}
 
         {!active && <SummaryActions tripId={trip.id} recordingId={rec?.recordingId ?? null} hasRawPoints={(rec?.rawPointCount ?? 0) > 0} />}
       </aside>
     </div>
+  );
+}
+
+function TravelogueCard({ tripId, travelogueId }: { tripId: string; travelogueId: string | null }) {
+  const T = t.travelogue.pages.tripCard;
+  return (
+    <section className="card space-y-3 p-4" aria-labelledby="trip-travelogue" data-testid="trip-travelogue">
+      <h2 id="trip-travelogue" className="flex items-center gap-2 font-bold"><BookOpenText className="size-5 text-amber-600" aria-hidden /> {T.title}</h2>
+      <p className="text-sm text-stone-600">{T.body}</p>
+      {travelogueId ? (
+        <ButtonLink href={`/seyahatnameler/${travelogueId}`} size="sm" variant="primary">{T.open}</ButtonLink>
+      ) : (
+        <CreateFromTrip tripId={tripId} />
+      )}
+    </section>
   );
 }
 

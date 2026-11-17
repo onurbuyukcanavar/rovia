@@ -599,7 +599,6 @@ export const tr = {
     descriptionPlaceholder: "Bu yolculuk hakkında kısa bir not",
     deleteWithJournal: "Bu yolculuğun notlarını ve fotoğraflarını da sil",
     keepJournalNote: "İşaretlemezsen notlar ve fotoğraflar Seyahat Günlüğüm'de yolculuksuz olarak kalır.",
-    travelogueSoon: "Seyahatname yazıları PHASE 7'de (ROVIA Journal) bu sayfaya bağlanacak.",
   },
   tripSummary: {
     title: "Yolculuk özeti",

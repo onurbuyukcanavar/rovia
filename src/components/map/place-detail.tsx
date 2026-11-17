@@ -8,6 +8,7 @@ import type { FoundPlace, RouteOption, RouteOptions, Stop } from "@/lib/maps/typ
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import { formatDistance, formatDuration } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { AddToTravelogue } from "@/components/travelogue/add-to-travelogue";
 import { t } from "@/i18n";
 
 type RouteContext = { route: RouteOption; origin: Stop; destination: Stop; waypoints: Stop[]; options?: RouteOptions };
@@ -92,6 +93,9 @@ export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoin
         <h2 id="place-title" className="mt-1 text-xl font-extrabold tracking-tight">{place.name}</h2>
       </header>
       {favoriteActions}
+      {favoriteActions && (
+        <AddToTravelogue className="w-full" place={{ name: place.name, address: place.address, lat: place.location.lat, lng: place.location.lng, osmRef: place.id }} />
+      )}
 
       <dl className="space-y-2.5 text-sm">
         {(street || place.address) && (

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { AddToTravelogue } from "@/components/travelogue/add-to-travelogue";
 import { deleteFavorites, updateFavorite } from "@/lib/actions/favorites";
 import { FAVORITE_CATEGORIES, isGoogleSource, type Favorite, type FavoriteCategory, type ListType } from "@/lib/favorites/types";
 import { normalizeForSearch } from "@/lib/places/normalize";
@@ -195,6 +196,7 @@ function FavoriteRow({ place, selected, onSelect, onDeleted }: { place: Favorite
             <Button type="button" size="sm" variant="secondary" onClick={() => setEditing(true)}>
               <Pencil className="size-4" aria-hidden /> {t.favorites.edit}
             </Button>
+            <AddToTravelogue place={{ name: place.name, address: place.address, lat: place.lat, lng: place.lng, osmRef: place.osmRef, savedPlaceId: place.id }} />
             {confirming ? (
               <span className="inline-flex items-center gap-2">
                 <span className="text-sm font-semibold">{t.favorites.deleteConfirm}</span>

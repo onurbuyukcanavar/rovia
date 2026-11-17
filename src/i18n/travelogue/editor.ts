@@ -1,3 +1,80 @@
 /** ROVIA Journal — editor metinleri */
 export const editor = {
+  toolbarLabel: "Biçimlendirme",
+  heading: "Başlık",
+  subheading: "Alt başlık",
+  bold: "Kalın",
+  italic: "İtalik",
+  underline: "Altı çizili",
+  quote: "Alıntı",
+  bulletList: "Madde işaretli liste",
+  orderedList: "Numaralı liste",
+  link: "Bağlantı",
+  divider: "Ayraç",
+  image: "Görsel ekle",
+  undo: "Geri al",
+  redo: "Yinele",
+  shortcut: (key: string) => `(${key})`,
+  words: (n: number) => `${n.toLocaleString("tr-TR")} kelime`,
+  placeholder: "Yazmaya başla…",
+
+  linkDialog: {
+    title: "Bağlantı",
+    label: "Adres",
+    placeholder: "https://…",
+    apply: "Uygula",
+    remove: "Bağlantıyı kaldır",
+    cancel: "Vazgeç",
+    invalid: "Geçerli bir web adresi (https://…) veya e-posta (mailto:…) gir.",
+  },
+
+  imageDialog: {
+    title: "Görsel ekle",
+    intro: "Yazına eklemek istediğin fotoğrafları seç ya da yeni fotoğraf yükle.",
+    library: "Fotoğraflarım",
+    empty: "Henüz fotoğraf yok. Aşağıdan yükleyebilirsin.",
+    upload: "Yeni fotoğraf yükle",
+    insert: (n: number) => (n > 1 ? `${n} fotoğraf ekle` : n === 1 ? "Fotoğrafı ekle" : "Ekle"),
+    cancel: "Vazgeç",
+    close: "Kapat",
+    loading: "Yükleniyor…",
+    select: (caption: string | null) => (caption ? `Seç: ${caption}` : "Fotoğrafı seç"),
+  },
+
+  imageBlock: {
+    captionLabel: "Fotoğraf açıklaması",
+    captionPlaceholder: "Açıklama ekle (isteğe bağlı)",
+    remove: "Fotoğrafı kaldır",
+    missing: "Fotoğraf bulunamadı",
+    missingHint: "Silinmiş olabilir. Bu bloğu kaldırabilirsin.",
+    loading: "Fotoğraf hazırlanıyor…",
+  },
+
+  save: {
+    idle: "Değişiklikler otomatik kaydedilir",
+    dirty: "Kaydedilmemiş değişiklikler",
+    saving: "Kaydediliyor…",
+    saved: (time: string) => `Kaydedildi · ${time}`,
+    savedNoTime: "Kaydedildi",
+    error: "Kaydedilemedi",
+    retry: "Tekrar dene",
+    offline: "Çevrimdışı — bu cihazda saklandı",
+    conflict: "Kaydetme durduruldu",
+    network: "Bağlantı kurulamadı.",
+    unloadWarning: "Kaydedilmemiş değişiklikler var. Sayfadan çıkmak istediğine emin misin?",
+  },
+
+  conflict: {
+    title: "Başka bir sekmede değişti",
+    body: "Bu içerik sen düzenlerken başka bir sekmede veya cihazda kaydedildi. Hangi sürümün kalacağını seç.",
+    mine: "Benimkini kaydet",
+    theirs: "Sunucudakini yükle",
+  },
+
+  backup: {
+    title: "Kaydedilmemiş değişiklikler bulundu",
+    body: "Bu cihazda önceki oturumdan kalan, kaydedilmemiş değişiklikler var.",
+    restore: "Geri yükle",
+    discard: "Yok say",
+  },
 } as const;

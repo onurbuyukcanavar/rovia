@@ -101,3 +101,228 @@ body {
 label:has(> input.sr-only) {
   position: relative;
 }
+
+/* ---------------------------------------------------------------- ROVIA Journal tipografisi
+ * DocView çıktısı (.prose-rovia) ve TipTap düzenleme alanı (.prose-rovia.ProseMirror) aynı görünür.
+ * Başlık eşlemesi: düzenleyicide h2/h3, salt okunur görünümde h3/h4 (sayfa başlığı h1/h2'dir). */
+@layer components {
+  .prose-rovia {
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--color-ink-900);
+    overflow-wrap: break-word;
+    font-feature-settings: "kern", "liga", "onum";
+  }
+  @media (max-width: 639px) {
+    .prose-rovia {
+      font-size: 1.0625rem;
+    }
+  }
+  .prose-rovia > * + * {
+    margin-top: 1.1em;
+  }
+  .prose-rovia p:empty::after {
+    content: "\00a0";
+  }
+  .prose-rovia:not(.ProseMirror) h3,
+  .prose-rovia.ProseMirror h2 {
+    margin-top: 1.9em;
+    font-size: 1.6em;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .prose-rovia:not(.ProseMirror) h4,
+  .prose-rovia.ProseMirror h3 {
+    margin-top: 1.6em;
+    font-size: 1.25em;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink-800);
+  }
+  .prose-rovia > :is(h2, h3, h4):first-child {
+    margin-top: 0;
+  }
+  .prose-rovia :is(h2, h3, h4) + * {
+    margin-top: 0.5em;
+  }
+  .prose-rovia strong {
+    font-weight: 650;
+  }
+  .prose-rovia u {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+  .prose-rovia a {
+    color: var(--color-amber-700);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-amber-500) 55%, transparent);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.18em;
+    transition: text-decoration-color 0.15s;
+  }
+  .prose-rovia a:hover {
+    text-decoration-color: currentColor;
+  }
+  .prose-rovia blockquote {
+    margin-left: 0;
+    padding: 0.15em 0 0.15em 1.1em;
+    border-left: 3px solid var(--color-amber-400);
+    color: var(--color-stone-700);
+    font-style: italic;
+  }
+  .prose-rovia blockquote > * + * {
+    margin-top: 0.6em;
+  }
+  .prose-rovia :is(ul, ol) {
+    padding-left: 1.5em;
+  }
+  .prose-rovia ul {
+    list-style: disc;
+  }
+  .prose-rovia ol {
+    list-style: decimal;
+  }
+  .prose-rovia li {
+    padding-left: 0.2em;
+  }
+  .prose-rovia li + li,
+  .prose-rovia li > * + * {
+    margin-top: 0.35em;
+  }
+  .prose-rovia li::marker {
+    color: var(--color-stone-500);
+  }
+  .prose-rovia hr {
+    margin: 2.2em auto;
+    width: 6rem;
+    border: 0;
+    border-top: 1px solid var(--color-sand-300);
+    overflow: visible;
+    text-align: center;
+  }
+  .prose-rovia hr::after {
+    content: "◆";
+    position: relative;
+    top: -0.75em;
+    padding: 0 0.6em;
+    font-size: 0.7rem;
+    color: var(--color-amber-500);
+    background: var(--color-paper);
+  }
+  .prose-rovia figure {
+    margin-block: 1.6em;
+  }
+  .prose-rovia figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 0.875rem;
+    background: var(--color-sand-100);
+  }
+  .prose-rovia figcaption {
+    margin-top: 0.55em;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--color-stone-600);
+    text-align: center;
+  }
+
+  /* ------------------------------------------------ Düzenleyici (ProseMirror) */
+  .rovia-editor hr::after {
+    background: var(--color-paper-50);
+  }
+  .prose-rovia.ProseMirror {
+    min-height: inherit;
+    outline: none;
+    white-space: pre-wrap;
+    caret-color: var(--color-amber-600);
+    /* iOS yakınlaştırmasın: en az 16px */
+    font-size: max(16px, 1.0625rem);
+  }
+  @media (min-width: 640px) {
+    .prose-rovia.ProseMirror {
+      font-size: 1.125rem;
+    }
+  }
+  .prose-rovia.ProseMirror.is-minimal {
+    font-size: max(16px, 1rem);
+  }
+  .rovia-editor .ProseMirror-focused {
+    outline: none;
+  }
+  .prose-rovia.ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    color: var(--color-stone-500);
+    font-style: italic;
+  }
+  .prose-rovia.ProseMirror .ProseMirror-selectednode:not(.rovia-image) {
+    outline: 2px solid var(--color-amber-500);
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+  .prose-rovia.ProseMirror .rovia-image {
+    position: relative;
+    border-radius: 1rem;
+    transition: box-shadow 0.15s;
+  }
+  .prose-rovia.ProseMirror .rovia-image.is-selected {
+    box-shadow: 0 0 0 3px var(--color-amber-400);
+  }
+  .prose-rovia.ProseMirror .rovia-image [data-drag-handle] {
+    cursor: grab;
+  }
+  .rovia-image-placeholder {
+    display: flex;
+    min-height: 10rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1.5rem;
+    border: 1px dashed var(--color-sand-300);
+    border-radius: 0.875rem;
+    background: var(--color-sand-100);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--color-stone-600);
+    text-align: center;
+  }
+  .rovia-caption-input {
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    color: var(--color-stone-700);
+    text-align: center;
+    outline: none;
+  }
+  @media (min-width: 640px) {
+    .rovia-caption-input {
+      font-size: 0.85rem;
+    }
+  }
+  .rovia-caption-input:hover {
+    border-color: var(--color-sand-200);
+  }
+  .rovia-caption-input:focus {
+    border-color: var(--color-amber-400);
+    background: #fff;
+  }
+  .rovia-caption-input::placeholder {
+    color: var(--color-stone-500);
+  }
+  .prose-rovia.ProseMirror .ProseMirror-gapcursor::after {
+    border-top-color: var(--color-amber-600);
+  }
+}

@@ -153,13 +153,15 @@ export function SavedPlaceList({ places }: { places: { id: string; name: string;
   );
 }
 
-export function EntryList({ entries }: { entries: { id: string; title: string; location_name: string | null; updated_at: string; travelogueTitle: string | null }[] }) {
+export function EntryList({ entries }: { entries: { id: string; title: string; location_name: string | null; updated_at: string; travelogue_id: string; travelogueTitle: string | null }[] }) {
   if (!entries.length) return <EmptyState icon={BookOpenText}>{t.dashboard.emptyEntries}</EmptyState>;
   return (
     <ul className="space-y-3">
       {entries.map((e) => (
         <li key={e.id}>
-          <p className="font-serif text-lg leading-snug">{e.title || e.location_name || "Adsız yazı"}</p>
+          <Link href={`/seyahatnameler/${e.travelogue_id}/yazi/${e.id}`} className="font-serif text-lg leading-snug hover:underline">
+            {e.title || e.location_name || t.travelogue.pages.entries.untitled}
+          </Link>
           <p className="text-xs text-stone-600">{[e.travelogueTitle, formatDate(e.updated_at)].filter(Boolean).join(" · ")}</p>
         </li>
       ))}
