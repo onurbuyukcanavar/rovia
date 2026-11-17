@@ -39,6 +39,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     await expect(page).toHaveURL(/\/seyahatnameler\/[0-9a-f-]{36}$/, { timeout: 20_000 });
     const workspaceUrl = page.url();
     const workspace = page.getByTestId("travelogue-workspace");
+    await expect(workspace).toHaveAttribute("data-ready", "true");
     await expect(workspace.getByTestId("workspace-title")).toHaveText(title);
 
     // Kapak: başlığı değiştir → otomatik kayıt
@@ -64,6 +65,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
     await page.getByTestId("new-entry-dialog").getByTestId("new-entry-place").click();
     await expect(page).toHaveURL(/\/yazi\/[0-9a-f-]{36}$/, { timeout: 20_000 });
     const editor = page.getByTestId("entry-editor");
+    await expect(editor).toHaveAttribute("data-ready", "true", { timeout: 20_000 });
     await editor.getByTestId("entry-title").fill(entryTitle);
 
     // Anlatı: kalın metin
@@ -108,6 +110,7 @@ test.describe("ROVIA Journal — seyahatname (PHASE 7)", () => {
 
     // Sil
     await page.goto(workspaceUrl);
+    await expect(workspace).toHaveAttribute("data-ready", "true", { timeout: 20_000 });
     await workspace.getByTestId("travelogue-delete").click();
     await workspace.getByTestId("travelogue-delete-confirm").click();
     await expect(page).toHaveURL(/\/seyahatnameler$/, { timeout: 20_000 });

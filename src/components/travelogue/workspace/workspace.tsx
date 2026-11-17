@@ -1,4 +1,5 @@
 "use client";
+import { useHydrated } from "@/lib/use-hydrated";
 import { ArrowLeft, BookOpen, Map as MapIcon, Route, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,6 +31,7 @@ export function Workspace(props: Props) {
 }
 
 function WorkspaceInner({ travelogue: tv, userId, styleUrl, onReload }: Props & { onReload: () => void }) {
+  const hydrated = useHydrated();
   const router = useRouter();
   const autosave = useAutosave<TravP>({
     key: `rovia:travelogue:${tv.id}`,
@@ -94,7 +96,7 @@ function WorkspaceInner({ travelogue: tv, userId, styleUrl, onReload }: Props & 
   const ctx = { media: tv.media, userId, tripId: tv.trip?.id ?? null, onReload, onMediaUploaded: () => router.refresh() };
 
   return (
-    <div className="flex flex-col lg:grid lg:h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(22rem,42%)] lg:grid-rows-[auto_minmax(0,1fr)]" data-testid="travelogue-workspace">
+    <div className="flex flex-col lg:grid lg:h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(22rem,42%)] lg:grid-rows-[auto_minmax(0,1fr)]" data-testid="travelogue-workspace" data-ready={hydrated || undefined}>
       <header className="space-y-2 border-b border-sand-200 bg-paper px-4 py-4 sm:px-6 lg:col-start-1 lg:row-start-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Link href="/seyahatnameler" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">

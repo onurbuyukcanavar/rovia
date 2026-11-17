@@ -1,4 +1,5 @@
 "use client";
+import { useHydrated } from "@/lib/use-hydrated";
 import { ArrowLeft, ChevronLeft, ChevronRight, Footprints, MapPinned, NotebookPen, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -68,6 +69,7 @@ export function EntryEditor(props: Props) {
 }
 
 function EntryEditorInner({ travelogueId, entry, media, userId, tripId, styleUrl, prevId, nextId, position, onReload }: Props & { onReload: () => void }) {
+  const hydrated = useHydrated();
   const router = useRouter();
   const autosave = useAutosave<EntryP>({
     key: `rovia:entry:${entry.id}`,
@@ -100,7 +102,7 @@ function EntryEditorInner({ travelogueId, entry, media, userId, tripId, styleUrl
   });
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-8 sm:py-8" data-testid="entry-editor">
+    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-8 sm:py-8" data-testid="entry-editor" data-ready={hydrated || undefined}>
       <header className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <a href={base} onClick={(e) => { e.preventDefault(); go(base); }} data-testid="entry-back"
