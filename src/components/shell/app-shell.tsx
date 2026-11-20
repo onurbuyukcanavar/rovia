@@ -4,6 +4,7 @@ import { Logo } from "@/components/brand/logo";
 import { MobileNav, MobileNavLive, SidebarNav, SidebarNavLive } from "./nav-link";
 import { MobileHeaderAvatar, SidebarUser } from "./user-menu";
 import { t } from "@/i18n";
+import { InstallHeaderButton } from "@/components/install/install-trigger";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -28,9 +29,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="fixed inset-x-0 top-0 z-30 border-b border-sand-200 bg-paper/95 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
         <div className="flex h-14 items-center justify-between pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))]">
           <Link href="/panel" aria-label="ROVIA panel"><Logo /></Link>
-          <Suspense fallback={<span className="size-8 rounded-full bg-sand-200" />}>
-            <MobileHeaderAvatar />
-          </Suspense>
+          <div className="flex items-center gap-1.5">
+            <InstallHeaderButton />
+            <Suspense fallback={<span className="size-8 rounded-full bg-sand-200" />}>
+              <MobileHeaderAvatar />
+            </Suspense>
+          </div>
         </div>
       </header>
 

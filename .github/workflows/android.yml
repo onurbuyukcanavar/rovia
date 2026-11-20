@@ -1,0 +1,130 @@
+name: Android APK
+
+# ROVIA Android uygulamasını (Capacitor) derler, sürüm anahtarıyla imzalar ve GitHub Release olarak yayımlar.
+# Sabit indirme adresi: https://github.com/onurbuyukcanavar/rovia/releases/latest/download/rovia.apk
+# Ayrıntılar ve tek elle yapılacak adım (ANDROID_KEYSTORE_PASSWORD gizli değişkeni): docs/ANDROID.md
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - "capacitor.config.ts"
+      - "mobile/**"
+      - "android-signing/**"
+      - ".github/workflows/android.yml"
+      - "package.json"
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  # Kayıtlı App Link parmak izi (public/.well-known/assetlinks.json ile aynı olmalı)
+  EXPECTED_CERT_SHA256: "9A:0A:D5:20:05:B5:EB:B9:AB:09:AD:56:BE:31:2C:79:14:11:5B:D9:3D:86:5A:66:D8:0F:A7:AD:C4:74:8F:DC"
+  VERSION_NAME: "1.0.${{ github.run_number }}"
+
+jobs:
+  apk:
+    name: APK derle · imzala · yayımla
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: İmza parolası var mı?
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_PASSWORD" ]; then
+            echo "::error title=İmza parolası eksik::GitHub deposunda ANDROID_KEYSTORE_PASSWORD gizli değişkeni tanımlı değil. Settings → Secrets and variables → Actions → New repository secret ile ekleyin (bkz. docs/ANDROID.md)."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Capacitor eşitleme
+        run: npx cap sync android
+
+      - name: İmza anahtarını çöz
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -in android-signing/release.jks.enc \
+            -out "$RUNNER_TEMP/release.jks" \
+            -pass env:ANDROID_KEYSTORE_PASSWORD \
+            || { echo "::error title=Anahtar çözülemedi::android-signing/release.jks.enc çözülemedi. ANDROID_KEYSTORE_PASSWORD doğru mu?"; exit 1; }
+
+      - name: APK derle (release)
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: rovia
+          ROVIA_VERSION_CODE: ${{ github.run_number }}
+          ROVIA_VERSION_NAME: ${{ env.VERSION_NAME }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+
+      - name: İmzayı doğrula
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          if [ ! -f "$APK" ]; then
+            echo "::error title=İmzalı APK yok::$APK bulunamadı (imza yapılandırması uygulanmamış olabilir)."
+            ls -la android/app/build/outputs/apk/release || true
+            exit 1
+          fi
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+          "$BT/apksigner" verify --verbose --print-certs "$APK" | tee "$RUNNER_TEMP/certs.txt"
+          ACTUAL=$(grep -m1 "certificate SHA-256 digest" "$RUNNER_TEMP/certs.txt" | awk -F': ' '{print $2}' | tr -d ' :' | tr 'a-f' 'A-F')
+          EXPECTED=$(echo "$EXPECTED_CERT_SHA256" | tr -d ' :' | tr 'a-f' 'A-F')
+          echo "Sertifika SHA-256: $ACTUAL"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error title=Yanlış imza::APK sertifikası beklenen parmak iziyle eşleşmiyor (beklenen $EXPECTED_CERT_SHA256). App Links ve güncellemeler bozulur."
+            exit 1
+          fi
+          mkdir -p dist
+          cp "$APK" dist/rovia.apk
+          sha256sum dist/rovia.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rovia-${{ env.VERSION_NAME }}
+          path: dist/rovia.apk
+          if-no-files-found: error
+
+      - name: GitHub Release yayımla
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="android-v$VERSION_NAME"
+          gh release create "$TAG" dist/rovia.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "ROVIA Android $VERSION_NAME" \
+            --notes "ROVIA Android uygulaması $VERSION_NAME (commit ${GITHUB_SHA::7}). Kurulum: https://github.com/$GITHUB_REPOSITORY/releases/latest/download/rovia.apk — ayrıntılar docs/ANDROID.md." \
+            --latest
+
+      - name: Çözülmüş anahtarı sil
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks" "$RUNNER_TEMP/certs.txt"

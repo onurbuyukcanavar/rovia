@@ -34,6 +34,14 @@ const nextConfig: NextConfig = {
       // Sürümlü statik dosyalar (yazı tipleri, MapLibre işçisi ?v=sürüm): 1 yıl, değişmez
       { source: "/fonts/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
       { source: "/maplibre/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      // Android App Links doğrulaması (Google girişi dönüşü uygulamaya gelir): JSON, kısa önbellek
+      {
+        source: "/.well-known/assetlinks.json",
+        headers: [
+          { key: "Content-Type", value: "application/json" },
+          { key: "Cache-Control", value: "public, max-age=300" },
+        ],
+      },
     ];
   },
 };

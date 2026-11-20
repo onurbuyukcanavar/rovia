@@ -10,6 +10,10 @@ import {
 } from "./local-store";
 import { flushOutbox } from "./sync-client";
 import { t } from "@/i18n";
+import { isNativeApp } from "@/lib/platform";
+import {
+  firstNativeFix, NATIVE_GEO_TEXT, offerNativeSettings, openNativeSettings, watchNativePosition, type NativeGeoProblem,
+} from "@/lib/native/background-geolocation";
 
 export type RecorderPhase = "loading" | "idle" | "starting" | "recording" | "paused" | "finished";
 
@@ -174,9 +178,24 @@ export function useRecorder(userId: string) {
     if (active) void acquireWakeLock();
     else void releaseWakeLock();
   });
+  const onNativePoint = useEffectEvent((p: RawPoint) => ingest(p));
+  const onNativeProblem = useEffectEvent((p: NativeGeoProblem) => {
+    setError(NATIVE_GEO_TEXT[p]);
+    if (p === "denied") offerNativeSettings();
+  });
 
   useEffect(() => {
-    if (!watching || !("geolocation" in navigator)) return;
+    if (!watching) return;
+    // Android uygulaması: ön plan hizmetiyle ekran kapalıyken de konum (src/lib/native)
+    if (isNativeApp()) {
+      const stop = watchNativePosition((p) => onNativePoint(p), (p) => onNativeProblem(p));
+      onWatchChange(true);
+      return () => {
+        stop();
+        onWatchChange(false);
+      };
+    }
+    if (!("geolocation" in navigator)) return;
     const id = navigator.geolocation.watchPosition(
       (pos) => onPosition(pos),
       (err) => onGeoError(err),
@@ -270,7 +289,8 @@ export function useRecorder(userId: string) {
     hiddenAtRef.current = null;
     if (sessionRef.current?.status === "recording") {
       void acquireWakeLock(); // Görünmez olunca tarayıcı kilidi bırakır
-      if (hiddenFor >= GAP_NOTICE_MS) setNotice(t.recording.gapNotice(Math.round(hiddenFor / 60_000)));
+      // Android uygulamasında kayıt arka planda sürer: boşluk uyarısı gereksiz
+      if (hiddenFor >= GAP_NOTICE_MS && !isNativeApp()) setNotice(t.recording.gapNotice(Math.round(hiddenFor / 60_000)));
     }
     void flush();
   });
@@ -304,9 +324,23 @@ export function useRecorder(userId: string) {
   }, []);
 
   // ------------------------------------------------------------------ Eylemler
+  async function openSession(opts: { plannedTripId: string | null; title: string }, startedAt: number) {
+    const recordingId = crypto.randomUUID();
+    const segmentId = crypto.randomUUID();
+    resetTrack();
+    await enqueue(userId, recordingId, { type: "start", segmentId, at: startedAt, tripId: opts.plannedTripId, title: opts.title });
+    await commitSession({
+      userId, recordingId, title: opts.title, plannedTripId: opts.plannedTripId, tripId: opts.plannedTripId,
+      startedAt, status: "recording", segments: [{ id: segmentId, startedAt, endedAt: null }],
+    });
+    setPhase("recording");
+    lastEnqueueRef.current = Date.now();
+  }
+
   async function start(opts: { plannedTripId: string | null; title: string }) {
       setError(null);
       setNotice(null);
+      if (isNativeApp()) return startNative(opts);
       if (!window.isSecureContext) return setError(t.recording.permission.insecure);
       if (!("geolocation" in navigator)) return setError(t.recording.permission.unsupported);
 
@@ -321,18 +355,25 @@ export function useRecorder(userId: string) {
         return setError(t.recording.permission.denied);
       }
 
-      const recordingId = crypto.randomUUID();
-      const segmentId = crypto.randomUUID();
-      resetTrack();
-      await enqueue(userId, recordingId, { type: "start", segmentId, at: startedAt, tripId: opts.plannedTripId, title: opts.title });
-      await commitSession({
-        userId, recordingId, title: opts.title, plannedTripId: opts.plannedTripId, tripId: opts.plannedTripId,
-        startedAt, status: "recording", segments: [{ id: segmentId, startedAt, endedAt: null }],
-      });
-      setPhase("recording");
-      lastEnqueueRef.current = Date.now();
+      await openSession(opts, startedAt);
       if ("coords" in first) ingest(toRaw(first));
       void flush();
+  }
+
+  /** Android uygulaması: izin + ilk konum eklentiden alınır; sonrası web yoluyla aynıdır. */
+  async function startNative(opts: { plannedTripId: string | null; title: string }) {
+    const startedAt = Date.now();
+    setPhase("starting");
+    const first = await firstNativeFix();
+    if (first === "denied") {
+      setPhase("idle");
+      setError(NATIVE_GEO_TEXT.denied);
+      offerNativeSettings();
+      return;
+    }
+    await openSession(opts, startedAt);
+    if (first && first !== "unavailable") ingest(first);
+    void flush();
   }
 
   async function pause() {
@@ -425,6 +466,8 @@ export function useRecorder(userId: string) {
   return {
     phase, session, stats, lastFix, error, notice, sync, wakeLock, finishedTripId,
     start, pause, resume, finish, cancel, adopt, flush,
+    /** Android uygulamasında konum izni için ayarlar sayfası (tarayıcıda işlevsiz) */
+    openLocationSettings: () => (isNativeApp() ? openNativeSettings().catch(() => undefined) : Promise.resolve()),
     dismissNotice: () => setNotice(null),
   };
 }
