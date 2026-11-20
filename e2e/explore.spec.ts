@@ -78,3 +78,21 @@ test.describe("Keşfet (PHASE 8)", () => {
     await expect(page.getByText("Alan çok geniş.")).toBeVisible({ timeout: 20_000 });
   });
 });
+
+test.describe("Vikipedi bilgisi (gerçek Wikimedia)", () => {
+  test.skip(!hasCredentials, "E2E_* secret'ları tanımlı değil");
+  test("Efes için Türkçe özet, kaynak bağlantısı ve görsel döner", async ({ page, baseURL }) => {
+    await login(page, "alice");
+    const res = await page.request.post("/api/maps/wiki", {
+      headers: { origin: new URL(baseURL!).origin, "content-type": "application/json" },
+      data: { wikipedia: "tr:Efes" },
+    });
+    expect(res.status()).toBe(200);
+    const { info } = await res.json();
+    expect(info, "Vikipedi yanıtı boş").toBeTruthy();
+    expect(info.lang).toBe("tr");
+    expect(info.extract.length).toBeGreaterThan(80);
+    expect(info.url).toMatch(/^https:\/\/tr\.wikipedia\.org\//);
+    if (info.thumbnail) expect(info.thumbnail).toMatch(/^https:\/\/upload\.wikimedia\.org\//);
+  });
+});
