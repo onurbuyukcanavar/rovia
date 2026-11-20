@@ -10,6 +10,7 @@ import { tools } from "./tools";
 import { share } from "./share";
 import { account } from "./account";
 import { install } from "./install";
+import { landing } from "./landing";
 
 export const tr = {
   brand: {
@@ -658,6 +659,7 @@ export const tr = {
   tools,
   account,
   install,
+  landing,
 } as const;
 
 export type Dictionary = typeof tr;

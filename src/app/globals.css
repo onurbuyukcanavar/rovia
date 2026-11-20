@@ -332,3 +332,36 @@ label:has(> input.sr-only) {
   content-visibility: auto;
   contain-intrinsic-size: auto 5.5rem;
 }
+
+/* ---------------------------------------------------------------- Ana sayfa (/) gece sahnesi
+ * WebGL yoksa ya da yüklenene kadar da görünen gece göğü ve ufuk ışıltısı. Ufuk: telefonda %30, masaüstünde %42. */
+.landing-sky {
+  --horizon: 24%;
+  background:
+    radial-gradient(120% 60% at 50% var(--horizon), rgb(34 48 75 / 0.55), transparent 70%),
+    linear-gradient(to bottom, #05080f 0%, #0a111d calc(var(--horizon) - 6%), #101b2e var(--horizon), #070b13 100%);
+}
+.landing-glow {
+  --horizon: 24%;
+  --sun-x: 58%;
+  background:
+    radial-gradient(30% 8% at var(--sun-x) var(--horizon), rgb(240 169 74 / 0.45), transparent 75%),
+    radial-gradient(80% 20% at var(--sun-x) var(--horizon), rgb(232 145 45 / 0.16), transparent 80%);
+}
+.landing-vignette {
+  background:
+    radial-gradient(140% 100% at 50% 40%, transparent 55%, rgb(5 8 15 / 0.65) 100%),
+    linear-gradient(to bottom, transparent 70%, rgb(5 8 15 / 0.55) 100%);
+}
+@media (min-width: 1024px) {
+  .landing-sky,
+  .landing-glow {
+    --horizon: 42%;
+    --sun-x: 52.5%;
+  }
+}
+.landing-cta-glow {
+  background:
+    radial-gradient(90% 50% at 60% 100%, rgb(232 145 45 / 0.12), transparent 80%),
+    radial-gradient(50% 40% at 10% 0%, rgb(54 69 95 / 0.45), transparent 70%);
+}
