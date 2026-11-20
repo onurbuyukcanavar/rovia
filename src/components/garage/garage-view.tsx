@@ -50,7 +50,7 @@ export function GarageView({ vehicles }: { vehicles: Vehicle[] }) {
           <p className="max-w-md text-sm leading-relaxed text-stone-600">{G.empty.body}</p>
         </section>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2" data-testid="vehicle-list">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-testid="vehicle-list">
           {vehicles.map((v) => (
             <VehicleCard key={v.id} v={v} pending={pending}
               onEdit={() => setEditing({ mode: "edit", vehicle: v })}

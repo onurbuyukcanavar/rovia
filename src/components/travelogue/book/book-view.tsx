@@ -61,7 +61,7 @@ function Section({ sec, media, styleUrl }: { sec: BookSection; media: Map<string
         <>
           <BookMap styleUrl={styleUrl} paths={sec.paths} markers={sec.markers} />
           {sec.markers.length > 0 && (
-            <ol className="mt-5 grid gap-x-6 gap-y-1.5 text-base sm:grid-cols-2">
+            <ol className="mt-5 grid grid-cols-1 gap-x-6 gap-y-1.5 text-base sm:grid-cols-2">
               {sec.markers.map((m) => (
                 <li key={m.number} className="flex items-center gap-2">
                   <Badge n={m.number} small />

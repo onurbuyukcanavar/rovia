@@ -55,7 +55,7 @@ export function ArchiveList({ trips }: { trips: ArchiveTrip[] }) {
       {shown.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-sand-300 p-6 text-center text-sm text-stone-600">{t.archive.noMatch}</p>
       ) : (
-        <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-testid="completed-list">
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" data-testid="completed-list">
           {shown.map((tr) => <ArchiveCard key={tr.id} trip={tr} />)}
         </ul>
       )}

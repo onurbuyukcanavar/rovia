@@ -34,7 +34,7 @@ async function DashboardData() {
   return (
     <>
       <StatsGrid stats={data.stats} />
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Panel title={t.dashboard.recentTrips}><TripList trips={data.recentTrips} empty={t.dashboard.emptyRecent} /></Panel>
         <Panel title={t.dashboard.upcomingTrips}><TripList trips={data.upcomingTrips} empty={t.dashboard.emptyUpcoming} /></Panel>
         <Panel title={t.dashboard.savedPlaces}><SavedPlaceList places={data.savedPlaces} /></Panel>
@@ -48,7 +48,7 @@ function DashboardSkeleton() {
   return (
     <div className="space-y-5" aria-label={t.common.loading}>
       <div className="h-28 animate-pulse rounded-2xl bg-sand-100" />
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {[0, 1, 2, 3].map((i) => <div key={i} className="h-44 animate-pulse rounded-2xl bg-sand-100" />)}
       </div>
     </div>

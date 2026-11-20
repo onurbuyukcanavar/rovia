@@ -49,7 +49,7 @@ export default function HomePage() {
 
       <section className="mx-auto max-w-6xl px-6 py-20">
         <p className="max-w-2xl font-serif text-3xl leading-snug text-ink-800 italic">“{t.brand.tagline}”</p>
-        <ol className="mt-14 grid gap-5 md:grid-cols-3">
+        <ol className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
           {t.marketing.pillars.map((p, i) => {
             const Icon = ICONS[p.key];
             return (
