@@ -19,7 +19,7 @@ export const landing = {
       index: "01",
       eyebrow: "Keşfet",
       title: "Haritaya değil, yola bak.",
-      body: "İstanbul'dan Fethiye'ye, ROVIA rotanın üzerindeki tarihî yapıları, doğa güzelliklerini ve iyi bir kahve molasını yolun kendisine göre bulur.",
+      body: "Nereye gidersen git, ROVIA rotanın üzerindeki tarihî yapıları, doğa güzelliklerini ve iyi bir kahve molasını yolun kendisine göre bulur.",
       tags: ["Rota üzerinde keşif", "Duraklar", "Favoriler"],
     },
     {
@@ -39,7 +39,7 @@ export const landing = {
       tags: ["Seyahat günlüğü", "Paylaşım bağlantısı", "PDF"],
     },
   ],
-  odometer: { unit: "km", route: "İstanbul → Fethiye", srLabel: "Örnek yolculuk: İstanbul'dan Fethiye'ye yaklaşık 830 kilometre." },
+  odometer: { unit: "km", route: "Senin rotan", srLabel: "Örnek bir yolculuk: yaklaşık 640 kilometre." },
   companion: {
     eyebrow: "Yol arkadaşın",
     title: "Yaşayan bir yol arkadaşı",
@@ -51,10 +51,10 @@ export const landing = {
     ],
     mock: {
       greeting: "Bugün yol nereye?",
-      from: "İstanbul",
-      to: "Fethiye",
-      meta: "830 km · 3 durak",
-      stops: ["Bursa", "İzmir", "Muğla"],
+      from: "Evden",
+      to: "Gün batımı koyu",
+      meta: "640 km · 3 durak",
+      stops: ["Kahve molası", "Antik kent", "Manzara noktası"],
       start: "Yolculuğu başlat",
       nav: ["Panel", "Harita", "Yolculuklar", "Kayıt", "Diğer"],
     },

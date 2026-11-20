@@ -90,7 +90,7 @@ export default function HomePage() {
                     {i === 1 ? (
                       <p className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                         <span aria-hidden className="text-4xl font-extralight text-amber-300 tabular-nums">
-                          <span data-scene-km>830</span> <span className="text-lg text-paper/50">{L.odometer.unit}</span>
+                          <span data-scene-km>640</span> <span className="text-lg text-paper/50">{L.odometer.unit}</span>
                         </span>
                         <span aria-hidden className="text-sm text-paper/50">{L.odometer.route}</span>
                         <span className="sr-only">{L.odometer.srLabel}</span>

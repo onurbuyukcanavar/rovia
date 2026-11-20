@@ -3,12 +3,12 @@
  *
  * Her parçacığın dört hedef konumu vardır (öznitelik olarak GPU'da):
  *   0 gece yolu (şerit çizgileri ve yol kenarları izleyiciye doğru akar, ufukta amber güneş)
- *   1 Türkiye ve İstanbul → Fethiye rotası          2 kilometre kadranı ve kendini çizen GPS izi
+ *   1 temsilî arazi haritası ve kıvrılan rota          2 kilometre kadranı ve kendini çizen GPS izi
  *   3 açık kitap (seyahatname)
  * Kaydırma ilerlemesi uStage (0..3) uniform'una yazılır; geçiş köşe gölgelendiricisinde yapılır.
  * Bu modül yalnızca istemcide, dinamik import ile yüklenir (ilk yükleme paketinde yer almaz).
  */
-import { TR_BOX, TR_EDGE, TR_FILL, TR_POINTS_B64, TR_ROUTE, TR_STOPS } from "./turkey-points";
+import { generateMap, MAP_ROUTE, MAP_STOPS, type MapPoints } from "./map-points";
 
 export type SceneOptions = {
   /** Sahnenin kaydırma kapsayıcısı (bölümler bunun içinde) */
@@ -26,7 +26,7 @@ export type SceneHandle = { destroy: () => void };
 
 const STRIDE = 20; // 4 hedef × vec4 + rastgele vec4
 const FOV_F = 1 / Math.tan((45 * Math.PI) / 360); // dikey 45°
-const ROUTE_KM = 830;
+const ROUTE_KM = 640;
 
 // ---------------------------------------------------------------- Yardımcılar
 let seed = 1;
@@ -57,25 +57,16 @@ function smoothPath(pts: ReadonlyArray<readonly [number, number]>, samples = 600
   };
 }
 
-function decodeTurkey() {
-  const bin = atob(TR_POINTS_B64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  const u16 = new Uint16Array(bytes.buffer);
-  const pts: [number, number][] = [];
-  for (let i = 0; i < u16.length; i += 2)
-    pts.push([TR_BOX.x0 + (u16[i] / 65535) * (TR_BOX.x1 - TR_BOX.x0), TR_BOX.y0 + (u16[i + 1] / 65535) * (TR_BOX.y1 - TR_BOX.y0)]);
-  return { fill: pts.slice(0, TR_FILL), edge: pts.slice(TR_FILL, TR_FILL + TR_EDGE) };
-}
-
 // Projekte birimlerden şekil birimlerine (yükseklik ≈ 4)
 const TR_S = 4 / 640, TR_CX = 272, TR_CY = 296;
 const trX = (x: number) => (x - TR_CX) * TR_S;
 const trY = (y: number) => -(y - TR_CY) * TR_S;
 
-/** Rota (İstanbul → Fethiye) kadranın içine sığacak biçimde: merkezlenmiş, yükseklik 2.3 */
-const routeFn = smoothPath(TR_ROUTE);
-const TRACK_S = 2.3 / 440, TRACK_CX = 196, TRACK_CY = 308;
+/** Rota kadranın içine sığacak biçimde: merkezlenmiş, yükseklik 2.3 */
+const routeFn = smoothPath(MAP_ROUTE);
+const RX = MAP_ROUTE.map((p) => p[0]), RY = MAP_ROUTE.map((p) => p[1]);
+const TRACK_S = 2.3 / (Math.max(...RY) - Math.min(...RY));
+const TRACK_CX = (Math.max(...RX) + Math.min(...RX)) / 2, TRACK_CY = (Math.max(...RY) + Math.min(...RY)) / 2;
 const trackAt = (t: number): [number, number] => {
   const [x, y] = routeFn(t);
   return [(x - TRACK_CX) * TRACK_S, -(y - TRACK_CY) * TRACK_S];
@@ -125,15 +116,9 @@ function buildRoad(put: Put, from: number, to: number) {
   }
 }
 
-function buildTurkey(put: Put, from: number, to: number, tr: ReturnType<typeof decodeTurkey>) {
+function buildMap(put: Put, from: number, to: number, tr: MapPoints) {
   const M = to - from;
-  const pick = (arr: [number, number][]) => {
-    // Kaynak harita sağda kırpık: doğuya doğru seyrelerek karanlığa karışsın
-    for (;;) {
-      const p = arr[Math.floor(rnd() * arr.length)];
-      if (p[0] < 430 || rnd() > (p[0] - 430) / 106) return p;
-    }
-  };
+  const pick = (arr: [number, number][]) => arr[Math.floor(rnd() * arr.length)];
   for (let j = 0; j < M; j++) {
     const i = from + j, r = j / M, dz = gauss() * 0.03;
     if (r < 0.46) {
@@ -146,7 +131,7 @@ function buildTurkey(put: Put, from: number, to: number, tr: ReturnType<typeof d
       const t = rnd(), [x, y] = routeFn(t);
       put(i, trX(x) + gauss() * 0.008, trY(y) + gauss() * 0.008, 0.02, kindParam(8, t));
     } else {
-      const s = TR_ROUTE[TR_STOPS[Math.floor(rnd() * TR_STOPS.length)]];
+      const s = MAP_ROUTE[MAP_STOPS[Math.floor(rnd() * MAP_STOPS.length)]];
       const k = rnd() < 0.5 ? 0.012 : 0.04;
       put(i, trX(s[0]) + gauss() * k, trY(s[1]) + gauss() * k, 0.04, 9);
     }
@@ -240,10 +225,10 @@ function buildData(N: number) {
     const x = -10 + rnd() * 20, y = -4 + rnd() * 9, z = -1.8 - Math.pow(rnd(), 0.7) * 22;
     for (let t = 0; t < 4; t++) putFor(t)(i, x, y, z, 0);
   }
-  const tr = decodeTurkey();
+  const tr = generateMap(rnd);
   // Şekil parçacıklarını hedefler arasında karıştır: geçişte noktalar uzak yerlerden gelsin
   buildRoad(putFor(0), D, N);
-  buildTurkey(putFor(1), D, N, tr);
+  buildMap(putFor(1), D, N, tr);
   buildDial(putFor(2), D, N);
   buildBook(putFor(3), D, N);
   for (let i = 0; i < N; i++) {
@@ -493,7 +478,7 @@ export function startScene(canvas: HTMLCanvasElement, opts: SceneOptions): Scene
 
   const draw = () => {
     dirty = false;
-    // İz başı: 13 sn'de bir İstanbul'dan Fethiye'ye
+    // İz başı: 13 sn'de bir başlangıçtan varışa
     let head = 1;
     if (!reduced) {
       const c = (time % 13) / 11;
