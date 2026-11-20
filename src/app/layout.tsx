@@ -4,6 +4,7 @@ import "./globals.css";
 import { fontVariables } from "./fonts";
 import { publicEnv } from "@/lib/env";
 import { t } from "@/i18n";
+import { SwRegister } from "@/components/install/sw-register";
 
 export const metadata: Metadata = {
   metadataBase: publicEnv.siteUrl ? new URL(publicEnv.siteUrl) : undefined,
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           İçeriğe geç
         </a>
         {children}
+        <SwRegister />
       </body>
     </html>
   );

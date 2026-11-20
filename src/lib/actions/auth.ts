@@ -60,11 +60,25 @@ export async function signUpWithPassword(_prev: FormState, fd: FormData): Promis
 }
 
 export async function signInWithGoogle(fd: FormData): Promise<void> {
+  redirect(await googleOAuthTarget(fd));
+}
+
+/**
+ * Android uygulaması: Google, WebView içinde OAuth'a izin vermez (disallowed_useragent). Bu eylem
+ * yönlendirmek yerine adresi döndürür; istemci onu sistem tarayıcısında (Custom Tab) açar.
+ * PKCE çerezi bu yanıtla WebView'a yazılır; dönüş /auth/callback App Link'i ile uygulamaya gelir.
+ */
+export async function googleSignInUrlForNative(fd: FormData): Promise<{ url: string; external: boolean }> {
+  const url = await googleOAuthTarget(fd);
+  return { url, external: /^https?:\/\//.test(url) };
+}
+
+async function googleOAuthTarget(fd: FormData): Promise<string> {
   const supabase = await createClient();
   const siteUrl = await getSiteUrl();
   const next = safeNextPath(str(fd, "next"));
   if ((await isGoogleAuthEnabled()) === false) {
-    redirect(`/giris?error=google_disabled${next !== "/panel" ? `&next=${encodeURIComponent(next)}` : ""}`);
+    return `/giris?error=google_disabled${next !== "/panel" ? `&next=${encodeURIComponent(next)}` : ""}`;
   }
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -76,9 +90,9 @@ export async function signInWithGoogle(fd: FormData): Promise<void> {
   });
   if (error || !data.url) {
     console.error("[rovia] Google OAuth başlatılamadı:", error?.message);
-    redirect("/giris?error=oauth");
+    return "/giris?error=oauth";
   }
-  redirect(data.url);
+  return data.url;
 }
 
 export async function requestPasswordReset(_prev: FormState, fd: FormData): Promise<FormState> {

@@ -7,6 +7,7 @@ import { NAV_ITEMS, isAvailable } from "@/config/navigation";
 import { signOut } from "@/lib/actions/auth";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { t } from "@/i18n";
+import { InstallListRow } from "@/components/install/install-trigger";
 
 export const metadata: Metadata = { title: t.nav.more };
 
@@ -35,6 +36,7 @@ export default function MorePage() {
             </li>
           );
         })}
+        <InstallListRow />
       </ul>
       <form action={signOut}><SubmitButton variant="danger" className="w-full">{t.nav.signOut}</SubmitButton></form>
     </div>

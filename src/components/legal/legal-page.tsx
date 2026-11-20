@@ -56,6 +56,7 @@ export function LegalLinks({ lang = "tr", className }: { lang?: "tr" | "en"; cla
       <ul className="flex flex-wrap gap-x-4 gap-y-1">
         <li><Link href={tr ? "/gizlilik" : "/privacy"} className="underline-offset-2 hover:underline">{tr ? "Gizlilik Politikası" : "Privacy Policy"}</Link></li>
         <li><Link href={tr ? "/kullanim-kosullari" : "/terms"} className="underline-offset-2 hover:underline">{tr ? "Kullanım Koşulları" : "Terms of Service"}</Link></li>
+        {tr && <li><Link href="/indir" className="underline-offset-2 hover:underline">Uygulamayı indir</Link></li>}
         <li><a href={`mailto:${CONTACT_EMAIL}`} className="underline-offset-2 hover:underline">{tr ? "İletişim" : "Contact"}</a></li>
       </ul>
     </nav>

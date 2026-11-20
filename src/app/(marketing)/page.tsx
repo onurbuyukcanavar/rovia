@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpenText, Compass, Route } from "lucide-react";
+import { ArrowRight, BookOpenText, Compass, Route, Smartphone } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { RouteIllustration } from "@/components/brand/route-illustration";
@@ -41,6 +41,9 @@ export default function HomePage() {
               {t.marketing.ctaSecondary}
             </ButtonLink>
           </div>
+          <Link href="/indir" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-paper/70 underline-offset-4 hover:text-paper hover:underline">
+            <Smartphone className="size-4" aria-hidden /> {t.install.trigger}
+          </Link>
         </div>
       </section>
 

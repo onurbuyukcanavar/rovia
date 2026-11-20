@@ -1,4 +1,4 @@
-import { signInWithGoogle } from "@/lib/actions/auth";
+import { GoogleSignInForm } from "@/lib/native/google-sign-in-form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { t } from "@/i18n";
 
@@ -15,13 +15,12 @@ function GoogleG() {
 
 export function GoogleButton({ next }: { next?: string }) {
   return (
-    <form action={signInWithGoogle}>
-      {next && <input type="hidden" name="next" value={next} />}
+    <GoogleSignInForm next={next}>
       <SubmitButton variant="secondary" size="lg" className="w-full">
         <GoogleG />
         {t.auth.google}
       </SubmitButton>
-    </form>
+    </GoogleSignInForm>
   );
 }
 

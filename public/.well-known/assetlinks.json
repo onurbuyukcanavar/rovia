@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.onurbuyukcanavar.rovia",
+      "sha256_cert_fingerprints": [
+        "9A:0A:D5:20:05:B5:EB:B9:AB:09:AD:56:BE:31:2C:79:14:11:5B:D9:3D:86:5A:66:D8:0F:A7:AD:C4:74:8F:DC"
+      ]
+    }
+  }
+]
