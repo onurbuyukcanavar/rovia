@@ -39,7 +39,9 @@ export async function updateSession(request: NextRequest) {
     return redirectWithCookies(url, response);
   }
 
-  if (isSignedIn && isAuthPagePath(pathname)) {
+  // Oturum açıkken ana sayfa yerine panel: Android uygulaması ve ana ekrana eklenen site "/" ile
+  // açılır; giriş yapmış kullanıcıya tanıtım sayfasını ("Giriş yap") göstermek oturum düşmüş izlenimi verir.
+  if (isSignedIn && (isAuthPagePath(pathname) || pathname === "/")) {
     const url = request.nextUrl.clone();
     url.pathname = "/panel";
     url.search = "";
