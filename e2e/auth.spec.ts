@@ -78,6 +78,12 @@ test.describe("kimlik doğrulama (gerçek Supabase)", () => {
     await expect(page).toHaveURL(/\/giris\?next=/);
   });
 
+  test("oturum açıkken ana sayfa panele yönlendirir (uygulama açılışı)", async ({ page }) => {
+    await login(page, "alice");
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/panel$/);
+  });
+
   test("giriş sonrası 'next' adresine döner", async ({ page }) => {
     await login(page, "alice", "/ayarlar");
     await expect(page.getByRole("heading", { name: "Ayarlar", level: 1 })).toBeVisible();
