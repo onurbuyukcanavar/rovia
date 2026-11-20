@@ -1,0 +1,12 @@
+{
+  "batchcomplete": true,
+  "query": {
+    "geosearch": [
+      { "pageid": 1, "ns": 0, "title": "Uçhisar", "lat": 38.6302, "lon": 34.8058, "dist": 40.2, "primary": true },
+      { "pageid": 2, "ns": 0, "title": "Uçhisar Kalesi", "lat": 38.6303, "lon": 34.8055, "dist": 12.5, "primary": true },
+      { "pageid": 3, "ns": 0, "title": "Güvercinlik Vadisi", "lat": 38.632, "lon": 34.81, "dist": 410, "primary": true },
+      { "pageid": 4, "ns": 6, "title": "Dosya:Uçhisar Kalesi.jpg", "lat": 38.63, "lon": 34.8, "dist": 1, "primary": true },
+      { "pageid": 5, "ns": 0, "dist": 2 }
+    ]
+  }
+}

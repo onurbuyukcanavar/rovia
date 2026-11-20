@@ -2,7 +2,7 @@
 import { ArrowLeft, BookOpen, CalendarPlus, Clock3, Database, ExternalLink, Globe, Info, MapPin, Mountain, Route } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CATEGORY_COLORS, type ExploreCategory } from "@/lib/explore/categories";
-import { osmUrl, safeUrl, wikidataUrl, wikipediaUrl } from "@/lib/explore/geo";
+import { cityOf, osmUrl, safeUrl, tripadvisorUrl, wikidataUrl, wikipediaUrl } from "@/lib/explore/geo";
 import { placeToSearchParams } from "@/lib/explore/place-param";
 import type { ExplorePlace } from "@/lib/explore/types";
 import { ButtonLink } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { AddToTravelogue } from "@/components/travelogue/add-to-travelogue";
 import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
 import { CATEGORY_ICONS } from "./category-chips";
+import { TripadvisorLink, WikiSection } from "./wiki-section";
 
 const T = t.explore.place;
 
@@ -70,6 +71,8 @@ export function PlacePanel({ place, category, distanceText, plannedTrips, favori
         )}
       </dl>
 
+      <WikiSection place={place} />
+
       {description && (
         <section className="rounded-2xl border border-dashed border-sand-300 bg-sand-50 p-3 text-sm" data-testid="explore-unverified">
           <h3 className="flex items-center gap-1.5 text-xs font-bold tracking-wide text-stone-600 uppercase">
@@ -80,6 +83,7 @@ export function PlacePanel({ place, category, distanceText, plannedTrips, favori
         </section>
       )}
       {!hasInfo && <p className="text-xs text-stone-600">{T.noInfo}</p>}
+      <TripadvisorLink href={tripadvisorUrl(place.name, cityOf(place.admin))} />
 
       {favoriteActions}
       <AddToTravelogue className="w-full"

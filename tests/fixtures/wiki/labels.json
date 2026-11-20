@@ -1,0 +1,8 @@
+{
+  "entities": {
+    "Q23413": { "id": "Q23413", "labels": { "tr": { "language": "tr", "value": "kale" }, "en": { "language": "en", "value": "castle" } } },
+    "Q570116": { "id": "Q570116", "labels": { "en": { "language": "en", "value": "tourist attraction" } } },
+    "Q9259": { "id": "Q9259", "labels": { "tr": { "language": "tr", "value": "UNESCO Dünya Mirası" } } },
+    "Q404": { "id": "Q404", "missing": "" }
+  }
+}

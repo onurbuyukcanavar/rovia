@@ -43,6 +43,8 @@ test.describe("Keşfet (PHASE 8)", () => {
     await item.click();
     const panel = page.getByTestId("explore-place");
     await expect(panel.getByRole("heading", { level: 2 })).toContainText("Uçhisar");
+    // Tripadvisor yalnızca dış arama bağlantısı (sabit alan adı, puan yok)
+    await expect(panel.getByTestId("tripadvisor-link")).toHaveAttribute("href", /^https:\/\/www\.tripadvisor\.com\.tr\/Search\?q=U%C3%A7hisar/);
     const source = panel.getByTestId("explore-source");
     await expect(source).toContainText("OpenStreetMap katkıcıları (ODbL)");
     const osm = source.getByTestId("explore-osm-link");
@@ -74,5 +76,23 @@ test.describe("Keşfet (PHASE 8)", () => {
     await login(page, "alice");
     await page.goto("/kesfet?konum=39,35,5&kategori=lake");
     await expect(page.getByText("Alan çok geniş.")).toBeVisible({ timeout: 20_000 });
+  });
+});
+
+test.describe("Vikipedi bilgisi (gerçek Wikimedia)", () => {
+  test.skip(!hasCredentials, "E2E_* secret'ları tanımlı değil");
+  test("Efes için Türkçe özet, kaynak bağlantısı ve görsel döner", async ({ page, baseURL }) => {
+    await login(page, "alice");
+    const res = await page.request.post("/api/maps/wiki", {
+      headers: { origin: new URL(baseURL!).origin, "content-type": "application/json" },
+      data: { wikipedia: "tr:Efes" },
+    });
+    expect(res.status()).toBe(200);
+    const { info } = await res.json();
+    expect(info, "Vikipedi yanıtı boş").toBeTruthy();
+    expect(info.lang).toBe("tr");
+    expect(info.extract.length).toBeGreaterThan(80);
+    expect(info.url).toMatch(/^https:\/\/tr\.wikipedia\.org\//);
+    if (info.thumbnail) expect(info.thumbnail.src).toMatch(/^https:\/\/upload\.wikimedia\.org\//);
   });
 });

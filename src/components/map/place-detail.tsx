@@ -8,6 +8,8 @@ import type { FoundPlace, RouteOption, RouteOptions, Stop } from "@/lib/maps/typ
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import { formatDistance, formatDuration } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { TripadvisorLink, WikiSection } from "@/components/explore/wiki-section";
+import { cityOf, tripadvisorUrl } from "@/lib/explore/geo";
 import { AddToTravelogue } from "@/components/travelogue/add-to-travelogue";
 import { t } from "@/i18n";
 
@@ -149,6 +151,8 @@ export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoin
       </dl>
       {!hasExtra && <p className="text-xs text-stone-600">{t.maps.noExtraInfo}</p>}
 
+      <WikiSection place={place} />
+
       {routeContext ? (
         <section className="rounded-2xl border border-ink-900/15 bg-ink-900/[0.03] p-4" aria-live="polite">
           <h3 className="text-sm font-bold">{t.maps.detourTitle}</h3>
@@ -176,9 +180,12 @@ export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoin
         </div>
       )}
 
-      <a href={osmUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:underline">
-        {t.maps.openInOsm} <ExternalLink className="size-3.5" aria-hidden />
-      </a>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+        <a href={osmUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:underline">
+          {t.maps.openInOsm} <ExternalLink className="size-3.5" aria-hidden />
+        </a>
+        <TripadvisorLink href={tripadvisorUrl(place.name, tags["addr:city"] ?? cityOf(place.address))} />
+      </div>
       <p className="text-[0.65rem] text-stone-500">{t.maps.dataNote}</p>
     </article>
   );

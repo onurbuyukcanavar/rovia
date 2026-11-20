@@ -62,3 +62,18 @@ export function parseKonum(raw: string | undefined | null): { lat: number; lng: 
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
   return { lat, lng, zoom: Number.isFinite(zoom) ? Math.min(18, Math.max(3, zoom)) : 11 };
 }
+
+/**
+ * Tripadvisor araması (yalnızca dış bağlantı; puan gösterilmez, API çağrılmaz). Alan adı sabittir:
+ * kullanıcı/OSM verisi yalnızca kodlanmış q parametresine girer. Ad yoksa null.
+ */
+export function tripadvisorUrl(name: string | null | undefined, locality?: string | null): string | null {
+  const n = name?.replace(/\s+/g, " ").trim();
+  if (!n) return null;
+  const loc = locality?.replace(/\s+/g, " ").trim();
+  const withLoc = loc && !n.toLocaleLowerCase("tr").includes(loc.toLocaleLowerCase("tr")) ? `${n} ${loc}` : n;
+  return `https://www.tripadvisor.com.tr/Search?q=${encodeURIComponent(withLoc.slice(0, 200))}`;
+}
+
+/** "Ürgüp, Nevşehir" → "Nevşehir" (il); boşsa null. */
+export const cityOf = (admin: string | null | undefined) => admin?.split(",").map((s) => s.trim()).filter(Boolean).pop() ?? null;

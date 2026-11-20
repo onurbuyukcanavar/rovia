@@ -5,8 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 import { GeoError } from "@/lib/geo-services/errors";
 import { isSameOriginRequest, PRIVATE_NO_STORE, readJsonBody } from "./request-guard";
 
-/** Kova adları ve limitleri veritabanında sabittir (migration 20261116000300). */
-type Bucket = "autocomplete" | "route" | "search" | "geocode" | "gps";
+/** Kova adları ve limitleri veritabanında sabittir (migration 20261116000300, 20261120000100). */
+type Bucket = "autocomplete" | "route" | "search" | "geocode" | "gps" | "wiki";
+
+/**
+ * Yeni kova veritabanına henüz eklenmemişse (migration uygulanmadan yayına çıkıldıysa) kullanılacak eski kova.
+ * "place" (60/dk, 1000/gün) artık başka bir uç noktada kullanılmıyor.
+ */
+const FALLBACK_BUCKET: Partial<Record<Bucket, string>> = { wiki: "place" };
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 /**
@@ -33,7 +39,11 @@ export function mapsHandler<S extends z.ZodType, R>(
       const parsed = schema.safeParse(body.data);
       if (!parsed.success) throw new GeoError("invalid_request", z.prettifyError(parsed.error));
 
-      const limit = await db.rpc("consume_rate_limit", { p_bucket: bucket });
+      let limit = await db.rpc("consume_rate_limit", { p_bucket: bucket });
+      const fallback = FALLBACK_BUCKET[bucket];
+      if (limit.error && fallback && /unknown_rate_limit_bucket/.test(limit.error.message)) {
+        limit = await db.rpc("consume_rate_limit", { p_bucket: fallback });
+      }
       if (limit.error) throw new Error(`rate_limit_rpc: ${limit.error.message}`);
       if (!limit.data) throw new GeoError("rate_limited");
 
