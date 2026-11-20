@@ -3,6 +3,8 @@ import type { LatLng } from "@/lib/geo";
 import { DEFAULT_ROUTE_OPTIONS, type FoundPlace, type RouteOptions, type RouteResult, type Stop, type Suggestion } from "./types";
 import type { BBox } from "@/lib/explore/geo";
 import type { ExploreResponse } from "@/lib/explore/types";
+import type { WikiInfo } from "@/lib/wiki/parse";
+import type { WikiRequest } from "@/lib/wiki/tags";
 import { t } from "@/i18n";
 
 /** Sunucunun döndürdüğü Türkçe hata mesajını taşır. */
@@ -65,6 +67,9 @@ export const mapsApi = {
     input: { category: string; bbox?: BBox; encodedPolyline?: string; radiusMeters?: number; limit?: number },
     signal?: AbortSignal,
   ) => post<ExploreResponse>("explore", input, signal),
+
+  /** Yer için Vikipedi/Wikidata bilgisi; madde yoksa null. */
+  wiki: (input: WikiRequest, signal?: AbortSignal) => post<{ info: WikiInfo | null }>("wiki", input, signal).then((r) => r.info),
 
   reverseGeocode: (point: LatLng) => post<{ label: string }>("reverse-geocode", point),
 };

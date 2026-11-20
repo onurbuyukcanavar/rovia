@@ -1,0 +1,9 @@
+{
+  "type": "standard",
+  "title": "Kötü",
+  "titles": { "normalized": "Kötü" },
+  "wikibase_item": "Q1; DROP",
+  "thumbnail": { "source": "https://evil.example.com/x.jpg", "width": 320, "height": 200 },
+  "content_urls": { "desktop": { "page": "javascript:alert(1)" } },
+  "extract": "Düz metin."
+}

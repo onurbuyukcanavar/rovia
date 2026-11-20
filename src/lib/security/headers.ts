@@ -24,6 +24,8 @@ export const DEFAULT_MAP_HOST = "https://tiles.openfreemap.org";
 const GOOGLE_AVATAR_HOST = "https://*.googleusercontent.com";
 /** Google OAuth: JS'siz form gönderiminde yönlendirme zinciri form-action ile denetlenir */
 const GOOGLE_ACCOUNTS = "https://accounts.google.com";
+/** Yer panelindeki Vikipedi küçük resimleri (yalnızca bu alan adı; sunucu başka görsel URL'si döndürmez) */
+const WIKIMEDIA_UPLOAD = "https://upload.wikimedia.org";
 
 function originOf(raw: string | null | undefined): string | null {
   if (!raw) return null;
@@ -49,7 +51,7 @@ export function buildCsp({ supabaseUrl, mapStyleUrl, isDev = false }: CspInput):
     "script-src": ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", ...(isDev ? ["'unsafe-eval'"] : [])],
     // MapLibre ve React satır içi style öznitelikleri kullanır
     "style-src": ["'self'", "'unsafe-inline'"],
-    "img-src": ["'self'", "data:", "blob:", supabaseHttp, ...mapHosts, GOOGLE_AVATAR_HOST],
+    "img-src": ["'self'", "data:", "blob:", supabaseHttp, ...mapHosts, GOOGLE_AVATAR_HOST, WIKIMEDIA_UPLOAD],
     "font-src": ["'self'", "data:"],
     "connect-src": ["'self'", supabaseHttp, supabaseWs, ...mapHosts, ...(isDev ? ["ws:"] : [])],
     // MapLibre çalışanı /maplibre/ altından; bazı sürümler blob: çalışan da kurar

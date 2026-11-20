@@ -276,6 +276,13 @@ describe("API hız sınırlama", () => {
     expect(await consume(bob)).toBe(true);
   });
 
+  it("Vikipedi kovası (wiki) tanımlı; dışa aktarma kovası korunur", async () => {
+    const ok = (bucket: string) =>
+      asUser(db, bob, async (tx) => (await tx.query<{ ok: boolean }>("select public.consume_rate_limit($1) as ok", [bucket])).rows[0].ok);
+    expect(await ok("wiki")).toBe(true);
+    expect(await ok("export")).toBe(true);
+  });
+
   it("izin listesinde olmayan kova reddedilir (keyfi satır üretilemez)", async () => {
     await expect(
       asUser(db, alice, (tx) => tx.query("select public.consume_rate_limit('spam-' || gen_random_uuid())")),

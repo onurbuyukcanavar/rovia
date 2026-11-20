@@ -32,6 +32,9 @@ describe("CSP", () => {
     expect(c).toContain("https://tiles.example.org");
     expect(c).not.toContain("*");
     expect(directive(csp, "img-src")).toContain("https://abcd.supabase.co");
+    expect(directive(csp, "img-src")).toContain("https://upload.wikimedia.org");
+    expect(directive(csp, "img-src")).not.toMatch(/wikimedia\.org\/|\*\.wikimedia|wikipedia/);
+    expect(directive(csp, "connect-src")).not.toContain("wiki");
     expect(directive(csp, "worker-src")).toBe("worker-src 'self' blob:");
   });
 

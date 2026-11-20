@@ -43,6 +43,8 @@ test.describe("Keşfet (PHASE 8)", () => {
     await item.click();
     const panel = page.getByTestId("explore-place");
     await expect(panel.getByRole("heading", { level: 2 })).toContainText("Uçhisar");
+    // Tripadvisor yalnızca dış arama bağlantısı (sabit alan adı, puan yok)
+    await expect(panel.getByTestId("tripadvisor-link")).toHaveAttribute("href", /^https:\/\/www\.tripadvisor\.com\.tr\/Search\?q=U%C3%A7hisar/);
     const source = panel.getByTestId("explore-source");
     await expect(source).toContainText("OpenStreetMap katkıcıları (ODbL)");
     const osm = source.getByTestId("explore-osm-link");
