@@ -18,7 +18,7 @@ export default function TermsPageTr() {
       alternate={{ href: "/terms", label: "English" }}
       intro={
         <p>
-          Bu koşullar, ROVIA web uygulamasını (rovia-seven.vercel.app) kullanımını düzenler. Hesap oluşturarak veya ROVIA’yı
+          Bu koşullar, ROVIA web uygulamasını (www.roviaroad.com) kullanımını düzenler. Hesap oluşturarak veya ROVIA’yı
           kullanarak bu koşulları kabul etmiş olursun. Kişisel verilerinin nasıl işlendiği{" "}
           <Link href="/gizlilik" className="underline">Gizlilik Politikası ve KVKK Aydınlatma Metni</Link>’nde açıklanır.
         </p>

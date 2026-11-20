@@ -19,7 +19,7 @@ export default function PrivacyPageEn() {
       intro={
         <p>
           This policy explains what personal data ROVIA — a road trip planning, GPS trip recording and travel journal web app
-          (rovia-seven.vercel.app) — processes, why, who it is shared with, and your rights, under the Turkish Personal Data
+          (www.roviaroad.com) — processes, why, who it is shared with, and your rights, under the Turkish Personal Data
           Protection Law No. 6698 (“KVKK”) and, where applicable, the EU General Data Protection Regulation (“GDPR”). ROVIA does not
           sell your data, does not use it for advertising, and does not use tracking or analytics cookies. The Turkish version is
           the{" "}

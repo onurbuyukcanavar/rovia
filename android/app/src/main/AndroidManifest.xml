@@ -28,6 +28,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
+                <data android:host="www.roviaroad.com" />
                 <data android:host="rovia-seven.vercel.app" />
                 <data android:path="/auth/callback" />
             </intent-filter>

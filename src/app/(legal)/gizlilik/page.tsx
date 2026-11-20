@@ -18,7 +18,7 @@ export default function PrivacyPageTr() {
       alternate={{ href: "/privacy", label: "English" }}
       intro={
         <p>
-          Bu metin, ROVIA yol yolculuğu planlama, GPS kaydı ve seyahat günlüğü uygulamasını (“ROVIA”, rovia-seven.vercel.app)
+          Bu metin, ROVIA yol yolculuğu planlama, GPS kaydı ve seyahat günlüğü uygulamasını (“ROVIA”, www.roviaroad.com)
           kullandığında hangi kişisel verilerinin işlendiğini, neden işlendiğini, kimlerle paylaşıldığını ve haklarını
           6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) ve uygulanabildiği ölçüde AB Genel Veri Koruma Tüzüğü
           (“GDPR”) çerçevesinde açıklar. ROVIA verilerini satmaz, reklam için kullanmaz ve izleme/analitik çerezi kullanmaz.

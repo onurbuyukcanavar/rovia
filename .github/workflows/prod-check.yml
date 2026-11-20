@@ -5,7 +5,7 @@ on:
     inputs:
       url:
         description: "Kontrol edilecek adres"
-        default: "https://rovia-seven.vercel.app"
+        default: "https://www.roviaroad.com"
   deployment_status:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       cancel-in-progress: false
     timeout-minutes: 15
     env:
-      E2E_BASE_URL: ${{ inputs.url || 'https://rovia-seven.vercel.app' }}
+      E2E_BASE_URL: ${{ inputs.url || 'https://www.roviaroad.com' }}
       NEXT_PUBLIC_SUPABASE_URL: https://lbocidoprcqiuxtqhoye.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_iwaXltsu1QuuBjHXAo0c-g_bQLrbqnc
       E2E_ALICE_EMAIL: e2e-alice@rovia.test
