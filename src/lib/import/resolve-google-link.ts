@@ -24,7 +24,7 @@ export async function resolveGoogleMapsLink(input: string): Promise<string> {
       method: "GET",
       redirect: "manual",
       signal: AbortSignal.timeout(5000),
-      headers: { "user-agent": "Mozilla/5.0 (compatible; ROVIA/0.5; +https://rovia-seven.vercel.app)", "accept-language": "tr-TR,tr;q=0.9" },
+      headers: { "user-agent": "Mozilla/5.0 (compatible; ROVIA/0.5; +https://www.roviaroad.com)", "accept-language": "tr-TR,tr;q=0.9" },
       cache: "no-store",
     });
     void res.body?.cancel().catch(() => undefined);

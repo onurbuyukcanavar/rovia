@@ -10,7 +10,7 @@ const config: CapacitorConfig = {
   appName: "ROVIA",
   webDir: "mobile/www",
   server: {
-    url: "https://rovia-seven.vercel.app",
+    url: "https://www.roviaroad.com",
     androidScheme: "https",
     // Supabase (e-posta doğrulama vb. bağlantılar) WebView içinde açılabilsin.
     // Google girişi WebView'da değil sistem tarayıcısında yapılır (src/lib/native/google-sign-in.ts).

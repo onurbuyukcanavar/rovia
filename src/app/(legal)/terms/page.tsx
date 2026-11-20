@@ -18,7 +18,7 @@ export default function TermsPageEn() {
       alternate={{ href: "/kullanim-kosullari", label: "Türkçe" }}
       intro={
         <p>
-          These terms govern your use of the ROVIA web app (rovia-seven.vercel.app). By creating an account or using ROVIA you
+          These terms govern your use of the ROVIA web app (www.roviaroad.com). By creating an account or using ROVIA you
           agree to them. How personal data is processed is described in the <Link href="/privacy" className="underline">Privacy Policy</Link>.
           In case of any conflict, the <Link href="/kullanim-kosullari" className="underline">Turkish version</Link> prevails.
         </p>

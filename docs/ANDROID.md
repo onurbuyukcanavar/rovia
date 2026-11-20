@@ -1,6 +1,6 @@
 # ROVIA Android uygulaması (APK)
 
-ROVIA'nın Android uygulaması, siteyi (https://rovia-seven.vercel.app) yerel bir kabukta açan bir
+ROVIA'nın Android uygulaması, siteyi (https://www.roviaroad.com) yerel bir kabukta açan bir
 [Capacitor 8](https://capacitorjs.com) uygulamasıdır. Asıl yerel katkısı: **ekran kapalıyken ya da
 uygulama arka plandayken de süren GPS yolculuk kaydı.**
 
@@ -67,7 +67,7 @@ korunur. Otomatik güncelleme yoktur.
   Google düğmesi (`src/lib/native/google-sign-in-form.tsx`) sunucu eyleminden OAuth adresini alır
   (`googleSignInUrlForNative`; PKCE çerezi bu sırada WebView'a yazılır) ve adresi sistem tarayıcısında
   (Custom Tab, `@capacitor/browser`) açar. Google'dan dönüş
-  `https://rovia-seven.vercel.app/auth/callback` adresine olur; bu adres Android App Link olarak
+  `https://www.roviaroad.com/auth/callback` adresine olur; bu adres Android App Link olarak
   uygulamaya bağlıdır (`AndroidManifest.xml`, `autoVerify`). `MainActivity` gelen adresi WebView'da
   açar, oturum WebView'da kurulur. E-posta/parola girişi değişmedi.
 - **App Link doğrulaması:** `public/.well-known/assetlinks.json` (paket `com.onurbuyukcanavar.rovia`,
