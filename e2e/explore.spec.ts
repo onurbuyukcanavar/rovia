@@ -93,6 +93,6 @@ test.describe("Vikipedi bilgisi (gerçek Wikimedia)", () => {
     expect(info.lang).toBe("tr");
     expect(info.extract.length).toBeGreaterThan(80);
     expect(info.url).toMatch(/^https:\/\/tr\.wikipedia\.org\//);
-    if (info.thumbnail) expect(info.thumbnail).toMatch(/^https:\/\/upload\.wikimedia\.org\//);
+    if (info.thumbnail) expect(info.thumbnail.src).toMatch(/^https:\/\/upload\.wikimedia\.org\//);
   });
 });
