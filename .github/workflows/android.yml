@@ -57,7 +57,12 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - uses: android-actions/setup-android@v3
+      # ubuntu-latest'te Android SDK hazır geliyor; setup-android eski
+      # "tools" paketini kurmaya çalışıp düştüğü için yalnızca lisansları onaylıyoruz.
+      - name: Android SDK lisansları
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
       - uses: gradle/actions/setup-gradle@v4
 
