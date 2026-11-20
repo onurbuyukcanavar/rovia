@@ -32,7 +32,7 @@ function ListSkeleton() {
   return (
     <div className="space-y-6" aria-label={t.common.loading}>
       <PageHeader eyebrow={t.nav.travelogues} title={T.title} description={T.subtitle} />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[0, 1, 2].map((i) => <div key={i} className="h-72 animate-pulse rounded-2xl bg-sand-100" />)}
       </div>
     </div>
@@ -56,7 +56,7 @@ async function TraveloguesLoader() {
           <div className="mt-5 flex justify-center"><NewTravelogueButton trips={trips} label={T.emptyCta} /></div>
         </div>
       ) : (
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-testid="travelogue-list">
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" data-testid="travelogue-list">
           {items.map((item) => <TravelogueCard key={item.id} item={item} />)}
         </ul>
       )}

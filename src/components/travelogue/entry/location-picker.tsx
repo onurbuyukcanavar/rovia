@@ -78,7 +78,7 @@ export function LocationPicker({ initial, styleUrl, onChange }: {
       </div>
       <p className="text-xs text-stone-600">{T.mapPickHint}</p>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <label htmlFor="entry-loc-name" className="block text-sm font-semibold text-ink-800">{T.locationName}</label>
           <input id="entry-loc-name" className={cn(fieldClass, "h-11")} value={loc.locationName ?? ""} maxLength={200}

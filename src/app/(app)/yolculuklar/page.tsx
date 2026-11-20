@@ -75,7 +75,7 @@ async function CompletedList() {
 
 function ListSkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label={t.common.loading}>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label={t.common.loading}>
       {[0, 1, 2].map((i) => <div key={i} className="h-56 animate-pulse rounded-2xl bg-sand-100" />)}
     </div>
   );

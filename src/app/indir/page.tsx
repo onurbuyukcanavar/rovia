@@ -30,7 +30,7 @@ export default function DownloadPage() {
       </section>
 
       <main className="mx-auto max-w-5xl px-5 py-12">
-        <div className="-mt-20 grid gap-5 md:grid-cols-3">
+        <div className="-mt-20 grid grid-cols-1 gap-5 md:grid-cols-3">
           <Card icon={<Download />} title={c.apk.title} badge={c.apk.badge} body={c.apk.body}>
             <a href={ANDROID_APK_URL} rel="noopener" className={buttonClass("accent", "md", "w-full")}>
               <Download className="size-4" aria-hidden /> {c.apk.cta}

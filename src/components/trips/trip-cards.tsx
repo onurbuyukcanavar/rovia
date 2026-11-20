@@ -11,7 +11,7 @@ import { t } from "@/i18n";
 
 export function TripCards({ trips }: { trips: TripListItem[] }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-testid="trip-list">
+    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" data-testid="trip-list">
       {trips.map((trip) => <TripCard key={trip.id} trip={trip} />)}
     </ul>
   );

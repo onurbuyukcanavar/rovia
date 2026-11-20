@@ -33,6 +33,28 @@ async function overflowReport(page: Page) {
 test.describe("mobil yerleşim", () => {
   test.skip(!hasCredentials, "E2E_* secret'ları tanımlı değil");
 
+  test("büyük yazı boyutunda (Android %130) dar ekranda yatay taşma yok", async ({ page }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width: 360, height: 760 });
+    // Android'in sistem yazı boyutu WebView'da metni büyütür; kök yazı boyutunu büyüterek taklit edilir
+    await page.addInitScript(() => {
+      document.addEventListener("DOMContentLoaded", () => { document.documentElement.style.fontSize = "130%"; });
+    });
+    await login(page, "alice");
+    const problems: string[] = [];
+    for (const path of [...PAGES, "/indir"]) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle").catch(() => {});
+      await page.waitForTimeout(600);
+      const rep = await overflowReport(page);
+      // html/body overflow-x: clip olduğundan scrollWidth taşmayı göstermez; taşan öğeler tek tek sayılır
+      if (rep.items.length) problems.push(`${path}: ekran ${rep.clientWidth}px\n    ${rep.items.join("\n    ")}`);
+      await page.screenshot({ path: `test-results/screens/buyuk-yazi${path.replace(/\//g, "_")}.png` });
+    }
+    console.log("\nSORUNLAR:\n" + problems.join("\n"));
+    expect(problems).toEqual([]);
+  });
+
   test("sayfalar ekrana sığar; menüler kaydırmada yerinde kalır", async ({ page }) => {
     test.setTimeout(180_000);
     await login(page, "alice");
