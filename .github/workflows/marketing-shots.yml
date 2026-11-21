@@ -1,0 +1,76 @@
+name: Pazarlama görüntüleri
+
+# Demo hesabını (demo@roviaroad.com) örnek verilerle doldurur ve canlı siteden ekran görüntüleri + kısa videolar alır.
+# Gerekli secret: DEMO_PASSWORD. Sonuç: "marketing-shots" artefaktı (7 gün).
+on:
+  push:
+    branches: [marketing-shots]
+    paths:
+      - .github/workflows/marketing-shots.yml
+      - scripts/marketing/**
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Görüntülerin alınacağı adres"
+        default: "https://www.roviaroad.com"
+      only:
+        description: "İsteğe bağlı: yalnızca bu dosya önekleri (ör. 03,04,video)"
+        default: ""
+      skip_seed:
+        description: "Veriyi yeniden oluşturma (yalnızca görüntü al)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: marketing-shots
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  # Publishable anahtar istemci paketine zaten gömülür; gizli değildir. Erişim RLS ile korunur.
+  NEXT_PUBLIC_SUPABASE_URL: https://lbocidoprcqiuxtqhoye.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_iwaXltsu1QuuBjHXAo0c-g_bQLrbqnc
+  BASE_URL: ${{ inputs.url || 'https://www.roviaroad.com' }}
+  SHOTS_ONLY: ${{ inputs.only || '' }}
+
+jobs:
+  shots:
+    name: Demo verisi · ekran görüntüleri · videolar
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
+    steps:
+      - name: DEMO_PASSWORD kontrolü
+        run: |
+          if [ -z "$DEMO_PASSWORD" ]; then
+            echo "::error::DEMO_PASSWORD secret tanımlı değil. Settings → Secrets and variables → Actions → New repository secret: DEMO_PASSWORD"
+            exit 1
+          fi
+          echo "DEMO_PASSWORD tanımlı."
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Demo verisi (seed)
+        id: seed
+        if: ${{ !inputs.skip_seed }}
+        run: npx tsx scripts/marketing/seed-demo.ts
+      - name: Ekran görüntüleri ve videolar
+        if: ${{ inputs.skip_seed || steps.seed.outputs.ready == 'true' }}
+        run: npx tsx scripts/marketing/shots.ts
+      - name: Hesap doğrulanmayı bekliyor
+        if: ${{ !inputs.skip_seed && steps.seed.outputs.ready != 'true' }}
+        run: echo "::notice::Demo hesabı henüz kullanılamıyor (e-posta doğrulaması). Seed adımındaki uyarıya bakın; doğrulamadan sonra iş akışını yeniden çalıştırın."
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: marketing-shots
+          path: marketing-out/
+          if-no-files-found: ignore
+          retention-days: 7
