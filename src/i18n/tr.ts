@@ -134,7 +134,21 @@ export const tr = {
       favorites: "Favorilerim",
       write: "Seyahatname Yaz",
     },
+    hero: {
+      body: "Rotanı çiz, yol üstündeki güzellikleri keşfet, kaydı başlat. Gerisini ROVIA biriktirir.",
+    },
+    /** Hızlı işlem kartlarının alt satırları */
+    actionHints: {
+      explore: "Rotanın çevresindeki tarihî yapıları, doğayı ve molaları bul.",
+      record: "GPS ile kilometre kilometre kaydet",
+      map: "Çevrendeki yerleri haritada gör",
+      favorites: "Kaydettiğin yerler bir arada",
+      write: "Yolu bir hikâyeye dönüştür",
+    },
     stats: "İstatistikler",
+    statsCaption: "Yolda biriktirdiklerin",
+    routeFrom: "Başlangıç",
+    routeTo: "Varış",
     statLabels: {
       trips: "Yolculuk",
       distance: "Kat edilen yol",

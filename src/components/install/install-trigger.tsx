@@ -25,7 +25,7 @@ export function InstallHeaderButton() {
   return (
     <>
       <button type="button" onClick={show} aria-label={t.install.trigger} title={t.install.trigger}
-        className="grid size-10 place-items-center rounded-full text-ink-800 hover:bg-sand-100 active:bg-sand-200">
+        className="grid size-10 place-items-center rounded-full text-paper/80 hover:bg-paper/10 hover:text-paper active:bg-paper/15">
         <Smartphone className="size-5" aria-hidden />
       </button>
       {sheet}

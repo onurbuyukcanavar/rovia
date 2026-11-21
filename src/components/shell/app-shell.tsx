@@ -10,7 +10,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[17rem_1fr]">
       {/* Masaüstü: sol navigasyon */}
-      <aside className="sticky top-0 hidden h-dvh flex-col bg-ink-900 px-4 py-6 lg:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-paper/[0.06] bg-ink-900 px-4 py-6 lg:flex">
         <Link href="/panel" className="px-2" aria-label="ROVIA panel">
           <Logo inverted />
         </Link>
@@ -24,14 +24,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Suspense>
       </aside>
 
-      {/* Mobil: üst çubuk */}
+      {/* Mobil: üst çubuk (masaüstü kenar çubuğu ve tema rengiyle aynı gece laciverti) */}
       {/* Sabit (fixed): kaydırmada ve iOS'ta yerinde kalır; çentik/durum çubuğu payı üstte */}
-      <header className="fixed inset-x-0 top-0 z-30 border-b border-sand-200 bg-paper/95 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
+      <header className="fixed inset-x-0 top-0 z-30 border-b border-paper/[0.07] bg-ink-950/95 pt-[env(safe-area-inset-top)] text-paper backdrop-blur lg:hidden">
         <div className="flex h-14 items-center justify-between pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))]">
-          <Link href="/panel" aria-label="ROVIA panel"><Logo /></Link>
+          <Link href="/panel" aria-label="ROVIA panel"><Logo inverted /></Link>
           <div className="flex items-center gap-1.5">
             <InstallHeaderButton />
-            <Suspense fallback={<span className="size-8 rounded-full bg-sand-200" />}>
+            <Suspense fallback={<span className="size-8 rounded-full bg-paper/10" />}>
               <MobileHeaderAvatar />
             </Suspense>
           </div>
@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobil: alt navigasyon */}
       <nav aria-label="Alt menü"
-        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-sand-200 bg-paper/95 pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] backdrop-blur lg:hidden">
+        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-paper/[0.07] bg-ink-950/95 pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] backdrop-blur lg:hidden">
         <Suspense fallback={<MobileNav pathname={null} />}>
           <MobileNavLive />
         </Suspense>

@@ -365,3 +365,44 @@ label:has(> input.sr-only) {
     radial-gradient(90% 50% at 60% 100%, rgb(232 145 45 / 0.12), transparent 80%),
     radial-gradient(50% 40% at 10% 0%, rgb(54 69 95 / 0.45), transparent 70%);
 }
+
+/* ---------------------------------------------------------------- Panel (/panel) gece teması
+ * Ana sayfanın dilinden hafif bir türev: WebGL yok, yalnızca CSS ve durağan SVG. */
+.panel-night {
+  background:
+    radial-gradient(70% 38% at 70% 0%, rgb(54 69 95 / 0.35), transparent 70%),
+    linear-gradient(to bottom, #070b13, #0a111d 40%, #0a111d);
+}
+.panel-hero-sky {
+  background:
+    radial-gradient(45% 30% at 75% 64%, rgb(240 169 74 / 0.26), transparent 72%),
+    radial-gradient(90% 60% at 75% 64%, rgb(34 48 75 / 0.6), transparent 75%),
+    linear-gradient(to bottom, #05080f 0%, #0a111d 52%, #111d31 64%, #070b13 100%);
+}
+@media (max-width: 1023px) {
+  .panel-hero-sky {
+    background:
+      radial-gradient(70% 22% at 60% 78%, rgb(240 169 74 / 0.24), transparent 72%),
+      radial-gradient(120% 40% at 60% 78%, rgb(34 48 75 / 0.55), transparent 75%),
+      linear-gradient(to bottom, #05080f 0%, #0a111d 66%, #111d31 78%, #070b13 100%);
+  }
+}
+/* Yolun orta şeridi: akan kesik çizgi (hareket azaltma tercihinde durur) */
+.panel-road-dash {
+  animation: panel-road 1.6s linear infinite;
+}
+@keyframes panel-road {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+/* Gösterge çizgisi: kadran tikleri */
+.panel-gauge-ticks {
+  background-image: repeating-linear-gradient(to right, rgb(247 245 240 / 0.22) 0 1px, transparent 1px 8px);
+  mask-image: linear-gradient(to right, black 60%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel-road-dash {
+    animation: none;
+  }
+}

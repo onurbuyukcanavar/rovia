@@ -57,8 +57,8 @@ function MobileTab({ itemKey, pathname, emphasized = false }: { itemKey: string;
   const content = emphasized ? (
     <span className="flex flex-col items-center gap-1">
       <span className={cn(
-        "-mt-6 grid size-14 place-items-center rounded-full shadow-lg ring-4 ring-paper",
-        available ? "bg-amber-500 text-ink-950" : "bg-sand-200 text-stone-500",
+        "-mt-6 grid size-14 place-items-center rounded-full ring-4 ring-ink-950",
+        available ? "bg-amber-500 text-ink-950 shadow-[0_8px_24px_-6px_rgb(232_145_45/0.6)]" : "bg-ink-700 text-paper/50",
       )}>
         <Icon className="size-6" aria-hidden />
       </span>
@@ -66,14 +66,14 @@ function MobileTab({ itemKey, pathname, emphasized = false }: { itemKey: string;
     </span>
   ) : (
     <span className="flex flex-col items-center gap-1">
-      <Icon className={cn("size-[22px]", active && "text-amber-600")} aria-hidden />
+      <Icon className={cn("size-[22px]", active && "text-amber-400")} aria-hidden />
       <span className="text-[0.68rem] font-semibold">{label}</span>
     </span>
   );
 
   const cls = cn(
     "flex h-14 flex-1 items-center justify-center",
-    active ? "text-ink-900" : available ? "text-stone-600" : "text-stone-500/60",
+    active ? "text-paper" : available ? "text-paper/65" : "text-paper/35",
   );
 
   if (!available) {
@@ -94,9 +94,9 @@ function MoreTab({ pathname }: { pathname: string | null }) {
   const active = isActive(pathname, "/diger") || isActive(pathname, "/ayarlar");
   return (
     <Link href="/diger" aria-current={active ? "page" : undefined}
-      className={cn("flex h-14 flex-1 items-center justify-center", active ? "text-ink-900" : "text-stone-600")}>
+      className={cn("flex h-14 flex-1 items-center justify-center", active ? "text-paper" : "text-paper/65")}>
       <span className="flex flex-col items-center gap-1">
-        <svg viewBox="0 0 24 24" className={cn("size-[22px]", active && "text-amber-600")} aria-hidden fill="currentColor">
+        <svg viewBox="0 0 24 24" className={cn("size-[22px]", active && "text-amber-400")} aria-hidden fill="currentColor">
           <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
         </svg>
         <span className="text-[0.68rem] font-semibold">{t.nav.more}</span>
