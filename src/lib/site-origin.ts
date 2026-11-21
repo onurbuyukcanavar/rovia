@@ -16,3 +16,12 @@ export function pickSiteOrigin(primary: string, host: string | null | undefined,
   const allowed = new Set([base, ...extra].map((o) => o.replace(/\/$/, "").toLowerCase()));
   return allowed.has(candidate) ? candidate : base;
 }
+
+/** Vercel önizleme adresleri (yalnızca bu projenin ekibine ait alt alan adları). */
+const PREVIEW_HOST = /^rovia-[a-z0-9-]+-onurbuyukcanavar\.vercel\.app$/;
+
+/** Önizleme ortamında istek bir ROVIA önizleme adresinden geliyorsa o adres; değilse null. */
+export function previewOrigin(host: string | null | undefined): string | null {
+  const h = host?.trim().toLowerCase();
+  return h && PREVIEW_HOST.test(h) ? `https://${h}` : null;
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickSiteOrigin } from "./site-origin";
+import { pickSiteOrigin, previewOrigin } from "./site-origin";
 
 const P = "https://www.roviaroad.com";
 describe("pickSiteOrigin", () => {
@@ -14,5 +14,15 @@ describe("pickSiteOrigin", () => {
   });
   it("sondaki eğik çizgi ve büyük harf sorun olmaz", () => {
     expect(pickSiteOrigin(`${P}/`, "WWW.ROVIAROAD.COM")).toBe(P);
+  });
+});
+
+describe("previewOrigin", () => {
+  it("yalnızca bu projenin önizleme adreslerini kabul eder", () => {
+    expect(previewOrigin("rovia-git-panel-v2-onurbuyukcanavar.vercel.app")).toBe("https://rovia-git-panel-v2-onurbuyukcanavar.vercel.app");
+    expect(previewOrigin("rovia-7c39u8kpb-onurbuyukcanavar.vercel.app")).toBe("https://rovia-7c39u8kpb-onurbuyukcanavar.vercel.app");
+    expect(previewOrigin("rovia-x-onurbuyukcanavar.vercel.app.evil.example")).toBeNull();
+    expect(previewOrigin("evil-onurbuyukcanavar.vercel.app")).toBeNull();
+    expect(previewOrigin(null)).toBeNull();
   });
 });

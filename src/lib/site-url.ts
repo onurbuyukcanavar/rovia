@@ -1,7 +1,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import { publicEnv } from "@/lib/env";
-import { pickSiteOrigin } from "@/lib/site-origin";
+import { pickSiteOrigin, previewOrigin } from "@/lib/site-origin";
 
 /**
  * OAuth ve e-posta yönlendirmeleri için güvenilir site kökü.
@@ -12,6 +12,11 @@ import { pickSiteOrigin } from "@/lib/site-origin";
 export async function getSiteUrl(): Promise<string> {
   if (publicEnv.siteUrl) {
     const h = await headers();
+    // Önizlemede giriş (ör. Google) aynı önizleme adresine dönsün; üretimde etkisizdir
+    if (process.env.VERCEL_ENV === "preview") {
+      const p = previewOrigin(h.get("x-forwarded-host") ?? h.get("host"));
+      if (p) return p;
+    }
     return pickSiteOrigin(publicEnv.siteUrl, h.get("x-forwarded-host") ?? h.get("host"));
   }
   if (process.env.NODE_ENV === "production" && process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
