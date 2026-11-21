@@ -51,7 +51,16 @@ Yerelde: `npm run cap:sync` ardından `cd android && ./gradlew assembleDebug` (A
 Uygulama içeriği (sayfalar, özellikler) sunucudan geldiği için site her yayımlandığında uygulama da
 güncellenir; APK'yı yeniden kurmak gerekmez. Yalnızca yerel kabuk değiştiğinde (eklenti, izin, simge)
 yeni APK çıkar: aynı bağlantıdan indirip üzerine kurmak yeterlidir — imza aynı olduğu için veriler
-korunur. Otomatik güncelleme yoktur.
+korunur.
+
+**Uygulama içi güncelleme:** uygulama kurulu sürümünü (`versionCode` = iş akışı run numarası) `RoviaUpdater`
+eklentisiyle ve WebView UA'sındaki ` RoviaAndroid/<kod> (<ad>)` ekiyle bildirir. Kabuktaki bildirim
+`/api/app/latest`'i (GitHub Releases, sunucuda ~10 dk önbellek) okur; yeni sürüm varsa "Güncelle" APK'yı
+yalnızca github.com / GitHub dosya sunucularından indirir, paket adını, daha yüksek sürüm kodunu ve imza
+sertifikasının çalışan uygulamayla aynı olduğunu doğrular, sonra Android paket yükleyicisini açar (ilk seferde
+"Bu kaynaktan izin ver" istenir). Bu özellikten önceki APK'lar (1.0.5 ve öncesi) eklentiyi içermez: bildirim
+onlarda "APK'yı indir" bağlantısı gösterir; bir kez elle güncellemek gerekir. PR'larda iş akışı yalnızca derler,
+yayımlamaz.
 
 ## Uygulamada nasıl çalışır
 

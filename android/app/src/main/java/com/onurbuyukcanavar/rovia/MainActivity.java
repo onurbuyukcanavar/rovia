@@ -1,7 +1,10 @@
 package com.onurbuyukcanavar.rovia;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
@@ -20,7 +23,32 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
 
     /** Uygulamanın açtığı site; eski Vercel adresi önceki sürümlerle başlatılmış girişler için kabul edilir. */
-    private static final java.util.Set<String> APP_HOSTS = new java.util.HashSet<>(java.util.Arrays.asList("www.roviaroad.com", "rovia-seven.vercel.app"));
+    static final java.util.Set<String> APP_HOSTS = new java.util.HashSet<>(java.util.Arrays.asList("www.roviaroad.com", "rovia-seven.vercel.app"));
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        // Uygulama içi güncelleme eklentisi (Capacitor yerel eklentileri bridge kurulmadan kaydedilmeli)
+        registerPlugin(RoviaUpdaterPlugin.class);
+        super.onCreate(savedInstanceState);
+        appendVersionToUserAgent();
+    }
+
+    /** Web katmanı kurulu sürümü eklenti olmadan da okuyabilsin: mevcut UA + " RoviaAndroid/<versionCode> (<versionName>)" */
+    @SuppressWarnings("deprecation")
+    private void appendVersionToUserAgent() {
+        try {
+            if (getBridge() == null || getBridge().getWebView() == null) return;
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            long code = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? info.getLongVersionCode() : info.versionCode;
+            android.webkit.WebSettings settings = getBridge().getWebView().getSettings();
+            String ua = settings.getUserAgentString();
+            if (ua != null && !ua.contains(" RoviaAndroid/")) {
+                settings.setUserAgentString(ua + " RoviaAndroid/" + code + " (" + info.versionName + ")");
+            }
+        } catch (Exception ignored) {
+            // Sürüm okunamazsa UA değişmez; eklenti yine sürüm bildirir
+        }
+    }
 
     /*
      * Oturum çerezlerini diske yaz. Android WebView çerezleri önce bellekte tutar ve diske

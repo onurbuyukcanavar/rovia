@@ -13,6 +13,7 @@ import { install } from "./install";
 import { landing } from "./landing";
 import { theme } from "./theme";
 import { sharedLocation } from "./shared-location";
+import { appUpdate } from "./app-update";
 
 export const tr = {
   brand: {
@@ -702,6 +703,7 @@ export const tr = {
   landing,
   theme,
   sharedLocation,
+  appUpdate,
 } as const;
 
 export type Dictionary = typeof tr;
