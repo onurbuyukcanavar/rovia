@@ -7,6 +7,7 @@ import { t } from "@/i18n";
 import { SwRegister } from "@/components/install/sw-register";
 import { ThemeSync } from "@/components/theme/theme-sync";
 import { THEME_COLOR, THEME_SCRIPT } from "@/lib/theme/theme";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   metadataBase: publicEnv.siteUrl ? new URL(publicEnv.siteUrl) : undefined,
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {children}
         <ThemeSync />
         <SwRegister />
+        <Analytics />
       </body>
     </html>
   );
