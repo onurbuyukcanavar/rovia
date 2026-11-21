@@ -293,7 +293,8 @@ label:has(> input.sr-only) {
     font-family: var(--font-serif);
     font-size: 1.125rem;
     line-height: 1.75;
-    color: var(--color-ink-900);
+    /* Uzun okuma: ön plan rengi zemine çok hafif karışır (koyuda parlamayı azaltır; her iki temada >12:1) */
+    color: color-mix(in srgb, var(--color-fg) 90%, var(--color-surface));
     overflow-wrap: break-word;
     font-feature-settings: "kern", "liga", "onum";
   }
@@ -312,7 +313,8 @@ label:has(> input.sr-only) {
   .prose-rovia.ProseMirror h2 {
     margin-top: 1.9em;
     font-size: 1.6em;
-    font-weight: 600;
+    font-weight: 500;
+    color: var(--color-fg);
     line-height: 1.2;
     letter-spacing: -0.01em;
   }
@@ -322,7 +324,7 @@ label:has(> input.sr-only) {
     font-size: 1.25em;
     font-weight: 600;
     line-height: 1.3;
-    color: var(--color-ink-800);
+    color: var(--color-fg);
   }
   .prose-rovia > :is(h2, h3, h4):first-child {
     margin-top: 0;
@@ -338,9 +340,9 @@ label:has(> input.sr-only) {
     text-underline-offset: 0.18em;
   }
   .prose-rovia a {
-    color: var(--color-amber-700);
+    color: var(--color-accent-ink);
     text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--color-amber-500) 55%, transparent);
+    text-decoration-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
     text-decoration-thickness: 1.5px;
     text-underline-offset: 0.18em;
     transition: text-decoration-color 0.15s;
@@ -351,8 +353,8 @@ label:has(> input.sr-only) {
   .prose-rovia blockquote {
     margin-left: 0;
     padding: 0.15em 0 0.15em 1.1em;
-    border-left: 3px solid var(--color-amber-400);
-    color: var(--color-stone-700);
+    border-left: 2px solid var(--color-accent);
+    color: var(--color-fg-muted);
     font-style: italic;
   }
   .prose-rovia blockquote > * + * {
@@ -375,24 +377,33 @@ label:has(> input.sr-only) {
     margin-top: 0.35em;
   }
   .prose-rovia li::marker {
-    color: var(--color-stone-500);
+    color: var(--color-fg-subtle);
   }
+  /* Ayraç: ortasında amber ◆ olan, zemin renginden bağımsız (kartta da sayfada da) çizgi */
   .prose-rovia hr {
     margin: 2.2em auto;
-    width: 6rem;
+    width: 7rem;
+    height: 1px;
     border: 0;
-    border-top: 1px solid var(--color-sand-300);
     overflow: visible;
     text-align: center;
+    background: linear-gradient(to right, var(--color-line-strong) 0 38%, transparent 38% 62%, var(--color-line-strong) 62%);
   }
   .prose-rovia hr::after {
     content: "◆";
     position: relative;
-    top: -0.75em;
-    padding: 0 0.6em;
+    top: -0.8em;
     font-size: 0.7rem;
-    color: var(--color-amber-500);
-    background: var(--color-paper);
+    color: var(--color-accent);
+  }
+  /* Kitap görünümü: bir durağın ilk paragrafı süslü büyük harfle (drop cap) başlar */
+  .prose-rovia.is-lead > p:first-child::first-letter {
+    float: left;
+    margin: 0.08em 0.1em 0 0;
+    font-size: 3.6em;
+    font-weight: 300;
+    line-height: 0.82;
+    color: var(--color-accent-glow);
   }
   .prose-rovia figure {
     margin-block: 1.6em;
@@ -404,26 +415,23 @@ label:has(> input.sr-only) {
     max-height: 80vh;
     object-fit: contain;
     border-radius: 0.875rem;
-    background: var(--color-sand-100);
+    background: var(--color-sunken);
   }
   .prose-rovia figcaption {
     margin-top: 0.55em;
     font-family: var(--font-sans);
     font-size: 0.8rem;
     line-height: 1.5;
-    color: var(--color-stone-600);
+    color: var(--color-fg-muted);
     text-align: center;
   }
 
   /* ------------------------------------------------ Düzenleyici (ProseMirror) */
-  .rovia-editor hr::after {
-    background: var(--color-paper-50);
-  }
   .prose-rovia.ProseMirror {
     min-height: inherit;
     outline: none;
     white-space: pre-wrap;
-    caret-color: var(--color-amber-600);
+    caret-color: var(--color-accent-ink);
     /* iOS yakınlaştırmasın: en az 16px */
     font-size: max(16px, 1.0625rem);
   }
@@ -443,11 +451,11 @@ label:has(> input.sr-only) {
     float: left;
     height: 0;
     pointer-events: none;
-    color: var(--color-stone-500);
+    color: var(--color-fg-subtle);
     font-style: italic;
   }
   .prose-rovia.ProseMirror .ProseMirror-selectednode:not(.rovia-image) {
-    outline: 2px solid var(--color-amber-500);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
     border-radius: 0.25rem;
   }
@@ -457,7 +465,7 @@ label:has(> input.sr-only) {
     transition: box-shadow 0.15s;
   }
   .prose-rovia.ProseMirror .rovia-image.is-selected {
-    box-shadow: 0 0 0 3px var(--color-amber-400);
+    box-shadow: 0 0 0 3px var(--color-accent);
   }
   .prose-rovia.ProseMirror .rovia-image [data-drag-handle] {
     cursor: grab;
@@ -470,12 +478,12 @@ label:has(> input.sr-only) {
     justify-content: center;
     gap: 0.35rem;
     padding: 1.5rem;
-    border: 1px dashed var(--color-sand-300);
+    border: 1px dashed var(--color-line-strong);
     border-radius: 0.875rem;
-    background: var(--color-sand-100);
+    background: var(--color-sunken);
     font-family: var(--font-sans);
     font-size: 0.875rem;
-    color: var(--color-stone-600);
+    color: var(--color-fg-muted);
     text-align: center;
   }
   .rovia-caption-input {
@@ -486,7 +494,7 @@ label:has(> input.sr-only) {
     background: transparent;
     font-family: var(--font-sans);
     font-size: 16px;
-    color: var(--color-stone-700);
+    color: var(--color-fg-muted);
     text-align: center;
     outline: none;
   }
@@ -496,17 +504,17 @@ label:has(> input.sr-only) {
     }
   }
   .rovia-caption-input:hover {
-    border-color: var(--color-sand-200);
+    border-color: var(--color-line);
   }
   .rovia-caption-input:focus {
-    border-color: var(--color-amber-400);
-    background: #fff;
+    border-color: var(--color-accent);
+    background: var(--color-field);
   }
   .rovia-caption-input::placeholder {
-    color: var(--color-stone-500);
+    color: var(--color-fg-subtle);
   }
   .prose-rovia.ProseMirror .ProseMirror-gapcursor::after {
-    border-top-color: var(--color-amber-600);
+    border-top-color: var(--color-accent-ink);
   }
 }
 

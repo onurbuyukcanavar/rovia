@@ -88,12 +88,12 @@ function RoviaImageView({ node, selected, updateAttributes, deleteNode, editor, 
           <img src={src} alt={caption} width={m?.width ?? undefined} height={m?.height ?? undefined} draggable={false} />
         ) : waiting.has(mediaId) ? (
           <div className="rovia-image-placeholder" role="status">
-            <LoaderCircle className="size-6 animate-spin text-amber-600" aria-hidden />
+            <LoaderCircle className="size-6 animate-spin text-accent-ink" aria-hidden />
             <span>{tx.loading}</span>
           </div>
         ) : (
           <div className="rovia-image-placeholder">
-            <ImageOff className="size-6 text-stone-500" aria-hidden />
+            <ImageOff className="size-6 text-fg-subtle" aria-hidden />
             <span className="font-semibold">{tx.missing}</span>
             <span className="text-xs">{tx.missingHint}</span>
           </div>
@@ -104,7 +104,8 @@ function RoviaImageView({ node, selected, updateAttributes, deleteNode, editor, 
             onClick={() => deleteNode()}
             title={tx.remove}
             aria-label={tx.remove}
-            className="absolute top-2 right-2 grid size-9 place-items-center rounded-full bg-ink-900/80 text-paper opacity-90 shadow transition hover:bg-ink-900 focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-[.is-selected]:opacity-100"
+            data-theme="dark"
+            className="absolute top-2 right-2 grid size-9 place-items-center rounded-full border border-line bg-overlay/85 text-fg opacity-90 shadow-[var(--shadow-overlay)] backdrop-blur transition hover:bg-overlay focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-[.is-selected]:opacity-100"
           >
             <X className="size-4" aria-hidden />
           </button>

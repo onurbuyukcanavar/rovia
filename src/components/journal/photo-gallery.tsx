@@ -8,6 +8,7 @@ import { deleteMedia, updateMediaCaption } from "@/lib/actions/journal";
 import type { MediaItem } from "@/lib/journal/types";
 import { formatDate, formatTime } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { inputClass } from "@/components/ui/field";
 import { t } from "@/i18n";
 
 /** Kare küçük görsel ızgarası; dokununca tam ekran görüntüleyici açılır. */
@@ -19,7 +20,7 @@ export function PhotoGrid({ media, tripId = null, className, label }: { media: M
       <ul className={cn("grid grid-cols-3 gap-1.5 sm:grid-cols-4", className)} aria-label={label} data-testid="photo-grid">
         {media.map((m, i) => (
           <li key={m.id}>
-            <button type="button" onClick={() => setOpen(i)} className="group block aspect-square w-full overflow-hidden rounded-xl bg-sand-100"
+            <button type="button" onClick={() => setOpen(i)} className="group block aspect-square w-full overflow-hidden rounded-xl border border-line bg-sunken"
               aria-label={m.caption || `${t.journal.lightbox.of(i + 1, media.length)}`}>
               {m.thumbUrl && <img src={m.thumbUrl} alt={m.caption ?? ""} loading="lazy" className="size-full object-cover transition group-hover:scale-105" />}
             </button>
@@ -60,7 +61,7 @@ function Lightbox({ media, index, onIndex, onClose, tripId }: {
 
   return (
     <div role="dialog" aria-modal="true" aria-label={t.journal.lightbox.of(index + 1, media.length)}
-      className="fixed inset-0 z-[60] flex flex-col bg-ink-950/95 text-paper" data-testid="lightbox"
+      data-theme="dark" className="fixed inset-0 z-[60] flex flex-col bg-sunken/95 text-fg backdrop-blur-sm" data-testid="lightbox"
       onTouchStart={(e) => { touch.current = e.touches[0]?.clientX ?? null; }}
       onTouchEnd={(e) => {
         const start = touch.current;
@@ -71,9 +72,9 @@ function Lightbox({ media, index, onIndex, onClose, tripId }: {
         else prev();
       }}>
       <div className="flex items-center justify-between gap-2 px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2">
-        <span className="text-sm font-semibold tabular-nums text-paper/80">{t.journal.lightbox.of(index + 1, media.length)}</span>
+        <span className="text-sm font-semibold tabular-nums text-fg-muted">{t.journal.lightbox.of(index + 1, media.length)}</span>
         <button ref={closeRef} type="button" onClick={onClose} aria-label={t.journal.lightbox.close}
-          className="grid size-11 place-items-center rounded-full hover:bg-paper/10"><X className="size-6" aria-hidden /></button>
+          className="grid size-11 place-items-center rounded-full hover:bg-fg/10"><X className="size-6" aria-hidden /></button>
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-2">
         {m.url ? (
@@ -84,11 +85,11 @@ function Lightbox({ media, index, onIndex, onClose, tripId }: {
         {media.length > 1 && (
           <>
             <button type="button" onClick={prev} aria-label={t.journal.lightbox.prev}
-              className="absolute top-1/2 left-2 hidden size-12 -translate-y-1/2 place-items-center rounded-full bg-ink-900/60 hover:bg-ink-900 sm:grid">
+              className="absolute top-1/2 left-2 hidden size-12 -translate-y-1/2 place-items-center rounded-full border border-line bg-overlay/70 backdrop-blur hover:bg-overlay sm:grid">
               <ChevronLeft className="size-7" aria-hidden />
             </button>
             <button type="button" onClick={next} aria-label={t.journal.lightbox.next}
-              className="absolute top-1/2 right-2 hidden size-12 -translate-y-1/2 place-items-center rounded-full bg-ink-900/60 hover:bg-ink-900 sm:grid">
+              className="absolute top-1/2 right-2 hidden size-12 -translate-y-1/2 place-items-center rounded-full border border-line bg-overlay/70 backdrop-blur hover:bg-overlay sm:grid">
               <ChevronRight className="size-7" aria-hidden />
             </button>
           </>
@@ -109,8 +110,8 @@ function PhotoInfo({ media, tripId, onDeleted }: { media: MediaItem; tripId: str
   const dirty = caption.trim() !== (media.caption ?? "");
 
   return (
-    <div className="space-y-2 bg-ink-950 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] text-sm">
-      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-paper/70">
+    <div className="space-y-2 border-t border-line bg-sunken px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] text-sm">
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-fg-muted">
         <span>{media.takenAt ? `${t.journal.lightbox.taken}: ` : ""}{formatDate(when)} · {formatTime(when)}</span>
         {media.lat !== null && media.lng !== null && (
           <a href={`https://www.openstreetmap.org/?mlat=${media.lat}&mlon=${media.lng}#map=15/${media.lat}/${media.lng}`} target="_blank" rel="noopener noreferrer"
@@ -131,10 +132,10 @@ function PhotoInfo({ media, tripId, onDeleted }: { media: MediaItem; tripId: str
         <label htmlFor={`cap-${media.id}`} className="sr-only">{t.journal.lightbox.caption}</label>
         <input id={`cap-${media.id}`} value={caption} maxLength={2000} placeholder={t.journal.lightbox.captionPlaceholder}
           onChange={(e) => { setCaption(e.target.value); setSavedNote(false); }}
-          className="h-10 min-w-0 flex-1 rounded-xl border border-paper/20 bg-ink-900 px-3 text-paper outline-none placeholder:text-paper/40 focus:border-amber-400" />
+          className={inputClass(false, "h-10 min-w-0 flex-1 px-3")} />
         {dirty && <Button type="submit" size="sm" variant="accent" disabled={pending}>{t.journal.lightbox.saveCaption}</Button>}
       </form>
-      {savedNote && <p className="text-xs text-paper/60" role="status">{t.journal.saved}</p>}
+      {savedNote && <p className="text-xs text-fg-muted" role="status">{t.journal.saved}</p>}
       {error && <Alert tone="error">{error}</Alert>}
       {confirming ? (
         <div className="flex flex-wrap items-center gap-2">
@@ -144,10 +145,10 @@ function PhotoInfo({ media, tripId, onDeleted }: { media: MediaItem; tripId: str
             if (!r.ok) setError(r.message);
             else onDeleted();
           })}>{t.journal.lightbox.deleteYes}</Button>
-          <Button type="button" size="sm" variant="ghost" className="text-paper hover:bg-paper/10" onClick={() => setConfirming(false)}>{t.common.cancel}</Button>
+          <Button type="button" size="sm" variant="ghost" onClick={() => setConfirming(false)}>{t.common.cancel}</Button>
         </div>
       ) : (
-        <button type="button" onClick={() => setConfirming(true)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-paper/70 hover:text-paper">
+        <button type="button" onClick={() => setConfirming(true)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-fg-muted hover:text-fg">
           <Trash2 className="size-3.5" aria-hidden /> {t.journal.lightbox.delete}
         </button>
       )}

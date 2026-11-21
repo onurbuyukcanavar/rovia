@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { inputClass, labelClass } from "@/components/ui/field";
+import { fieldClass } from "@/components/journal/note-editor";
 import { Modal } from "@/components/travelogue/workspace/modal";
 import { addPlaceToTravelogue, getTravelogueTargets } from "@/lib/actions/travelogue";
 import { cn } from "@/lib/cn";
@@ -111,8 +111,8 @@ function AddForm({ place, targets, loadError }: { place: TraveloguePlace; target
       </fieldset>
       {choice === "new" && (
         <div className="space-y-1.5">
-          <label htmlFor="att-title" className={labelClass}>{T.newTitle}</label>
-          <input id="att-title" className={inputClass(false, "h-11 px-3")} value={newTitle} maxLength={200} placeholder={T.newTitlePlaceholder}
+          <label htmlFor="att-title" className="block text-sm font-semibold text-fg">{T.newTitle}</label>
+          <input id="att-title" className={cn(fieldClass, "h-11")} value={newTitle} maxLength={200} placeholder={T.newTitlePlaceholder}
             onChange={(e) => setNewTitle(e.target.value)} />
         </div>
       )}
@@ -128,10 +128,10 @@ function Choice({ checked, onChange, title, sub, testId }: { checked: boolean; o
   return (
     <label className={cn("flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm",
       checked ? "border-accent/60 bg-accent-soft" : "border-line bg-raised hover:bg-fg/[0.05]")}>
-      <input type="radio" name="att-target" className="size-4 accent-[var(--color-accent)]" checked={checked} onChange={onChange} data-testid={testId} />
+      <input type="radio" name="att-target" className="size-4 accent-accent" checked={checked} onChange={onChange} data-testid={testId} />
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold text-fg">{title}</span>
-        {sub && <span className="block truncate text-xs text-fg-subtle">{sub}</span>}
+        <span className="block truncate font-semibold">{title}</span>
+        {sub && <span className="block truncate text-xs text-fg-muted">{sub}</span>}
       </span>
     </label>
   );

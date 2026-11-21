@@ -17,7 +17,7 @@ export function ShareGallery({ photos }: { photos: MediaItem[] }) {
         {photos.map((m, i) => (
           <li key={m.id}>
             <button type="button" onClick={() => setOpen(i)} aria-label={m.caption || P.photoAlt(i + 1)}
-              className="group block aspect-[4/3] w-full overflow-hidden rounded-xl bg-sand-100">
+              className="group block aspect-[4/3] w-full overflow-hidden rounded-xl border border-line bg-sunken">
               {(m.thumbUrl ?? m.url) && <img src={m.thumbUrl ?? m.url ?? undefined} alt={m.caption ?? ""} loading="lazy" className="size-full object-cover transition group-hover:scale-105" />}
             </button>
           </li>
@@ -54,7 +54,7 @@ function Viewer({ photos, index, onIndex, onClose }: { photos: MediaItem[]; inde
 
   return (
     <div role="dialog" aria-modal="true" aria-label={m.caption || P.photoAlt(index + 1)}
-      className="fixed inset-0 z-[60] flex flex-col bg-ink-950/95 text-paper"
+      data-theme="dark" className="fixed inset-0 z-[60] flex flex-col bg-sunken/95 text-fg backdrop-blur-sm"
       onTouchStart={(e) => { touch.current = e.touches[0]?.clientX ?? null; }}
       onTouchEnd={(e) => {
         const start = touch.current;
@@ -65,26 +65,26 @@ function Viewer({ photos, index, onIndex, onClose }: { photos: MediaItem[]; inde
         else prev();
       }}>
       <div className="flex items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2">
-        <span className="text-sm font-semibold tabular-nums text-paper/80">{index + 1} / {n}</span>
+        <span className="text-sm font-semibold tabular-nums text-fg-muted">{index + 1} / {n}</span>
         <button ref={closeRef} type="button" onClick={onClose} aria-label={P.closePhoto}
-          className="grid size-11 place-items-center rounded-full hover:bg-paper/10"><X className="size-6" aria-hidden /></button>
+          className="grid size-11 place-items-center rounded-full hover:bg-fg/10"><X className="size-6" aria-hidden /></button>
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-2">
         {m.url && <img key={m.id} src={m.url} alt={m.caption ?? ""} className="max-h-full max-w-full rounded-lg object-contain" />}
         {n > 1 && (
           <>
             <button type="button" onClick={prev} aria-label={P.prevPhoto}
-              className="absolute top-1/2 left-2 hidden size-12 -translate-y-1/2 place-items-center rounded-full bg-ink-900/60 hover:bg-ink-900 sm:grid">
+              className="absolute top-1/2 left-2 hidden size-12 -translate-y-1/2 place-items-center rounded-full border border-line bg-overlay/70 backdrop-blur hover:bg-overlay sm:grid">
               <ChevronLeft className="size-7" aria-hidden />
             </button>
             <button type="button" onClick={next} aria-label={P.nextPhoto}
-              className="absolute top-1/2 right-2 hidden size-12 -translate-y-1/2 place-items-center rounded-full bg-ink-900/60 hover:bg-ink-900 sm:grid">
+              className="absolute top-1/2 right-2 hidden size-12 -translate-y-1/2 place-items-center rounded-full border border-line bg-overlay/70 backdrop-blur hover:bg-overlay sm:grid">
               <ChevronRight className="size-7" aria-hidden />
             </button>
           </>
         )}
       </div>
-      <p className="min-h-12 px-4 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] text-center text-sm text-paper/80">{m.caption}</p>
+      <p className="min-h-12 px-4 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] text-center font-serif text-base text-fg-muted italic">{m.caption}</p>
     </div>
   );
 }

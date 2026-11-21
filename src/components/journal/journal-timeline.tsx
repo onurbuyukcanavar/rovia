@@ -61,15 +61,15 @@ export function JournalTimeline({ userId, notes, media, tripId, trips, defaultNo
       {notice && <Alert tone="success">{notice}</Alert>}
 
       {notes.length === 0 && editing !== "new" ? (
-        <p className="rounded-2xl border border-dashed border-sand-300 p-6 text-center text-sm text-stone-600" data-testid="journal-empty">
-          <NotebookPen className="mx-auto mb-2 size-6 text-stone-400" aria-hidden />{emptyText}
+        <p className="rounded-[var(--radius-card)] border border-dashed border-line-strong p-8 text-center text-sm text-fg-muted" data-testid="journal-empty">
+          <NotebookPen className="mx-auto mb-3 size-6 text-accent-ink" aria-hidden />{emptyText}
         </p>
       ) : (
         <ol className="space-y-6" aria-label={t.journal.tabs.timeline}>
           {groups.map((g) => (
             <li key={`${g.day}-${g.notes[0].id}`} className="space-y-3">
-              <h3 className="eyebrow sticky top-[var(--mobile-header)] z-10 -mx-1 bg-paper/95 px-1 py-1 backdrop-blur lg:top-0">{g.day}</h3>
-              <ol className="space-y-3 border-l-2 border-sand-200 pl-4">
+              <h3 className="eyebrow-accent sticky top-[calc(var(--mobile-header)+0.5rem)] z-10 -ml-1 w-fit rounded-full border border-line bg-chrome px-3 py-1.5 backdrop-blur lg:top-2">{g.day}</h3>
+              <ol className="space-y-3 border-l border-line-strong pl-4">
                 {g.notes.map((n) =>
                   editing === n.id ? (
                     <li key={n.id}>
@@ -99,22 +99,22 @@ function NoteCard({ note, media, showTrip, onEdit, onDeleted }: {
   const Icon = KIND_ICON[note.kind] ?? StickyNote;
 
   return (
-    <li className="relative rounded-2xl border border-sand-200 bg-white p-4" data-testid="journal-note">
-      <span className="absolute top-5 -left-[1.4rem] grid size-5 place-items-center rounded-full border-2 border-paper bg-amber-500 text-ink-950" aria-hidden>
+    <li className="relative rounded-[var(--radius-card)] border border-line bg-raised p-4 shadow-[var(--shadow-card)] sm:p-5" data-testid="journal-note">
+      <span className="absolute top-5 -left-[1.66rem] grid size-5 place-items-center rounded-full border-2 border-surface bg-accent text-accent-fg" aria-hidden>
         <Icon className="size-3" />
       </span>
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-stone-600">
-        <span className="font-semibold text-amber-700">{t.journal.kinds[note.kind]}</span>
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-muted">
+        <span className="font-semibold text-accent-ink">{t.journal.kinds[note.kind]}</span>
         <span className="tabular-nums">{formatTime(note.notedAt)}</span>
         {showTrip && note.tripId && note.tripTitle && (
-          <Link href={`/yolculuklar/${note.tripId}`} className="truncate font-semibold text-ink-800 underline-offset-2 hover:underline">· {note.tripTitle}</Link>
+          <Link href={`/yolculuklar/${note.tripId}`} className="truncate font-semibold text-fg underline-offset-2 hover:underline">· {note.tripTitle}</Link>
         )}
       </p>
-      <h4 className="mt-1 text-lg leading-snug font-bold">{note.title ?? (note.body ? null : t.journal.photoOnlyNote)}</h4>
-      {note.body && <p className="mt-1 font-serif text-[1.05rem] leading-relaxed whitespace-pre-line text-ink-800">{note.body}</p>}
+      <h4 className="mt-1 text-lg leading-snug font-semibold tracking-tight text-fg">{note.title ?? (note.body ? null : t.journal.photoOnlyNote)}</h4>
+      {note.body && <p className="mt-1.5 max-w-prose font-serif text-[1.08rem] leading-relaxed whitespace-pre-line text-fg/90">{note.body}</p>}
       {note.locationName && (
-        <p className="mt-2 flex items-center gap-1.5 text-sm text-stone-700">
-          <MapPin className="size-4 shrink-0 text-amber-600" aria-hidden />
+        <p className="mt-2 flex items-center gap-1.5 text-sm text-fg-muted">
+          <MapPin className="size-4 shrink-0 text-accent-ink" aria-hidden />
           {note.lat !== null && note.lng !== null ? (
             <a href={`https://www.openstreetmap.org/?mlat=${note.lat}&mlon=${note.lng}#map=16/${note.lat}/${note.lng}`} target="_blank" rel="noopener noreferrer"
               className="underline-offset-2 hover:underline">{note.locationName}</a>
@@ -124,11 +124,11 @@ function NoteCard({ note, media, showTrip, onEdit, onDeleted }: {
       {media.length > 0 && <PhotoGrid media={media} tripId={note.tripId} className="mt-3" label={t.journal.photoCount(media.length)} />}
 
       {confirming ? (
-        <div className="mt-3 space-y-2 rounded-xl bg-sand-100/70 p-3" role="alertdialog" aria-label={t.journal.deleteConfirm}>
+        <div className="mt-3 space-y-2 rounded-xl border border-danger/30 bg-danger-soft p-3" role="alertdialog" aria-label={t.journal.deleteConfirm}>
           <p className="text-sm font-semibold">{t.journal.deleteConfirm}</p>
           {media.length > 0 && (
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" className="size-4 accent-amber-600" checked={withPhotos} onChange={(e) => setWithPhotos(e.target.checked)} />
+              <input type="checkbox" className="size-4 accent-accent" checked={withPhotos} onChange={(e) => setWithPhotos(e.target.checked)} />
               {t.journal.deleteWithPhotos}
             </label>
           )}

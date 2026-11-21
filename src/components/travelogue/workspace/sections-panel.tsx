@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp, Eye, EyeOff, LoaderCircle, PenLine, Pencil, Plus, T
 import { useOptimistic, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { SectionEyebrow } from "@/components/ui/section-eyebrow";
 import { fieldClass } from "@/components/journal/note-editor";
 import { RichEditor } from "@/components/travelogue/editor/rich-editor-lazy";
 import { SaveStatus } from "@/components/travelogue/save-status";
@@ -57,8 +58,8 @@ export function SectionsPanel({ travelogueId, sections, ctx }: { travelogueId: s
   return (
     <section aria-labelledby="sections-title" className="space-y-3" data-testid="sections-panel">
       <div>
-        <h2 id="sections-title" className="text-lg font-extrabold tracking-tight">{T.title}</h2>
-        <p className="text-sm text-stone-600">{T.hint}</p>
+        <SectionEyebrow as="h2" id="sections-title" index={2}>{T.title}</SectionEyebrow>
+        <p className="mt-2 text-sm text-fg-muted">{T.hint}</p>
       </div>
       <ol className="space-y-2">
         {list.map((s, i) => (
@@ -124,10 +125,10 @@ function SectionRow({ section, index, count, ctx, busy, onMove, onError }: {
   }
 
   return (
-    <li className={cn("rounded-2xl border bg-white", visible ? "border-sand-200" : "border-dashed border-sand-300 bg-paper-50")}
+    <li className={cn("rounded-2xl border", visible ? "border-line bg-raised" : "border-dashed border-line-strong bg-transparent")}
       data-testid="section-row" data-kind={section.kind}>
       <div className="flex items-center gap-2 px-3 py-2">
-        <span className="w-6 shrink-0 text-center text-xs font-bold text-stone-500 tabular-nums">{index + 1}</span>
+        <span className="w-6 shrink-0 text-center font-serif text-sm text-accent-ink italic tabular-nums">{String(index + 1).padStart(2, "0")}</span>
         <span className="min-w-0 flex-1">
           {renaming ? (
             <form onSubmit={rename} className="flex gap-2">
@@ -137,7 +138,7 @@ function SectionRow({ section, index, count, ctx, busy, onMove, onError }: {
               <Button type="submit" size="sm" variant="secondary" disabled={!draftTitle.trim()}>{t.common.save}</Button>
             </form>
           ) : (
-            <span className={cn("block truncate font-semibold", !visible && "text-stone-500")} data-testid="section-title">
+            <span className={cn("block truncate font-semibold", !visible && "text-fg-subtle")} data-testid="section-title">
               {title}{!visible && <span className="ml-2 text-xs font-normal">({T.hidden})</span>}
             </span>
           )}
@@ -158,7 +159,7 @@ function SectionRow({ section, index, count, ctx, busy, onMove, onError }: {
       </div>
 
       {confirming && (
-        <div className="mx-3 mb-3 space-y-2 rounded-xl bg-sand-100/70 p-3" role="alertdialog" aria-label={T.deleteConfirm}>
+        <div className="mx-3 mb-3 space-y-2 rounded-xl border border-danger/30 bg-danger-soft p-3" role="alertdialog" aria-label={T.deleteConfirm}>
           <p className="text-sm font-semibold">{T.deleteConfirm}</p>
           <div className="flex gap-2">
             <Button type="button" size="sm" variant="danger" disabled={deleting} onClick={() => startDelete(async () => {
@@ -181,7 +182,7 @@ function SectionRow({ section, index, count, ctx, busy, onMove, onError }: {
                 onChange={(doc) => { setContent(doc); autosave.update({ content: doc }); }} />
               <div className="flex items-center justify-between gap-2">
                 <SaveStatus autosave={view} onReload={ctx.onReload} />
-                <button type="button" className="text-sm font-semibold text-stone-600 underline" onClick={() => { void autosave.flush(); setOpen(false); }}>
+                <button type="button" className="min-h-9 text-sm font-semibold text-fg-muted underline underline-offset-2 hover:text-fg" onClick={() => { void autosave.flush(); setOpen(false); }}>
                   {T.collapse}
                 </button>
               </div>
@@ -189,7 +190,7 @@ function SectionRow({ section, index, count, ctx, busy, onMove, onError }: {
           ) : (
             <div className="flex items-center gap-3">
               <button type="button" onClick={() => setOpen(true)} data-testid="section-edit"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:underline">
+                className="inline-flex min-h-9 items-center gap-1.5 text-sm font-semibold text-accent-ink underline-offset-4 hover:underline">
                 <PenLine className="size-4" aria-hidden /> {T.edit}
               </button>
               {(autosave.status !== "idle" || autosave.backup) && <SaveStatus autosave={view} onReload={ctx.onReload} />}
@@ -197,7 +198,7 @@ function SectionRow({ section, index, count, ctx, busy, onMove, onError }: {
           )
         ) : (
           <>
-            {autoHint && <p className="text-xs text-stone-600">{autoHint}</p>}
+            {autoHint && <p className="text-xs text-fg-muted">{autoHint}</p>}
             {(autosave.status !== "idle" || autosave.backup) && <SaveStatus autosave={view} onReload={ctx.onReload} />}
           </>
         )}
@@ -211,7 +212,7 @@ function IconBtn({ label, onClick, disabled, pressed, children }: {
 }) {
   return (
     <button type="button" onClick={onClick} disabled={disabled} aria-label={label} title={label} aria-pressed={pressed}
-      className="grid size-9 place-items-center rounded-full text-stone-600 hover:bg-sand-100 hover:text-ink-900 disabled:opacity-30">
+      className="grid size-9 place-items-center rounded-full text-fg-muted hover:bg-fg/[0.06] hover:text-fg disabled:opacity-30 aria-pressed:text-accent-ink">
       <span aria-hidden>{children}</span>
     </button>
   );

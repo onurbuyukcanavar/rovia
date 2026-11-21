@@ -8,12 +8,12 @@ import type { RichEditorProps } from "./rich-editor";
  */
 function EditorSkeleton({ minimal }: { minimal: boolean }) {
   return (
-    <div className="rounded-[var(--radius-card)] border border-sand-200 bg-paper-50" aria-busy="true">
-      <div className="h-[3.25rem] border-b border-sand-200 sm:h-12" />
+    <div className="rounded-[var(--radius-card)] border border-line bg-raised" aria-busy="true">
+      <div className="h-[3.25rem] border-b border-line sm:h-12" />
       <div className={minimal ? "min-h-28 px-4 py-4 sm:px-6" : "min-h-64 px-4 py-4 sm:px-6"}>
-        <div className="h-4 w-2/3 animate-pulse rounded bg-sand-100" />
+        <div className="h-4 w-2/3 animate-pulse rounded bg-sunken" />
       </div>
-      <div className="h-[1.9rem] border-t border-sand-200/70" />
+      <div className="h-[1.9rem] border-t border-line" />
     </div>
   );
 }

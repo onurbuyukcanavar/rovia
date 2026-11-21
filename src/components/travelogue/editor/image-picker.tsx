@@ -39,16 +39,16 @@ export function ImagePicker({
       data-testid="image-picker"
       onClose={onClose}
       onCancel={(e) => { e.preventDefault(); onClose(); }}
-      className="m-auto max-h-[min(90dvh,48rem)] w-[min(100vw-1.5rem,44rem)] overflow-hidden rounded-[var(--radius-card)] border border-sand-200 bg-paper-50 p-0 text-ink-900 shadow-2xl backdrop:bg-ink-950/50"
+      className="m-auto max-h-[min(90dvh,48rem)] w-[min(100vw-1.5rem,44rem)] overflow-hidden rounded-[var(--radius-card)] border border-line bg-overlay p-0 text-fg shadow-[var(--shadow-overlay)] backdrop:bg-backdrop"
     >
       <div className="flex max-h-[inherit] flex-col">
-        <header className="flex items-start justify-between gap-4 border-b border-sand-200 px-5 py-4">
+        <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div>
-            <h2 id="rovia-image-picker-title" className="font-serif text-xl font-semibold">{tx.title}</h2>
-            <p className="mt-0.5 text-sm text-stone-600">{tx.intro}</p>
+            <h2 id="rovia-image-picker-title" className="font-serif text-2xl font-light tracking-[-0.01em]">{tx.title}</h2>
+            <p className="mt-0.5 text-sm text-fg-muted">{tx.intro}</p>
           </div>
           <button type="button" onClick={onClose} aria-label={tx.close} title={tx.close}
-            className="grid size-9 shrink-0 place-items-center rounded-full hover:bg-sand-100">
+            className="grid size-9 shrink-0 place-items-center rounded-full hover:bg-fg/[0.06]">
             <X className="size-5" aria-hidden />
           </button>
         </header>
@@ -57,15 +57,15 @@ export function ImagePicker({
           <section>
             <h3 className="eyebrow mb-2">{tx.library}</h3>
             {media.length === 0 && waiting.length === 0 ? (
-              <p className="rounded-2xl bg-sand-100 px-4 py-6 text-center text-sm text-stone-600">{tx.empty}</p>
+              <p className="rounded-2xl bg-sunken px-4 py-6 text-center text-sm text-fg-muted">{tx.empty}</p>
             ) : (
               <ul className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {waiting.map((id) => (
                   <li key={id}>
                     <button type="button" onClick={() => toggle(id)} aria-pressed={selected.includes(id)} aria-label={tx.loading}
-                      className={cn("relative grid aspect-square w-full place-items-center rounded-xl border-2 bg-sand-100",
-                        selected.includes(id) ? "border-amber-500" : "border-transparent")}>
-                      <LoaderCircle className="size-5 animate-spin text-amber-600" aria-hidden />
+                      className={cn("relative grid aspect-square w-full place-items-center rounded-xl border-2 bg-sunken",
+                        selected.includes(id) ? "border-accent" : "border-transparent")}>
+                      <LoaderCircle className="size-5 animate-spin text-accent-ink" aria-hidden />
                       {selected.includes(id) && <SelectedMark />}
                     </button>
                   </li>
@@ -77,8 +77,8 @@ export function ImagePicker({
                     <li key={m.id}>
                       <button type="button" onClick={() => toggle(m.id)} aria-pressed={on} aria-label={tx.select(m.caption)}
                         data-testid="image-picker-item"
-                        className={cn("relative block aspect-square w-full overflow-hidden rounded-xl border-2 bg-sand-100 transition",
-                          on ? "border-amber-500 ring-2 ring-amber-300" : "border-transparent hover:border-sand-300")}>
+                        className={cn("relative block aspect-square w-full overflow-hidden rounded-xl border-2 bg-sunken transition",
+                          on ? "border-accent ring-2 ring-accent/40" : "border-transparent hover:border-line-strong")}>
                         {src && (
                           // eslint-disable-next-line @next/next/no-img-element -- imzalı Storage bağlantısı
                           <img src={src} alt="" loading="lazy" className="size-full object-cover" />
@@ -103,7 +103,7 @@ export function ImagePicker({
           </section>
         </div>
 
-        <footer className="flex justify-end gap-2 border-t border-sand-200 px-5 py-3">
+        <footer className="flex justify-end gap-2 border-t border-line px-5 py-3">
           <Button variant="ghost" size="sm" onClick={onClose}>{tx.cancel}</Button>
           <Button size="sm" disabled={!selected.length} onClick={() => onInsert(selected)} data-testid="image-picker-insert">
             {tx.insert(selected.length)}
@@ -116,7 +116,7 @@ export function ImagePicker({
 
 function SelectedMark() {
   return (
-    <span className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-amber-500 text-ink-950 shadow">
+    <span className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-accent text-accent-fg shadow-[var(--shadow-overlay)]">
       <Check className="size-3.5" aria-hidden />
     </span>
   );
