@@ -1,6 +1,7 @@
 /** ROVIA Garage ve yolculuk maliyeti metinleri. */
 export const garage = {
   title: "ROVIA Garage",
+  accent: "yola hazır.",
   description: "Araçlarını tanımla; yolculuk maliyeti tahminlerinde kullanılsın. Tüm bilgiler isteğe bağlıdır.",
   add: "Araç ekle",
   edit: "Düzenle",

@@ -18,13 +18,15 @@ import { TripInfo } from "@/components/journal/trip-info";
 import { TripCostSection } from "@/components/cost/trip-cost-section";
 import { formatDate, formatDistance, formatDuration, formatSpeed, formatTime } from "@/lib/format";
 import { ShareButton } from "@/components/share/share-button";
+import { SectionEyebrow } from "@/components/ui/section-eyebrow";
+import { SummaryEndpoint as Endpoint, SummaryStat as Stat } from "@/components/trips/summary-stats";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.tripSummary.title };
 
 export default function TripDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
-    <Suspense fallback={<div className="h-dvh animate-pulse bg-sand-100" aria-label={t.common.loading} />}>
+    <Suspense fallback={<div data-themed className="h-dvh animate-pulse bg-sunken" aria-label={t.common.loading} />}>
       <TripDetailView params={params} />
     </Suspense>
   );
@@ -48,19 +50,19 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
   const active = trip.status === "active" || rec?.status === "recording" || rec?.status === "paused";
 
   return (
-    <div className="flex min-h-app-mobile flex-col lg:grid lg:h-dvh lg:min-h-0 lg:grid-cols-[26rem_1fr]">
+    <div data-themed className="flex min-h-app-mobile flex-col text-fg lg:grid lg:h-dvh lg:min-h-0 lg:grid-cols-[26rem_1fr]">
       <div className="relative order-1 h-[42vh] shrink-0 lg:order-2 lg:h-full">
         <SummaryMap styleUrl={mapStyleUrl()} polyline={rec?.polyline ?? null} plannedPolyline={trip.routePolyline} pins={pins} />
       </div>
-      <aside className="order-2 space-y-6 border-t border-sand-200 bg-paper px-4 py-5 lg:order-1 lg:overflow-y-auto lg:border-t-0 lg:border-r lg:px-6 lg:py-6">
-        <header className="space-y-1">
-          <Link href="/yolculuklar" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
+      <aside className="page-backdrop order-2 min-w-0 space-y-7 border-t border-line bg-surface px-4 py-5 lg:order-1 lg:overflow-y-auto lg:border-t-0 lg:border-r lg:px-6 lg:py-7">
+        <header className="space-y-3">
+          <Link href="/yolculuklar" className="inline-flex items-center gap-1 text-sm font-semibold text-fg-muted transition-colors hover:text-fg">
             <ArrowLeft className="size-4" aria-hidden /> {t.trips.backToList}
           </Link>
-          <p className="eyebrow">{t.tripSummary.title}</p>
+          <SectionEyebrow className="pt-2">{t.tripSummary.title}</SectionEyebrow>
           <TripInfo id={trip.id} title={trip.title} description={trip.description} />
           {rec && (
-            <p className="text-sm text-stone-600" data-testid="summary-date">
+            <p className="text-sm text-fg-subtle tabular-nums" data-testid="summary-date">
               {formatDate(rec.startedAt)} · {formatTime(rec.startedAt)}{rec.endedAt ? ` – ${formatTime(rec.endedAt)}` : ""}
             </p>
           )}
@@ -77,7 +79,7 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
         ) : rec ? (
           <>
             {rec.polyline === null && <Alert>{t.tripSummary.preparing}</Alert>}
-            <dl className="grid grid-cols-2 gap-3" data-testid="summary-stats">
+            <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line" data-testid="summary-stats">
               <Stat label={t.tripSummary.totalDistance} value={formatDistance(rec.distanceM)} testId="sum-distance" big />
               <Stat label={t.tripSummary.totalDuration} value={formatDuration(rec.elapsedS)} testId="sum-elapsed" big />
               <Stat label={t.tripSummary.moving} value={formatDuration(rec.movingS)} testId="sum-moving" />
@@ -86,16 +88,16 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
               <Stat label={t.tripSummary.maxSpeed} value={formatSpeed(rec.maxKmh)} testId="sum-max" />
             </dl>
             {rec.pausedS > 0 && (
-              <p className="text-sm text-stone-600">{t.tripSummary.paused}: {formatDuration(rec.pausedS)}</p>
+              <p className="text-sm text-fg-muted">{t.tripSummary.paused}: {formatDuration(rec.pausedS)}</p>
             )}
-            <p className="text-xs text-stone-500">{t.tripSummary.avgNote}</p>
+            <p className="-mt-3 text-xs text-fg-subtle">{t.tripSummary.avgNote}</p>
 
-            <dl className="space-y-3 text-sm">
+            <dl className="card space-y-4 p-4 text-sm">
               <Endpoint label={t.tripSummary.start} value={rec.startLabel} time={rec.startedAt} />
-              <Endpoint label={t.tripSummary.end} value={rec.endLabel} time={rec.endedAt} />
+              <Endpoint label={t.tripSummary.end} value={rec.endLabel} time={rec.endedAt} end />
             </dl>
 
-            <p className="text-xs text-stone-500" data-testid="summary-points">
+            <p className="text-xs text-fg-subtle" data-testid="summary-points">
               {rec.pointCount === 0 ? t.tripSummary.noTrack : t.tripSummary.points(rec.pointCount)}
               {rec.rawPointCount === 0 && rec.pointCount > 0 && ` · ${t.tripSummary.rawDeleted}`}
             </p>
@@ -118,35 +120,16 @@ async function TripDetailView({ params }: { params: Promise<{ id: string }> }) {
 function TravelogueCard({ tripId, travelogueId }: { tripId: string; travelogueId: string | null }) {
   const T = t.travelogue.pages.tripCard;
   return (
-    <section className="card space-y-3 p-4" aria-labelledby="trip-travelogue" data-testid="trip-travelogue">
-      <h2 id="trip-travelogue" className="flex items-center gap-2 font-bold"><BookOpenText className="size-5 text-amber-600" aria-hidden /> {T.title}</h2>
-      <p className="text-sm text-stone-600">{T.body}</p>
+    <section className="card space-y-3 p-5" aria-labelledby="trip-travelogue" data-testid="trip-travelogue">
+      <h2 id="trip-travelogue" className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-fg">
+        <BookOpenText className="size-5 shrink-0 text-accent-ink" aria-hidden /> {T.title}
+      </h2>
+      <p className="text-sm leading-relaxed text-fg-muted">{T.body}</p>
       {travelogueId ? (
         <ButtonLink href={`/seyahatnameler/${travelogueId}`} size="sm" variant="primary">{T.open}</ButtonLink>
       ) : (
         <CreateFromTrip tripId={tripId} />
       )}
     </section>
-  );
-}
-
-function Stat({ label, value, testId, big = false }: { label: string; value: string; testId: string; big?: boolean }) {
-  return (
-    <div className="rounded-xl border border-sand-200 bg-white p-3">
-      <dt className="text-[0.7rem] font-semibold tracking-wide text-stone-500 uppercase">{label}</dt>
-      <dd className={big ? "mt-1 text-2xl font-extrabold tabular-nums" : "mt-1 text-lg font-bold tabular-nums"} data-testid={testId}>{value}</dd>
-    </div>
-  );
-}
-
-function Endpoint({ label, value, time }: { label: string; value: string | null; time: string | null }) {
-  return (
-    <div className="flex gap-3">
-      <dt className="w-20 shrink-0 font-semibold text-stone-500">{label}</dt>
-      <dd>
-        {value ?? "—"}
-        {time && <span className="ml-1.5 text-stone-500">{formatTime(time)}</span>}
-      </dd>
-    </div>
   );
 }

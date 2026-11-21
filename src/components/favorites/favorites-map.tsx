@@ -13,6 +13,15 @@ import { ThemedMapStyle } from "@/components/theme/themed-map-style";
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
 export const FAVORITE_LAYER = "favorite-points";
 
+/**
+ * Harita boya renkleri temaya göre (harita ifadeleri CSS değişkeni okuyamaz). Listedeki ListDot ile aynı dil:
+ * favori = amber dolgu, "daha sonra gideceğim" = zemin renginde dolgu + ön plan halkası.
+ */
+const PAINT = {
+  dark: { favorite: "#e8912d", later: "#0a111d", ring: "#f7f5f0", laterRing: "#f7f5f0", selected: "#f5c37a" },
+  light: { favorite: "#e8912d", later: "#ffffff", ring: "#ffffff", laterRing: "#0e1726", selected: "#0e1726" },
+} as const;
+
 type Props = {
   styleUrl: string;
   places: Favorite[];
@@ -29,7 +38,7 @@ type Props = {
 
 /**
  * Favori yerler haritası. Binlerce yer olabileceği için DOM işaretleri yerine tek GeoJSON katmanı
- * (daire) kullanılır: favoriler amber, "daha sonra gideceğim" lacivert.
+ * (daire) kullanılır: favoriler amber, "daha sonra gideceğim" halka (renkler temaya göre, bkz. PAINT).
  */
 export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate, picking, onPick, onBackgroundTap }: Props) {
   const [mapError, setMapError] = useState(false);
@@ -69,7 +78,7 @@ export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate
 
   return (
     <div className="relative h-full w-full" data-testid="favorites-map">
-      <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+      <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle, theme) => (
         <MapView
           initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
           mapStyle={mapStyle}
@@ -93,15 +102,16 @@ export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate
               paint={{
                 // MapLibre: "zoom" yalnızca en dıştaki interpolate'te kullanılabilir; seçili durum her durakta ayrı
                 "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, ["case", ["get", "selected"], 9, 5], 12, ["case", ["get", "selected"], 12, 8]],
-                "circle-color": ["case", ["==", ["get", "list"], "want_to_go"], "#1d3557", "#e8912d"],
-                "circle-stroke-color": ["case", ["get", "selected"], "#0e1726", "#ffffff"],
-                "circle-stroke-width": ["case", ["get", "selected"], 3, 2],
+                "circle-color": ["case", ["==", ["get", "list"], "want_to_go"], PAINT[theme].later, PAINT[theme].favorite],
+                "circle-stroke-color": ["case", ["get", "selected"], PAINT[theme].selected,
+                  ["==", ["get", "list"], "want_to_go"], PAINT[theme].laterRing, PAINT[theme].ring],
+                "circle-stroke-width": ["case", ["get", "selected"], 3, ["==", ["get", "list"], "want_to_go"], 2.5, 2],
               }}
             />
           </Source>
           {candidate && (
             <Marker longitude={candidate.lng} latitude={candidate.lat} anchor="bottom">
-              <span className="block size-6 rounded-full rounded-br-none border-[3px] border-ink-900 bg-amber-500 shadow-md [transform:rotate(45deg)]"
+              <span className="block size-6 rounded-full rounded-br-none border-[3px] border-fg bg-accent shadow-md [transform:rotate(45deg)]"
                 title={t.favorites.pickedPoint} data-testid="candidate-marker" />
             </Marker>
           )}

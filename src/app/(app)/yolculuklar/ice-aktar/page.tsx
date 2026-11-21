@@ -14,14 +14,16 @@ export const metadata: Metadata = { title: T.metaTitle };
 
 export default function TrackImportPage() {
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-8 sm:py-10">
-      <Link href="/yolculuklar" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
+    <div data-themed className="page-backdrop min-h-full">
+    <div className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-8 sm:py-10">
+      <Link href="/yolculuklar" className="inline-flex items-center gap-1 text-sm font-semibold text-fg-muted transition-colors hover:text-fg">
         <ArrowLeft className="size-4" aria-hidden /> {T.back}
       </Link>
-      <PageHeader eyebrow={T.eyebrow} title={T.title} description={T.subtitle} />
-      <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-sand-100" aria-label={t.common.loading} />}>
+      <PageHeader eyebrow={T.eyebrow} title={T.title} accent={T.accent} description={T.subtitle} />
+      <Suspense fallback={<div className="h-64 animate-pulse rounded-[var(--radius-card)] bg-sunken" aria-label={t.common.loading} />}>
         <Importer />
       </Suspense>
+    </div>
     </div>
   );
 }
