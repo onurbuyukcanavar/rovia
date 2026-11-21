@@ -75,11 +75,12 @@ function useWeather(): State {
   const [state, setState] = useState<State>({ status: "loading" });
   useEffect(() => {
     let alive = true;
+    const ctrl = new AbortController();
     (async () => {
       try {
         const pos = await grantedPosition();
         const res = await fetch("/api/weather", {
-          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(pos ?? {}),
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(pos ?? {}), signal: ctrl.signal,
         });
         const j = res.ok ? ((await res.json()) as { weather: Weather | null }) : null;
         if (alive) setState(j?.weather ? { status: "ok", weather: j.weather } : { status: "none" });
@@ -87,7 +88,7 @@ function useWeather(): State {
         if (alive) setState({ status: "none" });
       }
     })();
-    return () => { alive = false; };
+    return () => { alive = false; ctrl.abort(); };
   }, []);
   return state;
 }

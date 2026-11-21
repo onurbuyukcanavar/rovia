@@ -52,6 +52,8 @@ export function mapsHandler<S extends z.ZodType, R>(
 
       return NextResponse.json(await run(parsed.data, db), { headers: PRIVATE_NO_STORE });
     } catch (e) {
+      // İstemci isteği yarıda bıraktıysa (sayfadan ayrıldı) bu bir sunucu hatası değildir: sessizce kapat
+      if (req.signal.aborted) return new Response(null, { status: 499, headers: PRIVATE_NO_STORE });
       const err = e instanceof GeoError ? e : null;
       if (!err || err.status >= 500) {
         console.error(`[rovia] maps ${bucket}:`, err ? `${err.code} ${err.message}` : e);
