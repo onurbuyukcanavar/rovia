@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
 import { RouteFlags } from "./route-extras";
 import { PlannerCost } from "@/components/cost/planner-cost";
+import { GaugeValue, RoadMotif } from "./road-motif";
 import { t } from "@/i18n";
 
 type Props = {
@@ -22,7 +23,7 @@ export function RouteSummary({ result, selected, onSelect, loading, error, hasWa
   if (error) return <Alert tone="error">{error}</Alert>;
   if (!result && loading) {
     return (
-      <p className="flex items-center gap-2 text-sm text-stone-600" role="status">
+      <p className="flex items-center gap-2 text-sm text-fg-muted" role="status">
         <LoaderCircle className="size-4 animate-spin" aria-hidden /> {t.maps.computing}
       </p>
     );
@@ -32,14 +33,19 @@ export function RouteSummary({ result, selected, onSelect, loading, error, hasWa
   const route = result.routes[selected] ?? result.routes[0];
   return (
     <section aria-label={t.maps.route} aria-busy={loading} className={cn("space-y-3 transition-opacity", loading && "opacity-60")}>
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-sand-200 bg-sand-200" data-testid="route-summary">
-        <div className="bg-ink-900 p-4 text-paper">
-          <p className="flex items-center gap-1.5 text-xs font-semibold text-paper/60"><Gauge className="size-3.5" aria-hidden /> {t.maps.distance}</p>
-          <p className="mt-1 text-2xl font-extrabold tabular-nums" data-testid="route-distance">{formatDistance(route.distanceMeters)}</p>
+      <div className="card relative isolate grid grid-cols-2 overflow-hidden" data-testid="route-summary">
+        <RoadMotif />
+        <div className="min-w-0 p-4">
+          <p className="eyebrow flex items-center gap-1.5"><Gauge className="size-3.5 text-accent-ink" aria-hidden /> {t.maps.distance}</p>
+          <p className="mt-2 text-[1.85rem] leading-none font-extralight tracking-[-0.03em] break-words tabular-nums" data-testid="route-distance">
+            <GaugeValue value={formatDistance(route.distanceMeters)} accent />
+          </p>
         </div>
-        <div className="bg-ink-900 p-4 text-paper">
-          <p className="flex items-center gap-1.5 text-xs font-semibold text-paper/60"><Clock3 className="size-3.5" aria-hidden /> {t.maps.duration}</p>
-          <p className="mt-1 text-2xl font-extrabold tabular-nums" data-testid="route-duration">{formatDuration(route.durationSeconds)}</p>
+        <div className="min-w-0 border-l border-line p-4">
+          <p className="eyebrow flex items-center gap-1.5"><Clock3 className="size-3.5 text-accent-ink" aria-hidden /> {t.maps.duration}</p>
+          <p className="mt-2 text-[1.85rem] leading-none font-extralight tracking-[-0.03em] break-words tabular-nums" data-testid="route-duration">
+            <GaugeValue value={formatDuration(route.durationSeconds)} />
+          </p>
         </div>
       </div>
       {(route.hasToll || route.hasFerry) && (
@@ -49,7 +55,7 @@ export function RouteSummary({ result, selected, onSelect, loading, error, hasWa
         </div>
       )}
       {!!route.tollBridges?.length && (
-        <p className="flex items-start gap-1.5 text-xs text-stone-600" data-testid="bridge-note">
+        <p className="flex items-start gap-1.5 text-xs text-fg-muted" data-testid="bridge-note">
           <Landmark className="mt-0.5 size-3.5 shrink-0" aria-hidden /> {t.maps.bridgeNote(route.tollBridges.join(" ve "))}
         </p>
       )}
@@ -65,20 +71,20 @@ export function RouteSummary({ result, selected, onSelect, loading, error, hasWa
                 <button type="button" onClick={() => onSelect(i)} aria-pressed={i === selected}
                   className={cn(
                     "flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition",
-                    i === selected ? "border-ink-900 bg-ink-900/5 font-semibold" : "border-sand-200 hover:border-stone-500",
+                    i === selected ? "border-accent/60 bg-accent-soft font-semibold text-fg" : "border-line bg-raised text-fg-muted hover:border-line-strong hover:text-fg",
                   )}>
                   <span className="space-y-1">
                     <span className="block">{t.maps.routeN(i + 1)}</span>
                     <RouteFlags route={r} fastest={i === 0} />
                   </span>
-                  <span className="shrink-0 tabular-nums text-stone-700">{formatDistance(r.distanceMeters)} · {formatDuration(r.durationSeconds)}</span>
+                  <span className="shrink-0 text-fg-muted tabular-nums">{formatDistance(r.distanceMeters)} · {formatDuration(r.durationSeconds)}</span>
                 </button>
               </li>
             ))}
           </ul>
         </div>
       )}
-      {hasWaypoints && <p className="text-xs text-stone-600">{t.maps.alternativesNote}</p>}
+      {hasWaypoints && <p className="text-xs text-fg-subtle">{t.maps.alternativesNote}</p>}
     </section>
   );
 }

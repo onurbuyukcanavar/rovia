@@ -56,7 +56,7 @@ type Props = {
 export function MapFrame({ expanded, onExpand, onCollapse, className, children, testId }: Props) {
   return (
     <div
-      className={cn(expanded ? "fixed inset-0 z-50 h-dvh w-full bg-paper" : cn("relative", className))}
+      className={cn(expanded ? "fixed inset-0 z-50 h-dvh w-full bg-surface" : cn("relative", className))}
       data-testid={testId}
       data-expanded={expanded || undefined}
     >
@@ -67,7 +67,7 @@ export function MapFrame({ expanded, onExpand, onCollapse, className, children, 
         aria-label={expanded ? t.maps.collapseMap : t.maps.expandMap}
         aria-pressed={expanded}
         className={cn(
-          "absolute z-20 flex items-center gap-1.5 rounded-full border border-sand-300 bg-paper/95 font-semibold text-ink-900 shadow-md backdrop-blur hover:bg-white",
+          "absolute z-20 flex items-center gap-1.5 rounded-full border border-line-strong bg-overlay font-semibold text-fg shadow-[var(--shadow-overlay)] backdrop-blur transition-colors hover:border-accent/50 hover:text-accent-ink",
           expanded
             ? "top-[calc(env(safe-area-inset-top)+0.75rem)] left-[max(0.75rem,env(safe-area-inset-left))] h-11 px-4 text-sm"
             : "top-2.5 left-2.5 size-10 justify-center lg:hidden",

@@ -5,6 +5,7 @@ import type { LatLng } from "@/lib/geo";
 import { mapsApi } from "@/lib/maps/client";
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import type { Stop, Suggestion } from "@/lib/maps/types";
+import { inputClass } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
 
@@ -104,15 +105,11 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
             onFocus={() => setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             onKeyDown={onKeyDown}
-            className={cn(
-              "h-11 w-full rounded-xl border bg-white pr-9 pl-3 text-[0.92rem] outline-none transition placeholder:text-stone-500",
-              "focus:border-ink-700 focus:ring-4 focus:ring-amber-400/25",
-              error ? "border-danger/50" : "border-sand-300",
-            )}
+            className={inputClass(!!error, "h-11 pr-9 pl-3")}
           />
           <span className="absolute inset-y-0 right-2 flex items-center">
             {loading ? (
-              <LoaderCircle className="size-4 animate-spin text-stone-500" aria-label={t.common.loading} />
+              <LoaderCircle className="size-4 animate-spin text-fg-subtle" aria-label={t.common.loading} />
             ) : value || text ? (
               <button
                 type="button"
@@ -121,7 +118,7 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
                   setText("");
                   onSelect(null);
                 }}
-                className="grid size-7 place-items-center rounded-lg text-stone-500 hover:bg-sand-100"
+                className="grid size-7 place-items-center rounded-lg text-fg-subtle hover:bg-fg/[0.07] hover:text-fg"
                 aria-label={`${label}: ${t.maps.clear}`}
               >
                 <X className="size-4" />
@@ -134,7 +131,7 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
       {error && <p className="mt-1 pl-8 text-xs text-danger" role="alert">{error}</p>}
       {listOpen && (
         <ul id={listId} role="listbox" aria-label={label}
-          className="absolute inset-x-0 top-full z-30 mt-1 ml-8 overflow-hidden rounded-xl border border-sand-200 bg-white shadow-lg">
+          className="absolute inset-x-0 top-full z-30 mt-1 ml-8 overflow-hidden rounded-xl border border-line bg-overlay shadow-[var(--shadow-overlay)]">
           {items.map((s, i) => (
             <li
               key={s.id}
@@ -146,22 +143,22 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
                 void choose(s);
               }}
               onMouseEnter={() => setActive(i)}
-              className={cn("flex cursor-pointer items-start gap-2.5 px-3 py-2.5 text-sm", i === activeIndex && "bg-sand-100")}
+              className={cn("flex cursor-pointer items-start gap-2.5 px-3 py-2.5 text-sm", i === activeIndex && "bg-fg/[0.07]")}
             >
               {s.kind === "settlement" ? (
-                <Building2 className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+                <Building2 className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
               ) : s.kind === "address" ? (
-                <Home className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+                <Home className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
               ) : (
-                <MapPin className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+                <MapPin className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
               )}
               <span className="min-w-0">
-                <span className="block truncate font-semibold">{s.name}</span>
-                {s.secondary && <span className="block truncate text-xs text-stone-600">{s.secondary}</span>}
+                <span className="block truncate font-semibold text-fg">{s.name}</span>
+                {s.secondary && <span className="block truncate text-xs text-fg-subtle">{s.secondary}</span>}
               </span>
             </li>
           ))}
-          <li className="border-t border-sand-100 px-3 py-1.5 text-right text-[0.65rem] text-stone-500" aria-hidden>© OpenStreetMap</li>
+          <li className="border-t border-line px-3 py-1.5 text-right text-[0.65rem] text-fg-subtle" aria-hidden>© OpenStreetMap</li>
         </ul>
       )}
     </div>

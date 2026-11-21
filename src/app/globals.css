@@ -57,6 +57,7 @@
   --color-success: #5cc493;
   --color-success-soft: rgb(92 196 147 / 0.1);
   --color-backdrop: rgb(3 6 12 / 0.65); /* pencere arka perdesi */
+  --color-location: #3b8eea; /* harita "konumum" noktası (her iki temada aynı; yazı rengi değildir) */
 
   --radius-card: 1.25rem;
   --shadow-card: 0 1px 0 rgb(247 245 240 / 0.03) inset, 0 24px 48px -32px rgb(0 0 0 / 0.7);
@@ -644,4 +645,41 @@ label:has(> input.sr-only) {
 html:has(.theme-dark-only) {
   background-color: #05080f;
   color-scheme: dark;
+}
+
+/* ---------------------------------------------------------------- Harita denetimleri (MapLibre)
+ * Taşınmış ([data-themed]) sayfalarda yakınlaştırma, ölçek ve atıf denetimleri tema yüzeyleriyle çizilir.
+ * Simgeler koyu SVG arka planlardır; koyu temada tersine çevrilir. Taşınmamış sayfalarda MapLibre varsayılanı kalır. */
+[data-themed] .maplibregl-ctrl-group {
+  border: 1px solid var(--color-line-strong);
+  border-radius: 0.75rem;
+  background-color: var(--color-overlay);
+  box-shadow: var(--shadow-overlay);
+  overflow: hidden;
+}
+[data-themed] .maplibregl-ctrl-group:not(:empty) {
+  box-shadow: var(--shadow-overlay);
+}
+[data-themed] .maplibregl-ctrl-group button + button {
+  border-top-color: var(--color-line);
+}
+[data-themed] .maplibregl-ctrl button:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--color-fg) 7%, transparent);
+}
+[data-themed] .maplibregl-ctrl-attrib,
+[data-themed] .maplibregl-ctrl-attrib.maplibregl-compact {
+  background-color: var(--color-overlay);
+  color: var(--color-fg-muted);
+}
+[data-themed] .maplibregl-ctrl-attrib a {
+  color: var(--color-fg-muted);
+}
+[data-themed] .maplibregl-ctrl-scale {
+  border-color: var(--color-fg-muted);
+  background-color: color-mix(in srgb, var(--color-overlay) 80%, transparent);
+  color: var(--color-fg);
+}
+[data-theme="dark"] [data-themed] .maplibregl-ctrl-icon,
+[data-theme="dark"] [data-themed] .maplibregl-ctrl-attrib-button {
+  filter: invert(1);
 }

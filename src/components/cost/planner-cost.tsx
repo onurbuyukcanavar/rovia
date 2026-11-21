@@ -30,16 +30,16 @@ export function PlannerCost({ route }: { route: RouteOption }) {
   const routeKey = `${route.distanceMeters}:${route.encodedPolyline.length}:${tolls.map((x) => x.id).join(",")}`;
 
   return (
-    <details className="group rounded-2xl border border-sand-200 bg-paper-50" data-testid="planner-cost"
+    <details className="group card overflow-hidden" data-testid="planner-cost"
       onToggle={(e) => onToggle(e.currentTarget.open)}>
-      <summary className="flex cursor-pointer items-center justify-between gap-2 px-4 py-3 text-sm font-semibold">
-        <span className="flex items-center gap-2"><Wallet className="size-4 text-amber-600" aria-hidden /> {T.plannerTitle}
-          <span className="font-normal text-stone-500">· {T.plannerHint}</span></span>
-        <span className="text-stone-500 transition group-open:rotate-90" aria-hidden>›</span>
+      <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-fg hover:bg-fg/[0.04]">
+        <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5"><span className="flex items-center gap-2"><Wallet className="size-4 shrink-0 text-accent-ink" aria-hidden /> {T.plannerTitle}</span>
+          <span className="font-normal text-fg-subtle">· {T.plannerHint}</span></span>
+        <span className="text-fg-subtle transition group-open:rotate-90" aria-hidden>›</span>
       </summary>
-      <div className="border-t border-sand-200 p-4">
+      <div className="border-t border-line p-4">
         {loading || !ctx ? (
-          <p className="flex items-center gap-2 text-sm text-stone-600" role="status">
+          <p className="flex items-center gap-2 text-sm text-fg-muted" role="status">
             <LoaderCircle className="size-4 animate-spin" aria-hidden /> {T.loading}
           </p>
         ) : (

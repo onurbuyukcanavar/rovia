@@ -5,7 +5,7 @@ import { Camera, NotebookPen } from "lucide-react";
 import { Layer, Marker, NavigationControl, ScaleControl, Source } from "react-map-gl/maplibre";
 import { MapView } from "@/lib/maps/maplibre-setup";
 import { Alert } from "@/components/ui/alert";
-import { FitBounds, MyLocationMarker, PanTo, StopPin } from "@/components/map/map-layers";
+import { FitBounds, MyLocationMarker, PanTo, ROUTE_PAINT, StopPin } from "@/components/map/map-layers";
 import { decodePolyline, type LatLng } from "@/lib/geo";
 import { t } from "@/i18n";
 import { ThemedMapStyle } from "@/components/theme/themed-map-style";
@@ -64,7 +64,7 @@ export function TrackMap({ styleUrl, paths, position = null, plannedPolyline = n
 
   return (
     <div className={className} data-testid="track-map">
-      <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+      <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle, theme) => (
         <MapView
           initialViewState={
             position
@@ -85,14 +85,14 @@ export function TrackMap({ styleUrl, paths, position = null, plannedPolyline = n
           {planned && (
             <Source id="planned" type="geojson" data={planned}>
               <Layer id="planned-line" type="line" layout={{ "line-cap": "round", "line-join": "round" }}
-                paint={{ "line-color": "#7b879b", "line-width": 4, "line-dasharray": [1.5, 1.5], "line-opacity": 0.8 }} />
+                paint={{ "line-color": ROUTE_PAINT[theme].planned, "line-width": 4, "line-dasharray": [1.5, 1.5], "line-opacity": 0.8 }} />
             </Source>
           )}
           <Source id="track" type="geojson" data={track}>
             <Layer id="track-casing" type="line" layout={{ "line-cap": "round", "line-join": "round" }}
-              paint={{ "line-color": "#0e1726", "line-width": 8 }} />
+              paint={{ "line-color": ROUTE_PAINT[theme].casing, "line-width": 8 }} />
             <Layer id="track-line" type="line" layout={{ "line-cap": "round", "line-join": "round" }}
-              paint={{ "line-color": "#e8912d", "line-width": 4 }} />
+              paint={{ "line-color": ROUTE_PAINT[theme].line, "line-width": 4 }} />
           </Source>
           {showEndpoints && start && (
             <Marker longitude={start.lng} latitude={start.lat} anchor="center">
@@ -108,8 +108,8 @@ export function TrackMap({ styleUrl, paths, position = null, plannedPolyline = n
             <Marker key={p.id} longitude={p.lng} latitude={p.lat} anchor="center">
               <span title={p.label} aria-label={p.label} data-testid={`pin-${p.kind}`}
                 className={p.kind === "photo"
-                  ? "grid size-6 place-items-center rounded-full border-2 border-white bg-amber-500 text-ink-950 shadow-md"
-                  : "grid size-6 place-items-center rounded-full border-2 border-white bg-ink-900 text-paper shadow-md"}>
+                  ? "grid size-6 place-items-center rounded-full border-2 border-surface bg-accent text-accent-fg shadow-md"
+                  : "grid size-6 place-items-center rounded-full border-2 border-surface bg-fg text-surface shadow-md"}>
                 {p.kind === "photo" ? <Camera className="size-3.5" aria-hidden /> : <NotebookPen className="size-3.5" aria-hidden />}
               </span>
             </Marker>
@@ -120,7 +120,7 @@ export function TrackMap({ styleUrl, paths, position = null, plannedPolyline = n
         </MapView>
       )}</ThemedMapStyle>
       {mapError && (
-        <div className="absolute inset-x-3 top-3 z-10">
+        <div className="absolute top-3 right-14 left-3 z-10 rounded-xl bg-overlay shadow-[var(--shadow-overlay)]">
           <Alert tone="error">{t.maps.loadError}</Alert>
         </div>
       )}
