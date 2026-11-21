@@ -36,25 +36,25 @@ export function PhotoUploader({ userId, tripId, onUploaded, compact = false }: P
         onDragLeave={() => setDragging(false)}
         onDrop={(e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files); }}
         className={cn(
-          "flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed transition",
+          "flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed text-fg transition has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent/25",
           compact ? "px-4 py-3" : "flex-col px-6 py-6 text-center",
-          dragging ? "border-amber-500 bg-amber-50" : "border-sand-300 bg-paper-50 hover:border-stone-500",
+          dragging ? "border-accent bg-accent-soft" : "border-line-strong bg-raised hover:border-fg-subtle",
         )}
       >
-        {busy ? <LoaderCircle className="size-6 shrink-0 animate-spin text-amber-600" aria-hidden /> : <ImagePlus className="size-6 shrink-0 text-stone-500" aria-hidden />}
+        {busy ? <LoaderCircle className="size-6 shrink-0 animate-spin text-accent-ink" aria-hidden /> : <ImagePlus className="size-6 shrink-0 text-accent-ink" aria-hidden />}
         <span className={cn("font-semibold", compact && "text-sm")}>{compact ? t.journal.upload.button : t.journal.upload.drop}</span>
-        {!compact && <span className="text-xs text-stone-600">{t.journal.upload.hint}</span>}
+        {!compact && <span className="text-xs text-fg-muted">{t.journal.upload.hint}</span>}
         <input id={inputId} type="file" multiple accept="image/*,.heic,.heif" className="sr-only"
           data-testid="photo-input"
           onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
       </label>
-      {compact && <p className="text-xs text-stone-600">{t.journal.upload.hint}</p>}
+      {compact && <p className="text-xs text-fg-muted">{t.journal.upload.hint}</p>}
       {notice && <Alert>{notice}</Alert>}
 
       {items.length > 0 && (
         <ul className="grid grid-cols-4 gap-2 sm:grid-cols-6" aria-live="polite" data-testid="upload-list">
           {items.map((it) => (
-            <li key={it.key} className="relative aspect-square overflow-hidden rounded-xl border border-sand-200 bg-sand-100" title={it.error ?? it.name}
+            <li key={it.key} className="relative aspect-square overflow-hidden rounded-xl border border-line bg-sunken" title={it.error ?? it.name}
               data-status={it.status}>
               {it.preview && (
                 // eslint-disable-next-line @next/next/no-img-element -- yerel önizleme (blob URL)
@@ -62,7 +62,7 @@ export function PhotoUploader({ userId, tripId, onUploaded, compact = false }: P
               )}
               <span className={cn(
                 "absolute inset-x-1 bottom-1 flex items-center justify-center gap-1 rounded-md px-1 py-0.5 text-[0.62rem] font-semibold",
-                it.status === "error" ? "bg-danger text-white" : it.status === "done" ? "bg-success text-white" : "bg-paper/90 text-ink-900",
+                it.status === "error" ? "bg-danger text-surface" : it.status === "done" ? "bg-success text-surface" : "bg-surface/90 text-fg",
               )}>
                 {it.status === "done" ? <Check className="size-3" aria-hidden /> : it.status === "error" ? <AlertCircle className="size-3" aria-hidden />
                   : <LoaderCircle className="size-3 animate-spin" aria-hidden />}
@@ -78,7 +78,7 @@ export function PhotoUploader({ userId, tripId, onUploaded, compact = false }: P
         </ul>
       )}
       {finished && (
-        <button type="button" onClick={clear} className="text-xs font-semibold text-stone-600 underline">{t.journal.upload.clear}</button>
+        <button type="button" onClick={clear} className="text-xs font-semibold text-fg-muted underline">{t.journal.upload.clear}</button>
       )}
     </div>
   );

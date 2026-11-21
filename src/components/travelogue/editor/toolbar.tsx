@@ -35,9 +35,9 @@ function ToolButton({
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       className={cn(
-        "grid size-10 shrink-0 place-items-center rounded-xl text-ink-800 transition sm:size-9",
-        "hover:bg-sand-100 disabled:pointer-events-none disabled:opacity-35",
-        active && "bg-ink-900 text-paper hover:bg-ink-800",
+        "grid size-10 shrink-0 place-items-center rounded-xl transition sm:size-9 disabled:pointer-events-none disabled:opacity-35",
+        // Etkin biçim: amber zemin + amber ikon + iç çerçeve (yalnızca renge dayanmaz; aria-pressed da var)
+        active ? "bg-accent-soft text-accent-ink ring-1 ring-accent/40 ring-inset" : "text-fg-muted hover:bg-fg/[0.06] hover:text-fg",
       )}
     >
       <Icon className="size-[1.1rem]" aria-hidden strokeWidth={2.1} />
@@ -45,7 +45,7 @@ function ToolButton({
   );
 }
 
-const Sep = () => <span className="mx-1 h-6 w-px shrink-0 bg-sand-200" aria-hidden />;
+const Sep = () => <span className="mx-1 h-6 w-px shrink-0 bg-line" aria-hidden />;
 
 export function EditorToolbar({
   editor, minimal, linkOpen, onLink, onImage,

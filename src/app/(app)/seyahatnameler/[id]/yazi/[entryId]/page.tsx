@@ -14,7 +14,7 @@ type Params = Promise<{ id: string; entryId: string }>;
 
 export default function EntryPage({ params }: { params: Params }) {
   return (
-    <Suspense fallback={<div className="mx-auto h-[70dvh] max-w-3xl animate-pulse rounded-2xl bg-sand-100" aria-label={t.common.loading} />}>
+    <Suspense fallback={<div data-themed className="mx-auto h-[70dvh] max-w-3xl animate-pulse rounded-[var(--radius-card)] bg-sunken" aria-label={t.common.loading} />}>
       <EntryLoader params={params} />
     </Suspense>
   );

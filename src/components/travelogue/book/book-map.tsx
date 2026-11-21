@@ -8,6 +8,9 @@ import type { BookMarker } from "@/lib/travelogue/pdf/model";
 import { t } from "@/i18n";
 import { ThemedMapStyle } from "@/components/theme/themed-map-style";
 
+/** Rota boyası haritanın temasına göre (aydınlıkta önceki görünüm; koyuda açık kenar + amber çizgi). */
+const ROUTE = { light: { casing: "#ffffff", line: "#0e1726" }, dark: { casing: "#f7f5f0", line: "#e8912d" } } as const;
+
 /** Kitaptaki rota haritası: sabit görünüm (sürükleme/yakınlaştırma yok), rota ve numaralı duraklar. */
 export function BookMap({ styleUrl, paths, markers }: { styleUrl: string; paths: LatLng[][]; markers: BookMarker[] }) {
   const [failed, setFailed] = useState(false);
@@ -26,10 +29,10 @@ export function BookMap({ styleUrl, paths, markers }: { styleUrl: string; paths:
     return { bounds: [[b.west, b.south], [b.east, b.north]] as [[number, number], [number, number]], fitBoundsOptions: { padding: 48, maxZoom: 14 } };
   }, [paths, markers]);
 
-  if (failed) return <p className="rounded-lg bg-sand-100 p-6 text-center text-sm text-stone-600">{t.travelogue.book.mapUnavailable}</p>;
+  if (failed) return <p className="rounded-xl border border-line bg-sunken p-6 text-center font-sans text-sm text-fg-muted">{t.travelogue.book.mapUnavailable}</p>;
   return (
-    <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-sand-200 bg-sand-100" data-testid="book-map">
-      <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+    <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-line bg-sunken" data-testid="book-map">
+      <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle, theme) => (
         <MapView
           initialViewState={initialViewState}
           mapStyle={mapStyle}
@@ -43,15 +46,15 @@ export function BookMap({ styleUrl, paths, markers }: { styleUrl: string; paths:
         >
           {paths.length > 0 && (
             <Source id="book-route" type="geojson" data={route}>
-              <Layer id="book-route-casing" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": "#ffffff", "line-width": 7 }} />
-              <Layer id="book-route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": "#0e1726", "line-width": 4 }} />
+              <Layer id="book-route-casing" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": ROUTE[theme].casing, "line-width": 7 }} />
+              <Layer id="book-route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": ROUTE[theme].line, "line-width": 4 }} />
             </Source>
           )}
           {markers.map((m) => (
             <Marker key={m.number} longitude={m.lng} latitude={m.lat} anchor="center">
               <a
                 href={`#${m.anchor}`}
-                className="grid size-6 place-items-center rounded-full border-2 border-ink-900 bg-amber-500 font-sans text-[0.7rem] font-bold text-ink-950 shadow"
+                className="grid size-6 place-items-center rounded-full border-2 border-fg bg-accent font-sans text-[0.7rem] font-bold text-accent-fg shadow-[var(--shadow-overlay)]"
                 title={m.title}
               >
                 {m.number}

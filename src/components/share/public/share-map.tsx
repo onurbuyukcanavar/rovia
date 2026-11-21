@@ -7,6 +7,9 @@ import { boundsOf, type LatLng } from "@/lib/geo";
 import { t } from "@/i18n";
 import { ThemedMapStyle } from "@/components/theme/themed-map-style";
 
+/** Rota boyası haritanın temasına göre (aydınlıkta önceki görünüm; koyuda açık kenar + amber çizgi). */
+const ROUTE = { light: { casing: "#ffffff", line: "#0e1726" }, dark: { casing: "#f7f5f0", line: "#e8912d" } } as const;
+
 type Pin = { lat: number; lng: number; label: string; kind: string };
 
 /** Paylaşım sayfasındaki rota haritası: rotaya sığdırılmış görünüm, duraklar numaralı işaretlerle. */
@@ -24,9 +27,9 @@ export function ShareMap({ styleUrl, paths, pins }: { styleUrl: string; paths: L
     return { bounds: [[b.west, b.south], [b.east, b.north]] as [[number, number], [number, number]], fitBoundsOptions: { padding: 48, maxZoom: 14 } };
   }, [paths, pins]);
 
-  if (failed) return <p className="grid h-full place-items-center bg-sand-100 p-6 text-center text-sm text-stone-600">{t.share.page.mapUnavailable}</p>;
+  if (failed) return <p className="grid h-full place-items-center bg-sunken p-6 text-center text-sm text-fg-muted">{t.share.page.mapUnavailable}</p>;
   return (
-    <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+    <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle, theme) => (
       <MapView
         initialViewState={initialViewState}
         mapStyle={mapStyle}
@@ -42,16 +45,16 @@ export function ShareMap({ styleUrl, paths, pins }: { styleUrl: string; paths: L
         <NavigationControl position="top-right" showCompass={false} />
         {paths.length > 0 && (
           <Source id="share-route" type="geojson" data={route}>
-            <Layer id="share-route-casing" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": "#ffffff", "line-width": 8 }} />
-            <Layer id="share-route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": "#0e1726", "line-width": 4.5 }} />
+            <Layer id="share-route-casing" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": ROUTE[theme].casing, "line-width": 8 }} />
+            <Layer id="share-route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": ROUTE[theme].line, "line-width": 4.5 }} />
           </Source>
         )}
         {pins.map((p, i) => (
           <Marker key={`${i}-${p.lat}-${p.lng}`} longitude={p.lng} latitude={p.lat} anchor="center">
             <span title={p.label}
               className={p.kind === "destination"
-                ? "grid size-7 place-items-center rounded-full border-2 border-white bg-amber-500 font-sans text-xs font-bold text-ink-950 shadow"
-                : "grid size-6 place-items-center rounded-full border-2 border-ink-900 bg-white font-sans text-[0.7rem] font-bold text-ink-900 shadow"}>
+                ? "grid size-7 place-items-center rounded-full border-2 border-surface bg-accent font-sans text-xs font-bold text-accent-fg shadow-[var(--shadow-overlay)]"
+                : "grid size-6 place-items-center rounded-full border-2 border-fg bg-surface font-sans text-[0.7rem] font-bold text-fg shadow-[var(--shadow-overlay)]"}>
               {i + 1}
             </span>
           </Marker>

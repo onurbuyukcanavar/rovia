@@ -50,21 +50,21 @@ export function RevisionsButton({ entryId, beforeRestore, onRestored }: {
       </Button>
       <Modal open={open} onClose={() => setOpen(false)} title={T.revisions} testId="revisions-dialog">
         {loading && !revisions ? (
-          <p className="flex items-center gap-2 text-sm text-stone-600"><LoaderCircle className="size-4 animate-spin" aria-hidden /> {t.common.loading}</p>
+          <p className="flex items-center gap-2 text-sm text-fg-muted"><LoaderCircle className="size-4 animate-spin" aria-hidden /> {t.common.loading}</p>
         ) : revisions && revisions.length === 0 ? (
-          <p className="text-sm text-stone-600">{T.revisionsEmpty}</p>
+          <p className="text-sm text-fg-muted">{T.revisionsEmpty}</p>
         ) : (
           <ul className="max-h-[60dvh] space-y-2 overflow-y-auto">
             {(revisions ?? []).map((r) => (
-              <li key={r.id} className="space-y-1.5 rounded-2xl border border-sand-200 bg-white p-3">
-                <p className="flex flex-wrap items-baseline justify-between gap-2 text-xs text-stone-600">
-                  <span className="font-semibold text-ink-800">{T.revisionVersion(r.version)}</span>
+              <li key={r.id} className="space-y-1.5 rounded-2xl border border-line bg-raised p-3">
+                <p className="flex flex-wrap items-baseline justify-between gap-2 text-xs text-fg-muted">
+                  <span className="font-semibold text-fg">{T.revisionVersion(r.version)}</span>
                   <span className="tabular-nums">{formatDate(r.createdAt)} · {formatTime(r.createdAt)}</span>
                 </p>
                 {r.title && <p className="font-semibold">{r.title}</p>}
-                {r.preview && <p className="line-clamp-3 text-sm text-stone-700">{r.preview}</p>}
+                {r.preview && <p className="line-clamp-3 text-sm text-fg-muted">{r.preview}</p>}
                 {confirmId === r.id ? (
-                  <div className="space-y-2 rounded-xl bg-sand-100/70 p-2" role="alertdialog" aria-label={T.restoreConfirm}>
+                  <div className="space-y-2 rounded-xl bg-sunken p-2" role="alertdialog" aria-label={T.restoreConfirm}>
                     <p className="text-sm font-semibold">{T.restoreConfirm}</p>
                     <div className="flex gap-2">
                       <Button type="button" size="sm" variant="accent" disabled={restoring} onClick={() => restore(r.id)}>
@@ -74,7 +74,7 @@ export function RevisionsButton({ entryId, beforeRestore, onRestored }: {
                     </div>
                   </div>
                 ) : (
-                  <button type="button" className="text-sm font-semibold text-amber-700 underline" onClick={() => setConfirmId(r.id)}>{T.restore}</button>
+                  <button type="button" className="text-sm font-semibold text-accent-ink underline" onClick={() => setConfirmId(r.id)}>{T.restore}</button>
                 )}
               </li>
             ))}

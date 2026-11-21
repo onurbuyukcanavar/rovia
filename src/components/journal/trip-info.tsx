@@ -20,9 +20,9 @@ export function TripInfo({ id, title, description }: { id: string; title: string
     return (
       <div className="space-y-2">
         <h1 className="text-2xl font-extrabold tracking-tight" data-testid="trip-title">{title}</h1>
-        {description && <p className="text-sm leading-relaxed whitespace-pre-line text-stone-700" data-testid="trip-description">{description}</p>}
+        {description && <p className="text-sm leading-relaxed whitespace-pre-line text-fg-muted" data-testid="trip-description">{description}</p>}
         <button type="button" onClick={() => { setName(title); setDesc(description ?? ""); setEditing(true); }}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-stone-600 hover:text-ink-900">
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg-muted hover:text-fg">
           <Pencil className="size-3.5" aria-hidden /> {t.archive.editInfo}
         </button>
       </div>
@@ -39,11 +39,11 @@ export function TripInfo({ id, title, description }: { id: string; title: string
       });
     }}>
       <div className="space-y-1.5">
-        <label htmlFor="trip-name" className="block text-sm font-semibold text-ink-800">{t.trips.name}</label>
+        <label htmlFor="trip-name" className="block text-sm font-semibold text-fg">{t.trips.name}</label>
         <input id="trip-name" className={cn(fieldClass, "h-11")} value={name} maxLength={160} required onChange={(e) => setName(e.target.value)} />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="trip-desc" className="block text-sm font-semibold text-ink-800">{t.archive.description}</label>
+        <label htmlFor="trip-desc" className="block text-sm font-semibold text-fg">{t.archive.description}</label>
         <textarea id="trip-desc" rows={3} className={cn(fieldClass, "py-2")} value={desc} maxLength={5000}
           placeholder={t.archive.descriptionPlaceholder} onChange={(e) => setDesc(e.target.value)} />
       </div>

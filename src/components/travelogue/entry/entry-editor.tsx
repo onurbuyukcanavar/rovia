@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { SectionEyebrow } from "@/components/ui/section-eyebrow";
 import { fieldClass } from "@/components/journal/note-editor";
 import { RichEditor } from "@/components/travelogue/editor/rich-editor-lazy";
 import { SaveStatus } from "@/components/travelogue/save-status";
@@ -102,17 +103,17 @@ function EntryEditorInner({ travelogueId, entry, media, userId, tripId, styleUrl
   });
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-8 sm:py-8" data-testid="entry-editor" data-ready={hydrated || undefined}>
+    <div data-themed className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-8 sm:py-8" data-testid="entry-editor" data-ready={hydrated || undefined}>
       <header className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <a href={base} onClick={(e) => { e.preventDefault(); go(base); }} data-testid="entry-back"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
+            className="inline-flex items-center gap-1 text-sm font-semibold text-fg-muted hover:text-fg">
             <ArrowLeft className="size-4" aria-hidden /> {T.back}
           </a>
           <SaveStatus autosave={view} onReload={onReload} />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="eyebrow">{T.heading} · {T.position(position.index + 1, position.total)}</p>
+          <SectionEyebrow index={position.index + 1}>{T.heading} · {T.position(position.index + 1, position.total)}</SectionEyebrow>
           <nav className="flex items-center gap-1" aria-label={T.heading}>
             <Button type="button" size="sm" variant="ghost" disabled={!prevId || navigating} onClick={() => prevId && go(`${base}/yazi/${prevId}`)}>
               <ChevronLeft className="size-4" aria-hidden /> {T.prev}
@@ -129,7 +130,7 @@ function EntryEditorInner({ travelogueId, entry, media, userId, tripId, styleUrl
 
       <PhotoManager entryId={entry.id} initial={entry.photos} media={media} userId={userId} tripId={tripId} />
 
-      <footer className="flex flex-wrap items-center gap-2 border-t border-sand-200 pt-5">
+      <footer className="flex flex-wrap items-center gap-2 border-t border-line pt-5">
         <RevisionsButton entryId={entry.id} beforeRestore={() => autosave.flush()} onRestored={onReload} />
         {confirming ? (
           <div className="flex flex-wrap items-center gap-2" role="alertdialog" aria-label={T.deleteConfirm}>
@@ -183,20 +184,20 @@ function EntryForm({ initial, media, userId, tripId, styleUrl, onPatch, onMediaU
     <div className="space-y-6">
       <div className="space-y-1.5">
         <label htmlFor="entry-title" className="sr-only">{T.title}</label>
-        <input id="entry-title" className={cn(fieldClass, "h-14 font-serif text-2xl font-bold")} value={title} maxLength={200}
+        <input id="entry-title" className={cn(fieldClass, "h-14 font-serif text-2xl font-normal tracking-[-0.01em]")} value={title} maxLength={200}
           placeholder={T.titlePlaceholder} data-testid="entry-title"
           onChange={(e) => { setTitle(e.target.value); onPatch({ title: e.target.value }); }} />
       </div>
 
       <fieldset className="space-y-1.5">
-        <legend className="text-sm font-semibold text-ink-800">{T.type}</legend>
+        <legend className="text-sm font-semibold text-fg">{T.type}</legend>
         <div className="flex flex-wrap gap-2" role="radiogroup">
           {ENTRY_TYPES.map((ty) => {
             const Icon = TYPE_ICON[ty];
             return (
               <button key={ty} type="button" role="radio" aria-checked={type === ty} onClick={() => { setType(ty); onPatch({ entryType: ty }); }}
                 className={cn("inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold",
-                  type === ty ? "border-ink-900 bg-ink-900 text-paper" : "border-sand-300 bg-paper-50 text-ink-800 hover:bg-white")}>
+                  type === ty ? "border-fg bg-fg text-surface" : "border-line-strong bg-raised text-fg-muted hover:bg-fg/[0.05] hover:text-fg")}>
                 <Icon className="size-4" aria-hidden /> {TYPES[ty]}
               </button>
             );
@@ -205,7 +206,7 @@ function EntryForm({ initial, media, userId, tripId, styleUrl, onPatch, onMediaU
       </fieldset>
 
       <div className="space-y-1.5">
-        <label htmlFor="entry-visited" className="block text-sm font-semibold text-ink-800">{T.visitedAt}</label>
+        <label htmlFor="entry-visited" className="block text-sm font-semibold text-fg">{T.visitedAt}</label>
         <div className="flex gap-2">
           <input id="entry-visited" type="datetime-local" className={cn(fieldClass, "h-11 max-w-xs")} value={visited}
             aria-describedby="entry-visited-hint" data-testid="entry-visited"
@@ -216,27 +217,27 @@ function EntryForm({ initial, media, userId, tripId, styleUrl, onPatch, onMediaU
             }} />
           {visited && (
             <button type="button" aria-label={T.visitedAtClear} title={T.visitedAtClear} onClick={() => { setVisited(""); onPatch({ visitedAt: null }); }}
-              className="grid size-11 place-items-center rounded-full text-stone-600 hover:bg-sand-100"><X className="size-4" aria-hidden /></button>
+              className="grid size-11 place-items-center rounded-full text-fg-muted hover:bg-fg/[0.06]"><X className="size-4" aria-hidden /></button>
           )}
         </div>
-        <p id="entry-visited-hint" className="text-xs text-stone-600">{T.visitedAtHint}</p>
+        <p id="entry-visited-hint" className="text-xs text-fg-muted">{T.visitedAtHint}</p>
       </div>
 
       <section aria-labelledby="entry-location" className="space-y-2">
-        <h2 id="entry-location" className="text-sm font-semibold text-ink-800">{T.location}</h2>
+        <h2 id="entry-location" className="text-sm font-semibold text-fg">{T.location}</h2>
         <LocationPicker styleUrl={styleUrl}
           initial={{ locationName: initial.locationName, address: initial.address, lat: initial.lat, lng: initial.lng, osmRef: initial.osmRef }}
           onChange={(l: EntryLocation) => onPatch(l)} />
       </section>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold text-ink-800">{T.tags}</legend>
+        <legend className="text-sm font-semibold text-fg">{T.tags}</legend>
         <div className="flex flex-wrap gap-1.5">
           {[...ENTRY_TAGS, ...customTags].map((tag) => {
             const on = tags.includes(tag);
             return (
               <button key={tag} type="button" aria-pressed={on} onClick={() => toggleTag(tag)} data-testid="entry-tag"
-                className={cn("h-8 rounded-full border px-3 text-sm", on ? "border-amber-500 bg-amber-100 font-semibold text-ink-900" : "border-sand-300 bg-paper-50 text-stone-700 hover:bg-white")}>
+                className={cn("h-8 rounded-full border px-3 text-sm", on ? "border-accent/60 bg-accent-soft font-semibold text-accent-ink" : "border-line-strong bg-raised text-fg-muted hover:bg-fg/[0.05] hover:text-fg")}>
                 {tag}
               </button>
             );
@@ -271,7 +272,7 @@ function EntryForm({ initial, media, userId, tripId, styleUrl, onPatch, onMediaU
 function RichBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h2 className="text-sm font-semibold text-ink-800">{title}</h2>
+      <h2 className="font-serif text-lg font-normal text-fg italic">{title}</h2>
       {children}
     </section>
   );

@@ -62,7 +62,7 @@ export function PdfExportButton({ travelogue, styleUrl, className }: { travelogu
           {state.kind === "error" ? L.pdf.retry : L.downloadPdf}
         </Button>
       </div>
-      <p className="mt-1 min-h-4 text-right text-xs text-stone-600" role="status" aria-live="polite">
+      <p className="mt-1 min-h-4 text-right text-xs text-fg-muted" role="status" aria-live="polite">
         {working ? progressLabel(state.progress) : state.kind === "done" ? (state.skipped ? L.pdf.skippedPhotos(state.skipped) : L.pdf.done) : null}
         {state.kind === "error" ? <span className="text-danger">{L.pdf.failed}</span> : null}
       </p>

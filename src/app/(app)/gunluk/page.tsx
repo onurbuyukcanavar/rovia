@@ -10,11 +10,13 @@ export const metadata: Metadata = { title: t.journal.title };
 
 export default function JournalPage() {
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader eyebrow={t.nav.journal} title={t.journal.title} description={t.journal.subtitle} />
-      <Suspense fallback={<div className="space-y-3" aria-label={t.common.loading}>{[0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-sand-100" />)}</div>}>
-        <JournalLoader />
-      </Suspense>
+    <div data-themed className="page-backdrop min-h-full">
+      <div className="mx-auto max-w-5xl space-y-8 px-4 py-6 sm:px-8 sm:py-10">
+        <PageHeader eyebrow={t.nav.journal} title={t.journal.title} description={t.journal.subtitle} />
+        <Suspense fallback={<div className="space-y-3" aria-label={t.common.loading}>{[0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded-[var(--radius-card)] bg-sunken" />)}</div>}>
+          <JournalLoader />
+        </Suspense>
+      </div>
     </div>
   );
 }

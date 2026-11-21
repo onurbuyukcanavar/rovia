@@ -8,6 +8,7 @@ import { PRIVACY_RADII, SHARE_OPTION_KEYS, SHARE_VISIBILITIES, type ShareKind, t
 import { radiusLabel } from "@/lib/share/view";
 import { useHydrated } from "@/lib/use-hydrated";
 import { cn } from "@/lib/cn";
+import { inputClass } from "@/components/ui/field";
 import { t } from "@/i18n";
 
 const S = t.share;
@@ -76,12 +77,12 @@ export function ShareForm({ kind, targetId, initial, busy, onSaved }: {
           const Icon = ICONS[v];
           return (
             <label key={v} className={cn("flex cursor-pointer gap-3 rounded-xl border p-3 transition-colors",
-              visibility === v ? "border-ink-900 bg-white" : "border-sand-200 hover:border-stone-400")}>
+              visibility === v ? "border-accent/60 bg-accent-soft" : "border-line hover:border-fg-subtle")}>
               <input type="radio" name="visibility" value={v} checked={visibility === v} onChange={() => setVisibility(v)}
-                className="mt-1 accent-ink-900" data-testid={`share-visibility-${v}`} />
+                className="mt-1 accent-accent" data-testid={`share-visibility-${v}`} />
               <span className="min-w-0">
                 <span className="flex items-center gap-1.5 font-semibold"><Icon className="size-4" aria-hidden /> {S.visibility[v].label}</span>
-                <span className="block text-sm text-stone-600">{S.visibility[v].body}</span>
+                <span className="block text-sm text-fg-muted">{S.visibility[v].body}</span>
               </span>
             </label>
           );
@@ -96,10 +97,10 @@ export function ShareForm({ kind, targetId, initial, busy, onSaved }: {
               {keys.map((k: ShareOptionKey) => (
                 <label key={k} className="flex items-start gap-2 text-sm">
                   <input type="checkbox" checked={options[k]} onChange={(e) => setOptions({ ...options, [k]: e.target.checked })}
-                    className="mt-0.5 size-4 accent-ink-900" data-testid={`share-option-${k}`} />
+                    className="mt-0.5 size-4 accent-accent" data-testid={`share-option-${k}`} />
                   <span>
                     {S.options[k]}
-                    {k in S.optionHints && <span className="block text-xs text-stone-500">{S.optionHints[k as keyof typeof S.optionHints]}</span>}
+                    {k in S.optionHints && <span className="block text-xs text-fg-subtle">{S.optionHints[k as keyof typeof S.optionHints]}</span>}
                   </span>
                 </label>
               ))}
@@ -110,10 +111,10 @@ export function ShareForm({ kind, targetId, initial, busy, onSaved }: {
             <label htmlFor={`share-radius-${targetId}`} className="text-sm font-bold">{S.radiusLabel}</label>
             <select id={`share-radius-${targetId}`} value={radius} onChange={(e) => setRadius(Number(e.target.value))}
               disabled={options.endpoints} data-testid="share-radius"
-              className="block h-10 w-full rounded-xl border border-sand-300 bg-white px-3 text-sm disabled:opacity-50">
+              className={inputClass(false, "block h-10 px-3 text-sm")}>
               {PRIVACY_RADII.map((m) => <option key={m} value={m}>{radiusLabel(m)}</option>)}
             </select>
-            <p className="text-xs text-stone-500">{S.radiusHint}</p>
+            <p className="text-xs text-fg-subtle">{S.radiusHint}</p>
           </div>
         </>
       )}
@@ -122,14 +123,14 @@ export function ShareForm({ kind, targetId, initial, busy, onSaved }: {
         <Button type="submit" size="sm" disabled={disabled || !dirty} data-testid="share-save">
           {pending ? S.saving : S.save}
         </Button>
-        {dirty && <span className="text-xs text-amber-700" data-testid="share-dirty">{S.unsaved}</span>}
+        {dirty && <span className="text-xs text-accent-ink" data-testid="share-dirty">{S.unsaved}</span>}
       </div>
       {message && <Alert tone={message.tone}>{message.text}</Alert>}
 
-      <section className="rounded-xl border border-sand-200 bg-sand-100/50 p-3" aria-labelledby="share-preview-title" data-testid="share-preview">
+      <section className="rounded-xl border border-line bg-sunken p-3" aria-labelledby="share-preview-title" data-testid="share-preview">
         <h3 id="share-preview-title" className="flex items-center gap-1.5 text-sm font-bold"><Eye className="size-4" aria-hidden /> {S.previewTitle}</h3>
         {result.state.visibility === "private" ? (
-          <p className="mt-1 text-sm text-stone-600">{visibility === "private" ? S.previewNothing : S.previewAfterSave}</p>
+          <p className="mt-1 text-sm text-fg-muted">{visibility === "private" ? S.previewNothing : S.previewAfterSave}</p>
         ) : (
           <ul className="mt-2 space-y-1 text-sm">
             {result.preview.map((item) => (
@@ -144,14 +145,14 @@ export function ShareForm({ kind, targetId, initial, busy, onSaved }: {
           <label className="block space-y-1">
             <span className="text-sm font-bold">{S.linkLabel}</span>
             <input readOnly value={result.url} onFocus={(e) => e.currentTarget.select()} data-testid="share-url"
-              className="block h-10 w-full rounded-xl border border-sand-300 bg-white px-3 font-mono text-xs" />
+              className={inputClass(false, "block h-10 px-3 font-mono text-xs")} />
           </label>
           <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm" variant="primary" onClick={copy} data-testid="share-copy">
               {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />} {copied ? S.copied : S.copy}
             </Button>
             <a href={result.url} target="_blank" rel="noopener noreferrer" data-testid="share-open"
-              className="inline-flex h-9 items-center gap-2 rounded-full border border-sand-300 bg-paper-50 px-4 text-sm font-semibold hover:border-stone-500">
+              className="inline-flex h-9 items-center gap-2 rounded-full border border-line-strong bg-raised px-4 text-sm font-semibold hover:border-fg-subtle">
               <ExternalLink className="size-4" aria-hidden /> {S.open}
             </a>
             {canNativeShare && (
@@ -161,7 +162,7 @@ export function ShareForm({ kind, targetId, initial, busy, onSaved }: {
             )}
           </div>
           {confirmRotate ? (
-            <div className="space-y-2 rounded-xl border border-danger/30 bg-danger/5 p-3" role="alertdialog" aria-label={S.rotate}>
+            <div className="space-y-2 rounded-xl border border-danger/30 bg-danger-soft p-3" role="alertdialog" aria-label={S.rotate}>
               <p className="text-sm">{S.rotateConfirm}</p>
               <div className="flex gap-2">
                 <Button type="button" size="sm" variant="ghost" onClick={() => setConfirmRotate(false)} disabled={disabled}>{t.common.cancel}</Button>

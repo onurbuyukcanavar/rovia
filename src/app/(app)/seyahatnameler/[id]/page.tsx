@@ -13,7 +13,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function TravelogueWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   return (
-    <Suspense fallback={<div className="min-h-app-mobile animate-pulse bg-sand-100 lg:h-dvh" aria-label={t.common.loading} />}>
+    <Suspense fallback={<div data-themed className="min-h-app-mobile animate-pulse bg-sunken lg:h-dvh" aria-label={t.common.loading} />}>
       <WorkspaceLoader params={params} />
     </Suspense>
   );

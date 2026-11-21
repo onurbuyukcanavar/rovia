@@ -2,6 +2,7 @@
 import { Check, Link2Off, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { safeHref } from "@/lib/travelogue/doc";
+import { inputClass } from "@/components/ui/field";
 import { t } from "@/i18n";
 
 const tx = t.travelogue.editor.linkDialog;
@@ -51,7 +52,7 @@ export function LinkPopover({
       role="dialog"
       aria-label={tx.title}
       data-testid="link-popover"
-      className="absolute inset-x-2 top-full z-30 mt-2 rounded-2xl border border-sand-200 bg-paper-50 p-3 shadow-[var(--shadow-card)] sm:right-auto sm:left-2 sm:w-[26rem]"
+      className="absolute inset-x-2 top-full z-30 mt-2 rounded-2xl border border-line bg-overlay p-3 shadow-[var(--shadow-overlay)] sm:right-auto sm:left-2 sm:w-[26rem]"
       onKeyDown={(e) => {
         if (e.key === "Escape") {
           e.preventDefault();
@@ -77,20 +78,20 @@ export function LinkPopover({
           onKeyDown={(e) => {
             if (e.key === "Enter") { e.preventDefault(); apply(); }
           }}
-          className="h-10 min-w-0 flex-1 rounded-xl border border-sand-300 bg-white px-3 text-base text-ink-900 outline-none focus:border-amber-500 sm:text-sm"
+          className={inputClass(error, "h-10 min-w-0 flex-1 px-3 text-base sm:text-sm")}
         />
         <button type="button" onClick={apply} title={tx.apply} aria-label={tx.apply}
-          className="grid size-10 shrink-0 place-items-center rounded-xl bg-ink-900 text-paper hover:bg-ink-800">
+          className="grid size-10 shrink-0 place-items-center rounded-xl bg-fg text-surface hover:bg-fg/85">
           <Check className="size-4" aria-hidden />
         </button>
         {hasLink && (
           <button type="button" onClick={onRemove} title={tx.remove} aria-label={tx.remove}
-            className="grid size-10 shrink-0 place-items-center rounded-xl border border-sand-300 text-danger hover:bg-danger/5">
+            className="grid size-10 shrink-0 place-items-center rounded-xl border border-line-strong text-danger hover:bg-danger-soft">
             <Link2Off className="size-4" aria-hidden />
           </button>
         )}
         <button type="button" onClick={onClose} title={tx.cancel} aria-label={tx.cancel}
-          className="grid size-10 shrink-0 place-items-center rounded-xl text-stone-600 hover:bg-sand-100">
+          className="grid size-10 shrink-0 place-items-center rounded-xl text-fg-muted hover:bg-fg/[0.06]">
           <X className="size-4" aria-hidden />
         </button>
       </div>

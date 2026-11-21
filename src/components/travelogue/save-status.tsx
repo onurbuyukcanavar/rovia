@@ -32,7 +32,7 @@ export function SaveStatus({ autosave, onReload }: { autosave: AutosaveHandle; o
     icon = <LoaderCircle className="size-3.5 animate-spin" aria-hidden />;
     text = s.saving;
   } else if (status === "dirty") {
-    icon = <span className="size-2 rounded-full bg-amber-500" aria-hidden />;
+    icon = <span className="size-2 rounded-full bg-accent" aria-hidden />;
     text = s.dirty;
   } else if (status === "saved") {
     text = lastSavedAt ? s.saved(formatTime(lastSavedAt)) : s.savedNoTime;
@@ -56,7 +56,7 @@ export function SaveStatus({ autosave, onReload }: { autosave: AutosaveHandle; o
         aria-live="polite"
         className={cn(
           "flex min-h-6 flex-wrap items-center gap-1.5 text-xs font-medium",
-          status === "error" || status === "conflict" ? "text-danger" : status === "offline" ? "text-amber-700" : "text-stone-600",
+          status === "error" || status === "conflict" ? "text-danger" : status === "offline" ? "text-accent-ink" : "text-fg-muted",
         )}
       >
         {icon}
@@ -66,7 +66,7 @@ export function SaveStatus({ autosave, onReload }: { autosave: AutosaveHandle; o
             {error && <span className="sr-only">: {error}</span>}
             <span aria-hidden>—</span>
             <button type="button" onClick={() => void autosave.flush()}
-              className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 hover:text-ink-900"
+              className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 hover:text-fg"
               title={error ?? undefined}>
               <RotateCw className="size-3" aria-hidden />
               {s.retry}
@@ -76,12 +76,12 @@ export function SaveStatus({ autosave, onReload }: { autosave: AutosaveHandle; o
       </p>
 
       {status === "conflict" && (
-        <div role="alert" data-testid="save-conflict" className="rounded-2xl border border-danger/30 bg-danger/5 p-4 text-sm">
+        <div role="alert" data-testid="save-conflict" className="rounded-2xl border border-danger/30 bg-danger-soft p-4 text-sm">
           <p className="flex items-center gap-2 font-semibold text-danger">
             <AlertTriangle className="size-4" aria-hidden />
             {t.travelogue.editor.conflict.title}
           </p>
-          <p className="mt-1 text-stone-700">{t.travelogue.editor.conflict.body}</p>
+          <p className="mt-1 text-fg-muted">{t.travelogue.editor.conflict.body}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button size="sm" onClick={() => autosave.resolveConflict("mine")}>{t.travelogue.editor.conflict.mine}</Button>
             <Button size="sm" variant="secondary" onClick={() => { autosave.resolveConflict("theirs"); onReload?.(); }}>
@@ -92,12 +92,12 @@ export function SaveStatus({ autosave, onReload }: { autosave: AutosaveHandle; o
       )}
 
       {autosave.backup != null && status !== "conflict" && (
-        <div role="alert" data-testid="save-backup" className="rounded-2xl border border-amber-400/50 bg-amber-300/15 p-4 text-sm">
-          <p className="flex items-center gap-2 font-semibold text-ink-900">
-            <History className="size-4 text-amber-700" aria-hidden />
+        <div role="alert" data-testid="save-backup" className="rounded-2xl border border-accent/40 bg-accent-soft p-4 text-sm">
+          <p className="flex items-center gap-2 font-semibold text-fg">
+            <History className="size-4 text-accent-ink" aria-hidden />
             {t.travelogue.editor.backup.title}
           </p>
-          <p className="mt-1 text-stone-700">{t.travelogue.editor.backup.body}</p>
+          <p className="mt-1 text-fg-muted">{t.travelogue.editor.backup.body}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button size="sm" variant="accent" onClick={autosave.restoreBackup}>{t.travelogue.editor.backup.restore}</Button>
             <Button size="sm" variant="ghost" onClick={autosave.discardBackup}>{t.travelogue.editor.backup.discard}</Button>

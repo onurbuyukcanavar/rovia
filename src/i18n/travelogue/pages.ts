@@ -6,6 +6,7 @@ export const pages = {
     newButton: "Yeni seyahatname",
     empty: "Henüz bir seyahatnamen yok. Tamamladığın bir yolculuktan ya da boş bir sayfadan başlayabilirsin.",
     emptyCta: "İlk seyahatnameni oluştur",
+    emptyTitle: "Yol biter, hikâye kalır.",
     entries: (n: number) => `${n} yazı`,
     photos: (n: number) => `${n} fotoğraf`,
     updated: (d: string) => `Güncellendi: ${d}`,

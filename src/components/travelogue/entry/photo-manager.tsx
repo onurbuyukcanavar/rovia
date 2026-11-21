@@ -72,23 +72,23 @@ export function PhotoManager({ entryId, initial, media, userId, tripId }: {
     <section aria-labelledby="entry-photos" className="space-y-3" data-testid="entry-photos">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id="entry-photos" className="text-lg font-extrabold tracking-tight">{T.photos}</h2>
-        <span className="text-xs text-stone-600" role="status">
+        <span className="text-xs text-fg-muted" role="status">
           {state === "saving" ? T.photosSaving : state === "saved" ? T.photosSaved : ""}
         </span>
       </div>
 
-      {items.length === 0 ? <p className="text-sm text-stone-600">{T.photosEmpty}</p> : (
+      {items.length === 0 ? <p className="text-sm text-fg-muted">{T.photosEmpty}</p> : (
         <ol className="space-y-2">
           {items.map((it, i) => {
             const m = byId.get(it.mediaId);
             return (
-              <li key={it.mediaId} className="flex gap-3 rounded-2xl border border-sand-200 bg-white p-2" data-testid="entry-photo">
-                <span className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand-100">
+              <li key={it.mediaId} className="flex gap-3 rounded-2xl border border-line bg-raised p-2" data-testid="entry-photo">
+                <span className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-xl bg-sunken">
                   {m?.thumbUrl ? <img src={m.thumbUrl} alt={it.caption ?? m.caption ?? ""} className="size-full object-cover" loading="lazy" />
-                    : <LoaderCircle className="size-5 animate-spin text-stone-400" aria-label={T.photoLoading} />}
+                    : <LoaderCircle className="size-5 animate-spin text-fg-subtle" aria-label={T.photoLoading} />}
                 </span>
                 <div className="min-w-0 flex-1 space-y-1">
-                  <label htmlFor={`cap-${it.mediaId}`} className="text-xs font-semibold text-stone-600">{T.photoCaption}</label>
+                  <label htmlFor={`cap-${it.mediaId}`} className="text-xs font-semibold text-fg-muted">{T.photoCaption}</label>
                   <textarea id={`cap-${it.mediaId}`} rows={2} maxLength={2000} className={cn(fieldClass, "py-1.5 text-sm")}
                     value={it.caption ?? ""} placeholder={m?.caption ?? undefined}
                     onChange={(e) => void commit(items.map((x) => (x.mediaId === it.mediaId ? { ...x, caption: e.target.value } : x)))} />
@@ -131,7 +131,7 @@ export function PhotoManager({ entryId, initial, media, userId, tripId }: {
 
 function PhotoPicker({ media, onPick }: { media: MediaItem[]; onPick: (ids: string[]) => void }) {
   const [selected, setSelected] = useState<string[]>([]);
-  if (!media.length) return <p className="text-sm text-stone-600">{T.photoPickEmpty}</p>;
+  if (!media.length) return <p className="text-sm text-fg-muted">{T.photoPickEmpty}</p>;
   return (
     <div className="space-y-3">
       <ul className="grid max-h-[50dvh] grid-cols-3 gap-1.5 overflow-y-auto sm:grid-cols-4">
@@ -141,9 +141,9 @@ function PhotoPicker({ media, onPick }: { media: MediaItem[]; onPick: (ids: stri
             <li key={m.id}>
               <button type="button" aria-pressed={on} aria-label={m.caption || T.photos}
                 onClick={() => setSelected((s) => (on ? s.filter((x) => x !== m.id) : [...s, m.id]))}
-                className={cn("relative block aspect-square w-full overflow-hidden rounded-lg bg-sand-100", on && "ring-4 ring-amber-500")}>
+                className={cn("relative block aspect-square w-full overflow-hidden rounded-lg bg-sunken", on && "ring-4 ring-accent")}>
                 {m.thumbUrl && <img src={m.thumbUrl} alt="" loading="lazy" className="size-full object-cover" />}
-                {on && <Check className="absolute top-1 right-1 size-5 rounded-full bg-amber-500 p-0.5 text-ink-950" aria-hidden />}
+                {on && <Check className="absolute top-1 right-1 size-5 rounded-full bg-accent p-0.5 text-accent-fg" aria-hidden />}
               </button>
             </li>
           );
@@ -159,7 +159,7 @@ function PhotoPicker({ media, onPick }: { media: MediaItem[]; onPick: (ids: stri
 function IconBtn({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: React.ReactNode }) {
   return (
     <button type="button" onClick={onClick} disabled={disabled} aria-label={label} title={label}
-      className="grid size-8 place-items-center rounded-full text-stone-600 hover:bg-sand-100 hover:text-ink-900 disabled:opacity-30">
+      className="grid size-8 place-items-center rounded-full text-fg-muted hover:bg-fg/[0.06] hover:text-fg disabled:opacity-30">
       <span aria-hidden>{children}</span>
     </button>
   );
