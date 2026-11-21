@@ -69,8 +69,8 @@ test.describe("Haritayı Keşfet — uçtan uca akış (OSM verisi gerekli)", ()
     await pick("Varış", "Ankara", /^Ankara/);
 
     await expect(page.getByTestId("route-distance")).toHaveText(/\d+ km/, { timeout: 30_000 });
-    // Rota haritada çizilmiş olmalı: rota rengi (amber #e8912d) ekranda görünür
-    await expect.poll(() => mapHasColor(page, [0xe8, 0x91, 0x2d]), { timeout: 20_000 }).toBe(true);
+    // Rota haritada çizilmiş olmalı: varsayılan koyu temada rota rengi (açık amber #f0a94a, ROUTE_PAINT.dark) ekranda görünür
+    await expect.poll(() => mapHasColor(page, [0xf0, 0xa9, 0x4a]), { timeout: 20_000 }).toBe(true);
     expect(errors).toEqual([]);
 
     await page.getByRole("button", { name: "Benzin istasyonları" }).click();
