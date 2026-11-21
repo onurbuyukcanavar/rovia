@@ -11,7 +11,7 @@ export function SetupNotice() {
       <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 text-xs leading-6 text-paper">
         {REQUIRED_ENV_VARS.map((v) => `${v.name}=${v.example}`).join("\n")}
       </pre>
-      <p className="text-sm text-stone-600">Ayrıntılı kurulum: docs/SETUP.md</p>
+      <p className="text-sm text-fg-muted">Ayrıntılı kurulum: docs/SETUP.md</p>
     </div>
   );
 }
