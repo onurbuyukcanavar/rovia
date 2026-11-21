@@ -8,5 +8,6 @@ export const theme = {
     light: { label: "Aydınlık", hint: "Sıcak kâğıt tonları" },
     system: { label: "Sistem", hint: "Cihazının ayarını izler" },
   },
+  toggle: { toLight: "Aydınlık temaya geç", toDark: "Koyu temaya geç" },
   systemNow: (resolved: "dark" | "light") => `Şu an cihazın ${resolved === "dark" ? "koyu" : "aydınlık"} modda.`,
 } as const;

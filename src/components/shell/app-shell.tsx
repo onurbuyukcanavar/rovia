@@ -5,15 +5,19 @@ import { MobileNav, MobileNavLive, SidebarNav, SidebarNavLive } from "./nav-link
 import { MobileHeaderAvatar, SidebarUser } from "./user-menu";
 import { t } from "@/i18n";
 import { InstallHeaderButton } from "@/components/install/install-trigger";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[17rem_1fr]">
       {/* Masaüstü: sol navigasyon */}
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-chrome px-4 py-6 lg:flex">
-        <Link href="/panel" className="px-2" aria-label="ROVIA panel">
-          <Logo />
-        </Link>
+        <div className="flex items-center justify-between gap-2 pr-1">
+          <Link href="/panel" className="px-2" aria-label="ROVIA panel">
+            <Logo />
+          </Link>
+          <ThemeToggle />
+        </div>
         <nav aria-label="Ana menü" className="scroll-quiet mt-8 flex-1 space-y-0.5 overflow-y-auto">
           <Suspense fallback={<SidebarNav pathname={null} />}>
             <SidebarNavLive />
