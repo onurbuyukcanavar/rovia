@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: m.page.title, description: m.page.lea
 export default function DownloadPage() {
   const c = m.page.cards;
   return (
-    <div className="min-h-dvh bg-paper">
+    <div data-theme="light" className="min-h-dvh bg-paper text-ink-900">
       <section className="bg-ink-900 text-paper">
         <header className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-5 pt-[env(safe-area-inset-top)]">
           <Link href="/" aria-label="ROVIA ana sayfa"><Logo inverted /></Link>

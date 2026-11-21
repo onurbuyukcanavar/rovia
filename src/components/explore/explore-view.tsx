@@ -24,6 +24,7 @@ import { t } from "@/i18n";
 import { CategoryChips, CATEGORY_ICONS } from "./category-chips";
 import { ExploreMarkers, TripLine } from "./explore-markers";
 import { PlacePanel } from "./place-panel";
+import { ThemedMapStyle } from "@/components/theme/themed-map-style";
 
 const E = t.explore;
 const TURKEY = { lat: 39.0, lng: 35.2, zoom: 6 };
@@ -118,36 +119,38 @@ export function ExploreView({ styleUrl, initialCategory, initialView, initialTri
     <div className="relative flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr] lg:overflow-hidden">
       <MapFrame expanded={mapView.expanded} onExpand={mapView.expand} onCollapse={mapView.collapse}
         className="order-1 h-[42%] shrink-0 lg:order-2 lg:h-full" testId="map">
-        <MapView
-          ref={mapRef}
-          initialViewState={{
-            longitude: initialView?.lng ?? TURKEY.lng, latitude: initialView?.lat ?? TURKEY.lat, zoom: initialView?.zoom ?? TURKEY.zoom,
-          }}
-          mapStyle={styleUrl}
-          style={{ width: "100%", height: "100%" }}
-          onLoad={(e) => {
-            const b = e.target.getBounds();
-            setBbox(normalizeBbox([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]));
-          }}
-          onMoveEnd={onMoveEnd}
-          onClick={() => {
-            if (!mapView.expanded && isMobileViewport()) mapView.expand();
-          }}
-          onError={(e) => {
-            console.error("[rovia] harita:", e.error?.message);
-            setMapError(true);
-          }}
-          attributionControl={{ compact: true }}
-          dragRotate={false}
-        >
-          <NavigationControl position="top-right" showCompass={false} />
-          <ScaleControl position="bottom-left" unit="metric" />
-          {trip && <TripLine polyline={trip.polyline} />}
-          <ExploreMarkers places={places} color={color} selectedId={selectedId} onSelect={select} />
-          <MyLocationMarker position={mode === "near" ? geo.position : null} />
-          <FitBounds points={fit.points} deps={fit.key} />
-          <PanTo position={selected?.location ?? null} />
-        </MapView>
+        <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+          <MapView
+            ref={mapRef}
+            initialViewState={{
+              longitude: initialView?.lng ?? TURKEY.lng, latitude: initialView?.lat ?? TURKEY.lat, zoom: initialView?.zoom ?? TURKEY.zoom,
+            }}
+            mapStyle={mapStyle}
+            style={{ width: "100%", height: "100%" }}
+            onLoad={(e) => {
+              const b = e.target.getBounds();
+              setBbox(normalizeBbox([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]));
+            }}
+            onMoveEnd={onMoveEnd}
+            onClick={() => {
+              if (!mapView.expanded && isMobileViewport()) mapView.expand();
+            }}
+            onError={(e) => {
+              console.error("[rovia] harita:", e.error?.message);
+              setMapError(true);
+            }}
+            attributionControl={{ compact: true }}
+            dragRotate={false}
+          >
+            <NavigationControl position="top-right" showCompass={false} />
+            <ScaleControl position="bottom-left" unit="metric" />
+            {trip && <TripLine polyline={trip.polyline} />}
+            <ExploreMarkers places={places} color={color} selectedId={selectedId} onSelect={select} />
+            <MyLocationMarker position={mode === "near" ? geo.position : null} />
+            <FitBounds points={fit.points} deps={fit.key} />
+            <PanTo position={selected?.location ?? null} />
+          </MapView>
+        )}</ThemedMapStyle>
         {mapError && (
           <div className="absolute inset-x-3 top-14 z-10"><Alert tone="error">{t.maps.loadError}</Alert></div>
         )}

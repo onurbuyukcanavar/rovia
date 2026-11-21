@@ -10,6 +10,7 @@ import { mapsApi } from "@/lib/maps/client";
 import type { Stop } from "@/lib/maps/types";
 import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
+import { ThemedMapStyle } from "@/components/theme/themed-map-style";
 
 const T = t.travelogue.pages.entry;
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
@@ -61,20 +62,22 @@ export function LocationPicker({ initial, styleUrl, onChange }: {
         }} />
 
       <div className="relative h-48 overflow-hidden rounded-2xl border border-sand-200 sm:h-56" data-testid="location-map">
-        <MapView
-          initialViewState={hasCoords ? { longitude: loc.lng!, latitude: loc.lat!, zoom: 13 } : { longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 4.6 }}
-          mapStyle={styleUrl} style={{ width: "100%", height: "100%" }} attributionControl={{ compact: true }} dragRotate={false}
-          cursor="crosshair"
-          onClick={(e) => void pickOnMap(Number(e.lngLat.lat.toFixed(6)), Number(e.lngLat.lng.toFixed(6)))}
-        >
-          <NavigationControl position="top-right" showCompass={false} />
-          {hasCoords && (
-            <Marker longitude={loc.lng!} latitude={loc.lat!} anchor="bottom">
-              <MapPin className="size-8 fill-amber-500 text-ink-900 drop-shadow" aria-hidden />
-            </Marker>
-          )}
-          <Recenter lat={loc.lat} lng={loc.lng} nonce={moveNonce} />
-        </MapView>
+        <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+          <MapView
+            initialViewState={hasCoords ? { longitude: loc.lng!, latitude: loc.lat!, zoom: 13 } : { longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 4.6 }}
+            mapStyle={mapStyle} style={{ width: "100%", height: "100%" }} attributionControl={{ compact: true }} dragRotate={false}
+            cursor="crosshair"
+            onClick={(e) => void pickOnMap(Number(e.lngLat.lat.toFixed(6)), Number(e.lngLat.lng.toFixed(6)))}
+          >
+            <NavigationControl position="top-right" showCompass={false} />
+            {hasCoords && (
+              <Marker longitude={loc.lng!} latitude={loc.lat!} anchor="bottom">
+                <MapPin className="size-8 fill-amber-500 text-ink-900 drop-shadow" aria-hidden />
+              </Marker>
+            )}
+            <Recenter lat={loc.lat} lng={loc.lng} nonce={moveNonce} />
+          </MapView>
+        )}</ThemedMapStyle>
       </div>
       <p className="text-xs text-stone-600">{T.mapPickHint}</p>
 

@@ -26,10 +26,10 @@ export function GoogleButton({ next }: { next?: string }) {
 
 export function OrDivider() {
   return (
-    <div className="my-6 flex items-center gap-3 text-xs font-semibold tracking-widest text-stone-500 uppercase">
-      <span className="h-px flex-1 bg-sand-200" />
+    <div className="my-6 flex items-center gap-3 text-xs font-semibold tracking-widest text-fg-subtle uppercase">
+      <span className="h-px flex-1 bg-line" />
       {t.common.or}
-      <span className="h-px flex-1 bg-sand-200" />
+      <span className="h-px flex-1 bg-line" />
     </div>
   );
 }

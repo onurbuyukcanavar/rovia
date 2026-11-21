@@ -5,6 +5,7 @@ import { Layer, Marker, NavigationControl, Source } from "react-map-gl/maplibre"
 import { MapView } from "@/lib/maps/maplibre-setup";
 import { boundsOf, type LatLng } from "@/lib/geo";
 import { t } from "@/i18n";
+import { ThemedMapStyle } from "@/components/theme/themed-map-style";
 
 type Pin = { lat: number; lng: number; label: string; kind: string };
 
@@ -25,35 +26,37 @@ export function ShareMap({ styleUrl, paths, pins }: { styleUrl: string; paths: L
 
   if (failed) return <p className="grid h-full place-items-center bg-sand-100 p-6 text-center text-sm text-stone-600">{t.share.page.mapUnavailable}</p>;
   return (
-    <MapView
-      initialViewState={initialViewState}
-      mapStyle={styleUrl}
-      style={{ width: "100%", height: "100%" }}
-      dragRotate={false}
-      cooperativeGestures
-      attributionControl={{ compact: true }}
-      onError={(e) => {
-        console.error("[rovia] paylaşım haritası:", e.error?.message);
-        setFailed(true);
-      }}
-    >
-      <NavigationControl position="top-right" showCompass={false} />
-      {paths.length > 0 && (
-        <Source id="share-route" type="geojson" data={route}>
-          <Layer id="share-route-casing" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": "#ffffff", "line-width": 8 }} />
-          <Layer id="share-route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": "#0e1726", "line-width": 4.5 }} />
-        </Source>
-      )}
-      {pins.map((p, i) => (
-        <Marker key={`${i}-${p.lat}-${p.lng}`} longitude={p.lng} latitude={p.lat} anchor="center">
-          <span title={p.label}
-            className={p.kind === "destination"
-              ? "grid size-7 place-items-center rounded-full border-2 border-white bg-amber-500 font-sans text-xs font-bold text-ink-950 shadow"
-              : "grid size-6 place-items-center rounded-full border-2 border-ink-900 bg-white font-sans text-[0.7rem] font-bold text-ink-900 shadow"}>
-            {i + 1}
-          </span>
-        </Marker>
-      ))}
-    </MapView>
+    <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+      <MapView
+        initialViewState={initialViewState}
+        mapStyle={mapStyle}
+        style={{ width: "100%", height: "100%" }}
+        dragRotate={false}
+        cooperativeGestures
+        attributionControl={{ compact: true }}
+        onError={(e) => {
+          console.error("[rovia] paylaşım haritası:", e.error?.message);
+          setFailed(true);
+        }}
+      >
+        <NavigationControl position="top-right" showCompass={false} />
+        {paths.length > 0 && (
+          <Source id="share-route" type="geojson" data={route}>
+            <Layer id="share-route-casing" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": "#ffffff", "line-width": 8 }} />
+            <Layer id="share-route-line" type="line" layout={{ "line-join": "round", "line-cap": "round" }} paint={{ "line-color": "#0e1726", "line-width": 4.5 }} />
+          </Source>
+        )}
+        {pins.map((p, i) => (
+          <Marker key={`${i}-${p.lat}-${p.lng}`} longitude={p.lng} latitude={p.lat} anchor="center">
+            <span title={p.label}
+              className={p.kind === "destination"
+                ? "grid size-7 place-items-center rounded-full border-2 border-white bg-amber-500 font-sans text-xs font-bold text-ink-950 shadow"
+                : "grid size-6 place-items-center rounded-full border-2 border-ink-900 bg-white font-sans text-[0.7rem] font-bold text-ink-900 shadow"}>
+              {i + 1}
+            </span>
+          </Marker>
+        ))}
+      </MapView>
+    )}</ThemedMapStyle>
   );
 }

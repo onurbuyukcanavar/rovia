@@ -25,7 +25,7 @@ export function InstallHeaderButton() {
   return (
     <>
       <button type="button" onClick={show} aria-label={t.install.trigger} title={t.install.trigger}
-        className="grid size-10 place-items-center rounded-full text-paper/80 hover:bg-paper/10 hover:text-paper active:bg-paper/15">
+        className="grid size-10 place-items-center rounded-full text-fg-muted hover:bg-fg/10 hover:text-fg active:bg-fg/15">
         <Smartphone className="size-5" aria-hidden />
       </button>
       {sheet}
@@ -40,13 +40,13 @@ export function InstallListRow() {
   if (!s.ready || s.installed) return null;
   return (
     <li>
-      <button type="button" onClick={show} className="flex min-h-14 w-full items-center gap-4 px-4 text-left hover:bg-sand-100/60">
-        <Smartphone className="size-5 text-ink-700" aria-hidden />
+      <button type="button" onClick={show} className="flex min-h-14 w-full items-center gap-4 px-4 text-left hover:bg-fg/[0.04]">
+        <Smartphone className="size-5 text-accent-ink" aria-hidden />
         <span className="flex-1">
           <span className="block font-semibold">{t.install.trigger}</span>
-          <span className="block text-sm text-stone-600">{t.install.triggerHint}</span>
+          <span className="block text-sm text-fg-muted">{t.install.triggerHint}</span>
         </span>
-        <ChevronRight className="size-4 text-stone-500" aria-hidden />
+        <ChevronRight className="size-4 text-fg-subtle" aria-hidden />
       </button>
       {sheet}
     </li>

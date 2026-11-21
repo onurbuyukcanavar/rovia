@@ -8,6 +8,7 @@ import { FitBounds, PanTo } from "@/components/map/map-layers";
 import type { LatLng } from "@/lib/geo";
 import type { Favorite } from "@/lib/favorites/types";
 import { t } from "@/i18n";
+import { ThemedMapStyle } from "@/components/theme/themed-map-style";
 
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
 export const FAVORITE_LAYER = "favorite-points";
@@ -68,44 +69,46 @@ export function FavoritesMap({ styleUrl, places, selectedId, onSelect, candidate
 
   return (
     <div className="relative h-full w-full" data-testid="favorites-map">
-      <MapView
-        initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
-        mapStyle={styleUrl}
-        style={{ width: "100%", height: "100%" }}
-        cursor={picking ? "crosshair" : undefined}
-        interactiveLayerIds={picking ? [] : [FAVORITE_LAYER]}
-        onClick={onClick}
-        attributionControl={{ compact: true }}
-        dragRotate={false}
-        onError={(e) => {
-          console.error("[rovia] harita:", e.error?.message);
-          setMapError(true);
-        }}
-      >
-        <NavigationControl position="top-right" showCompass={false} />
-        <ScaleControl position="bottom-left" unit="metric" />
-        <Source id="favorites" type="geojson" data={data}>
-          <Layer
-            id={FAVORITE_LAYER}
-            type="circle"
-            paint={{
-              // MapLibre: "zoom" yalnızca en dıştaki interpolate'te kullanılabilir; seçili durum her durakta ayrı
-              "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, ["case", ["get", "selected"], 9, 5], 12, ["case", ["get", "selected"], 12, 8]],
-              "circle-color": ["case", ["==", ["get", "list"], "want_to_go"], "#1d3557", "#e8912d"],
-              "circle-stroke-color": ["case", ["get", "selected"], "#0e1726", "#ffffff"],
-              "circle-stroke-width": ["case", ["get", "selected"], 3, 2],
-            }}
-          />
-        </Source>
-        {candidate && (
-          <Marker longitude={candidate.lng} latitude={candidate.lat} anchor="bottom">
-            <span className="block size-6 rounded-full rounded-br-none border-[3px] border-ink-900 bg-amber-500 shadow-md [transform:rotate(45deg)]"
-              title={t.favorites.pickedPoint} data-testid="candidate-marker" />
-          </Marker>
-        )}
-        <FitBounds points={points} deps={fitKey} />
-        <PanTo position={focus} />
-      </MapView>
+      <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+        <MapView
+          initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
+          mapStyle={mapStyle}
+          style={{ width: "100%", height: "100%" }}
+          cursor={picking ? "crosshair" : undefined}
+          interactiveLayerIds={picking ? [] : [FAVORITE_LAYER]}
+          onClick={onClick}
+          attributionControl={{ compact: true }}
+          dragRotate={false}
+          onError={(e) => {
+            console.error("[rovia] harita:", e.error?.message);
+            setMapError(true);
+          }}
+        >
+          <NavigationControl position="top-right" showCompass={false} />
+          <ScaleControl position="bottom-left" unit="metric" />
+          <Source id="favorites" type="geojson" data={data}>
+            <Layer
+              id={FAVORITE_LAYER}
+              type="circle"
+              paint={{
+                // MapLibre: "zoom" yalnızca en dıştaki interpolate'te kullanılabilir; seçili durum her durakta ayrı
+                "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, ["case", ["get", "selected"], 9, 5], 12, ["case", ["get", "selected"], 12, 8]],
+                "circle-color": ["case", ["==", ["get", "list"], "want_to_go"], "#1d3557", "#e8912d"],
+                "circle-stroke-color": ["case", ["get", "selected"], "#0e1726", "#ffffff"],
+                "circle-stroke-width": ["case", ["get", "selected"], 3, 2],
+              }}
+            />
+          </Source>
+          {candidate && (
+            <Marker longitude={candidate.lng} latitude={candidate.lat} anchor="bottom">
+              <span className="block size-6 rounded-full rounded-br-none border-[3px] border-ink-900 bg-amber-500 shadow-md [transform:rotate(45deg)]"
+                title={t.favorites.pickedPoint} data-testid="candidate-marker" />
+            </Marker>
+          )}
+          <FitBounds points={points} deps={fitKey} />
+          <PanTo position={focus} />
+        </MapView>
+      )}</ThemedMapStyle>
       {mapError && (
         <div className="absolute inset-x-3 top-14 z-10">
           <Alert tone="error">{t.maps.loadError}</Alert>

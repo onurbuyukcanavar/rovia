@@ -14,9 +14,9 @@ export default function NewPasswordPage() {
   if (!isSupabaseConfigured) return <SetupNotice />;
   return (
     <>
-      <h1 className="text-3xl font-extrabold tracking-tight">{t.auth.newPasswordTitle}</h1>
+      <h1 className="text-[2.4rem] leading-[1.05] font-extralight tracking-[-0.03em] text-fg">{t.auth.newPasswordTitle}</h1>
       <div className="mt-8">
-        <Suspense fallback={<div className="h-56 animate-pulse rounded-2xl bg-sand-100" />}>
+        <Suspense fallback={<div className="h-56 animate-pulse rounded-2xl bg-sunken" />}>
           <Body />
         </Suspense>
       </div>

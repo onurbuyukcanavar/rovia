@@ -111,48 +111,48 @@ export function HeroConditions() {
   return (
     <section aria-label={C.label} className="min-w-0">
       {/* Telefon: ince şerit */}
-      <div className="inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 rounded-[1.25rem] border border-paper/[0.1] bg-paper/[0.04] px-3.5 py-2 text-[0.8rem] whitespace-nowrap text-paper/75 [text-shadow:none] backdrop-blur-sm sm:gap-x-3 sm:px-4 sm:text-sm xl:hidden">
-        <span className="font-light tracking-tight text-paper tabular-nums">{now ? timeFmt.format(now) : "--:--"}</span>
-        <span aria-hidden className="h-3 w-px bg-paper/20" />
+      <div className="inline-flex max-w-full min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 rounded-[1.25rem] border border-line bg-raised px-3.5 py-2 text-[0.8rem] whitespace-nowrap text-fg-muted [text-shadow:none] backdrop-blur-sm sm:gap-x-3 sm:px-4 sm:text-sm xl:hidden">
+        <span className="font-light tracking-tight text-fg tabular-nums">{now ? timeFmt.format(now) : "--:--"}</span>
+        <span aria-hidden className="h-3 w-px bg-fg/20" />
         <span className="capitalize">{now ? dayShortFmt.format(now) : " "}</span>
         {w.status !== "none" && (
           <>
-            <span aria-hidden className="h-3 w-px bg-paper/20" />
+            <span aria-hidden className="h-3 w-px bg-fg/20" />
             <span className="flex min-w-0 items-center gap-1.5">
-              <WeatherIcon code={code} isDay={isDay} className="size-4 shrink-0 text-amber-300" />
+              <WeatherIcon code={code} isDay={isDay} className="size-4 shrink-0 text-accent-ink" />
               {w.status === "ok" ? (
                 <>
-                  <span className="text-paper tabular-nums">{w.weather.temp}°</span>
+                  <span className="text-fg tabular-nums">{w.weather.temp}°</span>
                   <span className="max-w-[10rem] min-w-0 truncate">{place}</span>
                 </>
-              ) : <span className="h-3 w-16 animate-pulse rounded bg-paper/10" />}
+              ) : <span className="h-3 w-16 animate-pulse rounded bg-fg/10" />}
             </span>
           </>
         )}
       </div>
 
       {/* Masaüstü: gösterge kartı */}
-      <div className="hidden w-64 rounded-3xl border border-paper/[0.1] bg-[rgb(10_17_29/0.55)] p-6 shadow-[0_20px_60px_-30px_rgb(0_0_0/0.8)] backdrop-blur-md xl:block">
+      <div className="hidden w-64 rounded-3xl border border-line bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] p-6 shadow-[var(--shadow-overlay)] backdrop-blur-md xl:block">
         <div aria-hidden className="mb-4 flex justify-between">
           {Array.from({ length: 17 }, (_, i) => (
-            <span key={i} className={i % 4 === 0 ? "h-2 w-px bg-amber-400/60" : "h-1 w-px bg-paper/20"} />
+            <span key={i} className={i % 4 === 0 ? "h-2 w-px bg-accent-ink/60" : "h-1 w-px bg-fg/20"} />
           ))}
         </div>
-        <p className="text-[3.25rem] leading-none font-extralight tracking-[-0.04em] text-paper tabular-nums">
+        <p className="text-[3.25rem] leading-none font-extralight tracking-[-0.04em] text-fg tabular-nums">
           {now ? timeFmt.format(now) : "--:--"}
         </p>
-        <p className="mt-2 text-sm text-paper/60 capitalize">{now ? dayFmt.format(now) : " "}</p>
-        <div className="my-5 h-px bg-gradient-to-r from-amber-400/50 via-paper/10 to-transparent" />
-        {w.status === "loading" && <div className="h-12 animate-pulse rounded-xl bg-paper/[0.06]" />}
-        {w.status === "none" && <p className="text-sm text-paper/50">{C.weatherUnavailable}</p>}
+        <p className="mt-2 text-sm text-fg-muted capitalize">{now ? dayFmt.format(now) : " "}</p>
+        <div className="my-5 h-px bg-gradient-to-r from-accent-ink/50 via-fg/10 to-transparent" />
+        {w.status === "loading" && <div className="h-12 animate-pulse rounded-xl bg-fg/[0.06]" />}
+        {w.status === "none" && <p className="text-sm text-fg-subtle">{C.weatherUnavailable}</p>}
         {w.status === "ok" && (
           <div className="flex items-center gap-4">
-            <WeatherIcon code={code} isDay={isDay} className="size-9 shrink-0 text-amber-300" strokeWidth={1.4} />
+            <WeatherIcon code={code} isDay={isDay} className="size-9 shrink-0 text-accent-ink" strokeWidth={1.4} />
             <div className="min-w-0">
-              <p className="text-3xl leading-none font-extralight tracking-tight text-paper tabular-nums">
-                {w.weather.temp}<span className="text-amber-300">°</span>
+              <p className="text-3xl leading-none font-extralight tracking-tight text-fg tabular-nums">
+                {w.weather.temp}<span className="text-accent-ink">°</span>
               </p>
-              <p className="mt-1 truncate text-xs text-paper/60">{desc} · {place}</p>
+              <p className="mt-1 truncate text-xs text-fg-muted">{desc} · {place}</p>
             </div>
           </div>
         )}

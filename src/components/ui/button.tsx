@@ -7,12 +7,13 @@ type Size = "sm" | "md" | "lg";
 
 const base =
   "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-[background,color,box-shadow,transform] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 select-none";
+// Renkler globals.css'teki .btn-* bileşen sınıflarındadır: className ile verilen renkler her zaman kazanır.
 const variants: Record<Variant, string> = {
-  primary: "bg-ink-900 text-paper hover:bg-ink-800",
-  accent: "bg-amber-500 text-ink-950 hover:bg-amber-400",
-  secondary: "border border-sand-300 bg-paper-50 text-ink-900 hover:border-stone-500 hover:bg-white",
-  ghost: "text-ink-800 hover:bg-sand-100",
-  danger: "border border-danger/30 bg-paper-50 text-danger hover:bg-danger/5",
+  primary: "btn-primary", // temanın ön plan rengiyle dolu (koyuda kâğıt, aydınlıkta mürekkep)
+  accent: "btn-accent", // amber; sayfa başına bir ana çağrı
+  secondary: "btn-secondary",
+  ghost: "btn-ghost",
+  danger: "btn-danger",
 };
 const sizes: Record<Size, string> = {
   sm: "h-9 px-4 text-sm",

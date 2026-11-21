@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function SharePage({ params }: Props) {
   return (
-    <div className="min-h-dvh bg-paper-50 text-ink-900">
+    <div data-theme="light" className="min-h-dvh bg-paper-50 text-ink-900">
       <header className="border-b border-sand-200 bg-paper-50/90">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
           <Link href="/" aria-label={t.brand.name}><Logo /></Link>

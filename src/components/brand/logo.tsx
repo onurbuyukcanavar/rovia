@@ -28,7 +28,7 @@ export function Logo({ className, inverted = false }: { className?: string; inve
       <span
         className={cn(
           "text-[1.05rem] font-extrabold tracking-[0.28em]",
-          inverted ? "text-paper" : "text-ink-900",
+          inverted ? "text-paper" : "text-fg",
         )}
       >
         ROVIA

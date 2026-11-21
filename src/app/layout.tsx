@@ -5,6 +5,8 @@ import { fontVariables } from "./fonts";
 import { publicEnv } from "@/lib/env";
 import { t } from "@/i18n";
 import { SwRegister } from "@/components/install/sw-register";
+import { ThemeSync } from "@/components/theme/theme-sync";
+import { THEME_COLOR, THEME_SCRIPT } from "@/lib/theme/theme";
 
 export const metadata: Metadata = {
   metadataBase: publicEnv.siteUrl ? new URL(publicEnv.siteUrl) : undefined,
@@ -15,8 +17,8 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
+// theme-color burada değil: <head>'de elle yazılır ve tema betiği tarafından güncellenir (src/lib/theme/theme.ts)
 export const viewport: Viewport = {
-  themeColor: "#0e1726",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -24,12 +26,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="tr" className={fontVariables}>
+    // data-theme: betik çalışmadan önceki varsayılan (koyu). Betik ve ThemeSync değiştirir → suppressHydrationWarning
+    <html lang="tr" className={fontVariables} data-theme="dark" suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content={THEME_COLOR.dark} />
+        {/* Tema: ilk boyamadan önce, eşzamanlı. Sabit dizge; kullanıcı girdisi içermez. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body>
-        <a href="#icerik" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-ink-900 focus:px-4 focus:py-2 focus:text-paper">
+        <a href="#icerik" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-fg focus:px-4 focus:py-2 focus:text-surface">
           İçeriğe geç
         </a>
         {children}
+        <ThemeSync />
         <SwRegister />
       </body>
     </html>

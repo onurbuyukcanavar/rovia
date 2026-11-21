@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: t.install.offline.title, robots: { in
 export default function OfflinePage() {
   const m = t.install.offline;
   return (
-    <main id="icerik" className="grid min-h-dvh place-items-center bg-paper px-6 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+    <main id="icerik" data-theme="light" className="grid min-h-dvh place-items-center bg-paper text-ink-900 px-6 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <div className="w-full max-w-sm text-center">
         <div className="flex justify-center"><Logo /></div>
         <span className="mx-auto mt-10 grid size-16 place-items-center rounded-3xl bg-ink-900 text-amber-400">

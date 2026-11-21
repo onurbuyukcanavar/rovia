@@ -32,7 +32,7 @@ export function Modal({ open, onClose, title, children, className, testId }: {
       onCancel={(e) => { e.preventDefault(); onClose(); }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       className={cn(
-        "m-0 mt-auto max-h-[90dvh] w-full max-w-none overflow-y-auto rounded-t-3xl border border-sand-200 bg-paper p-0 text-ink-900 shadow-xl backdrop:bg-ink-950/50",
+        "m-0 mt-auto max-h-[90dvh] w-full max-w-none overflow-y-auto rounded-t-3xl border border-line bg-overlay p-0 text-fg shadow-[var(--shadow-overlay)] backdrop:bg-backdrop",
         "sm:m-auto sm:max-w-lg sm:rounded-3xl",
         className,
       )}>
@@ -41,7 +41,7 @@ export function Modal({ open, onClose, title, children, className, testId }: {
           <div className="flex items-start justify-between gap-3">
             <h2 id={titleId} className="text-lg font-extrabold tracking-tight">{title}</h2>
             <button type="button" onClick={onClose} aria-label={t.common.close}
-              className="-mt-1 -mr-1 grid size-10 shrink-0 place-items-center rounded-full hover:bg-sand-100">
+              className="-mt-1 -mr-1 grid size-10 shrink-0 place-items-center rounded-full hover:bg-fg/[0.07]">
               <X className="size-5" aria-hidden />
             </button>
           </div>

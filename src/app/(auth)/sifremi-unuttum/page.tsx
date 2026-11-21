@@ -11,11 +11,11 @@ export default function ForgotPasswordPage() {
   if (!isSupabaseConfigured) return <SetupNotice />;
   return (
     <>
-      <h1 className="text-3xl font-extrabold tracking-tight">{t.auth.resetTitle}</h1>
-      <p className="mt-2 text-stone-600">{t.auth.resetSubtitle}</p>
+      <h1 className="text-[2.4rem] leading-[1.05] font-extralight tracking-[-0.03em] text-fg">{t.auth.resetTitle}</h1>
+      <p className="mt-2 text-fg-muted">{t.auth.resetSubtitle}</p>
       <div className="mt-8"><ResetRequestForm /></div>
       <p className="mt-8 text-center text-sm">
-        <Link href="/giris" className="font-semibold text-ink-900 hover:underline">← {t.auth.login}</Link>
+        <Link href="/giris" className="font-semibold text-fg hover:underline">← {t.auth.login}</Link>
       </p>
     </>
   );

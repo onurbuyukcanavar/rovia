@@ -21,7 +21,7 @@ export function SignupForm() {
       <SubmitButton size="lg" className="w-full" pendingLabel={t.common.loading}>
         {t.auth.signup}
       </SubmitButton>
-      <p className="text-xs leading-relaxed text-stone-600">{t.auth.legal}</p>
+      <p className="text-xs leading-relaxed text-fg-subtle">{t.auth.legal}</p>
     </form>
   );
 }

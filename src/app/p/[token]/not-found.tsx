@@ -6,11 +6,11 @@ const P = t.share.page;
 
 export default function ShareNotFound() {
   return (
-    <main id="icerik" className="grid min-h-[70dvh] place-items-center px-6 text-center" data-testid="share-unavailable">
+    <main id="icerik" data-themed className="grid min-h-[70dvh] place-items-center px-6 text-center" data-testid="share-unavailable">
       <div>
         <LogoMark className="mx-auto size-14" />
-        <h1 className="mt-6 text-3xl font-extrabold tracking-tight">{P.unavailableTitle}</h1>
-        <p className="mt-2 text-stone-600">{P.unavailableBody}</p>
+        <h1 className="mt-6 text-[2.4rem] leading-[1.05] font-extralight tracking-[-0.03em] text-fg">{P.unavailableTitle}</h1>
+        <p className="mt-2 text-fg-muted">{P.unavailableBody}</p>
         <ButtonLink href="/" className="mt-8">{P.home}</ButtonLink>
       </div>
     </main>

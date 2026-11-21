@@ -5,7 +5,7 @@ import { ButtonLink } from "@/components/ui/button";
 import {
   EntryList, Panel, QuickActions, SavedPlaceList, StatsGrid, TripList,
 } from "@/components/dashboard/sections";
-import { PanelHero, PanelNight } from "@/components/dashboard/hero";
+import { PanelBackdrop, PanelHero } from "@/components/dashboard/hero";
 import { HeroConditions } from "@/components/dashboard/hero-conditions";
 import { firstName, requireUser } from "@/lib/dal";
 import { getDashboardData } from "@/lib/queries/dashboard";
@@ -15,9 +15,9 @@ export const metadata: Metadata = { title: t.nav.overview };
 
 export default function DashboardPage() {
   return (
-    <PanelNight>
+    <PanelBackdrop>
       <div className="mx-auto max-w-6xl space-y-10 px-4 py-5 sm:space-y-12 sm:px-8 sm:py-8">
-        <Suspense fallback={<div className="h-80 animate-pulse rounded-[2rem] border border-paper/[0.06] bg-paper/[0.04] sm:h-96" />}>
+        <Suspense fallback={<div className="h-80 animate-pulse rounded-[2rem] border border-line bg-raised sm:h-96" />}>
           <Greeting />
         </Suspense>
         <QuickActions index={1} />
@@ -25,7 +25,7 @@ export default function DashboardPage() {
           <DashboardData />
         </Suspense>
       </div>
-    </PanelNight>
+    </PanelBackdrop>
   );
 }
 
@@ -65,9 +65,9 @@ async function DashboardData() {
 function DashboardSkeleton() {
   return (
     <div className="space-y-10" aria-label={t.common.loading}>
-      <div className="h-32 animate-pulse rounded-[var(--radius-card)] bg-paper/[0.05]" />
+      <div className="h-32 animate-pulse rounded-[var(--radius-card)] bg-fg/[0.05]" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {[0, 1, 2, 3].map((i) => <div key={i} className="h-44 animate-pulse rounded-[var(--radius-card)] bg-paper/[0.05]" />)}
+        {[0, 1, 2, 3].map((i) => <div key={i} className="h-44 animate-pulse rounded-[var(--radius-card)] bg-fg/[0.05]" />)}
       </div>
     </div>
   );

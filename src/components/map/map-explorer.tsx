@@ -32,6 +32,7 @@ import { RouteBuilder } from "./route-builder";
 import { RouteSummary } from "./route-summary";
 import { RouteDirections, RouteOptionsBar, RouteSuggestions } from "./route-extras";
 import { t } from "@/i18n";
+import { ThemedMapStyle } from "@/components/theme/themed-map-style";
 
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
 
@@ -295,39 +296,41 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
     <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr] relative lg:overflow-hidden">
       <MapFrame expanded={mapView.expanded} onExpand={mapView.expand} onCollapse={mapView.collapse}
         className="order-1 h-[45%] shrink-0 lg:order-2 lg:h-full" testId="map">
-        <MapView
-          initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
-          mapStyle={styleUrl}
-          style={{ width: "100%", height: "100%" }}
-          cursor={picking ? "crosshair" : undefined}
-          interactiveLayerIds={routeResult && routeResult.routes.length > 1 ? [ALT_ROUTE_LAYER] : []}
-          onClick={onMapClick}
-          onMoveEnd={(e) => setMapCenter({ lat: e.viewState.latitude, lng: e.viewState.longitude })}
-          onError={(e) => {
-            console.error("[rovia] harita:", e.error?.message);
-            setMapError(true);
-          }}
-          attributionControl={{ compact: true }}
-          dragRotate={false}
-        >
-          <NavigationControl position="top-right" showCompass={false} />
-          <ScaleControl position="bottom-left" unit="metric" />
-          {routeResult && <RouteLines routes={routeResult.routes} selected={selectedIndex} />}
-          <StopMarkers origin={state.origin.stop} waypoints={state.waypoints.map((w) => w.stop)} destination={state.destination.stop} />
-          {results && <ResultMarkers places={results} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
-            setSelectedPlace(p);
-            // Tam ekranda yer seçilince ayrıntısı görünsün
-            if (mapView.expanded) mapView.collapse();
-          }} />}
-          <MyLocationMarker position={geo.position} />
-          <FitBounds points={fitPoints} deps={fitKey} />
-          <SuggestionMarkers places={suggested} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
-            setSelectedPlace(p);
-            if (mapView.expanded) mapView.collapse();
-          }} />
-          <FocusMarker position={focus} />
-          <PanTo position={selectedPlace?.location ?? focus} />
-        </MapView>
+        <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle) => (
+          <MapView
+            initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
+            mapStyle={mapStyle}
+            style={{ width: "100%", height: "100%" }}
+            cursor={picking ? "crosshair" : undefined}
+            interactiveLayerIds={routeResult && routeResult.routes.length > 1 ? [ALT_ROUTE_LAYER] : []}
+            onClick={onMapClick}
+            onMoveEnd={(e) => setMapCenter({ lat: e.viewState.latitude, lng: e.viewState.longitude })}
+            onError={(e) => {
+              console.error("[rovia] harita:", e.error?.message);
+              setMapError(true);
+            }}
+            attributionControl={{ compact: true }}
+            dragRotate={false}
+          >
+            <NavigationControl position="top-right" showCompass={false} />
+            <ScaleControl position="bottom-left" unit="metric" />
+            {routeResult && <RouteLines routes={routeResult.routes} selected={selectedIndex} />}
+            <StopMarkers origin={state.origin.stop} waypoints={state.waypoints.map((w) => w.stop)} destination={state.destination.stop} />
+            {results && <ResultMarkers places={results} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
+              setSelectedPlace(p);
+              // Tam ekranda yer seçilince ayrıntısı görünsün
+              if (mapView.expanded) mapView.collapse();
+            }} />}
+            <MyLocationMarker position={geo.position} />
+            <FitBounds points={fitPoints} deps={fitKey} />
+            <SuggestionMarkers places={suggested} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
+              setSelectedPlace(p);
+              if (mapView.expanded) mapView.collapse();
+            }} />
+            <FocusMarker position={focus} />
+            <PanTo position={selectedPlace?.location ?? focus} />
+          </MapView>
+        )}</ThemedMapStyle>
         {mapError && (
           <div className="absolute inset-x-3 top-14 z-10">
             <Alert tone="error">{t.maps.loadError}</Alert>

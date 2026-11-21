@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { Modal } from "@/components/travelogue/workspace/modal";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { inputClass, labelClass } from "@/components/ui/field";
 import { SubmitButton } from "@/components/ui/submit-button";
 import {
   clearLocalRoviaData, DELETE_CONFIRM_PHRASE, DELETED_REDIRECT, normalizeConfirm, type DeleteErrorCode,
@@ -86,9 +87,9 @@ export function DeleteAccountCard() {
   }
 
   return (
-    <div className="rounded-xl border border-danger/30 bg-danger/5 p-4" data-testid="account-delete">
+    <div className="rounded-xl border border-danger/30 bg-danger-soft p-4" data-testid="account-delete">
       <h3 className="flex items-center gap-2 font-semibold text-danger"><TriangleAlert className="size-4" aria-hidden /> {m.title}</h3>
-      <p className="mt-1 text-sm text-stone-700">{m.body}</p>
+      <p className="mt-1 text-sm text-fg-muted">{m.body}</p>
       <Button type="button" variant="danger" size="sm" className="mt-4" onClick={() => setOpen(true)}>{m.open}</Button>
 
       <Modal open={open} onClose={close} title={m.dialogTitle} testId="account-delete-dialog">
@@ -101,20 +102,20 @@ export function DeleteAccountCard() {
           </div>
         ) : (
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void run(); }}>
-            <p className="text-sm text-stone-700">{m.intro}</p>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-stone-700">
+            <p className="text-sm text-fg-muted">{m.intro}</p>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-fg-muted">
               {m.items.map((it) => <li key={it}>{it}</li>)}
             </ul>
             <Alert tone="error">{m.irreversible}</Alert>
-            <p className="text-xs text-stone-600">{m.reauthNote}</p>
+            <p className="text-xs text-fg-subtle">{m.reauthNote}</p>
             <div className="space-y-1.5">
-              <label htmlFor={inputId} className="block text-sm font-semibold text-ink-800">{m.confirmLabel(DELETE_CONFIRM_PHRASE)}</label>
+              <label htmlFor={inputId} className={labelClass}>{m.confirmLabel(DELETE_CONFIRM_PHRASE)}</label>
               <input id={inputId} value={text} onChange={(e) => setText(e.target.value)} disabled={busy}
                 autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder={DELETE_CONFIRM_PHRASE}
-                className="h-12 w-full rounded-xl border border-sand-300 bg-white px-4 text-[0.95rem] outline-none focus:border-ink-700 focus:ring-4 focus:ring-amber-400/25" />
+                className={inputClass(false, "h-12 px-4")} />
             </div>
 
-            <div role="status" aria-live="polite" className="text-sm font-semibold text-ink-800">
+            <div role="status" aria-live="polite" className="text-sm font-semibold text-fg">
               {phase.kind === "checking" && m.steps.checking}
               {phase.kind === "media" && m.steps.media(phase.done, phase.total)}
               {phase.kind === "account" && m.steps.account}
@@ -127,7 +128,7 @@ export function DeleteAccountCard() {
 
             <div className="flex flex-wrap justify-end gap-2">
               <Button type="button" variant="secondary" onClick={close} disabled={busy}>{m.cancel}</Button>
-              <Button type="submit" variant="danger" disabled={!matches || busy} className="border-danger! bg-danger! text-paper! hover:bg-danger/90!">
+              <Button type="submit" variant="danger" disabled={!matches || busy} className="border-danger bg-danger text-surface hover:bg-danger/90">
                 {phase.kind === "error" ? m.errors.retry : m.submit}
               </Button>
             </div>

@@ -44,10 +44,10 @@ export function DataExportCard() {
   }
 
   return (
-    <div className="rounded-xl border border-sand-200 p-4" data-testid="account-export">
+    <div className="rounded-xl border border-line p-4" data-testid="account-export">
       <h3 className="font-semibold">{m.title}</h3>
-      <p className="mt-1 text-sm text-stone-600">{m.body}</p>
-      <p className="mt-2 text-xs text-stone-500">{m.photosNote}</p>
+      <p className="mt-1 text-sm text-fg-muted">{m.body}</p>
+      <p className="mt-2 text-xs text-fg-subtle">{m.photosNote}</p>
       {state.status === "error" && <Alert tone="error" className="mt-3">{state.message}</Alert>}
       {state.status === "done" && <Alert tone="success" className="mt-3">{m.done}</Alert>}
       <Button type="button" variant="secondary" size="sm" className="mt-4" onClick={download} disabled={state.status === "pending"}>

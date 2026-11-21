@@ -11,6 +11,7 @@ import { share } from "./share";
 import { account } from "./account";
 import { install } from "./install";
 import { landing } from "./landing";
+import { theme } from "./theme";
 
 export const tr = {
   brand: {
@@ -695,6 +696,7 @@ export const tr = {
   account,
   install,
   landing,
+  theme,
 } as const;
 
 export type Dictionary = typeof tr;
