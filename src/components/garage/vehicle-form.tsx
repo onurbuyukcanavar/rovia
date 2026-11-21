@@ -5,7 +5,7 @@ import { formatDecimalTR, parseDecimalTR } from "@/lib/cost/parse";
 import { energyUnit, FUEL_TYPES, isFuelType, type FuelType, type Vehicle } from "@/lib/cost/types";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
+import { Field, inputClass, labelClass } from "@/components/ui/field";
 import { t } from "@/i18n";
 
 const F = t.garage.form;
@@ -58,14 +58,14 @@ export function VehicleForm({ vehicle, suggestDefault, onDone }: { vehicle: Vehi
     <form onSubmit={(e) => { e.preventDefault(); submit(new FormData(e.currentTarget)); }} className="space-y-4" data-testid="vehicle-form" noValidate>
       {message && <Alert tone="error">{message}</Alert>}
       <Field label={F.name} name="name" defaultValue={vehicle?.name ?? ""} maxLength={80} hint={F.nameHint} error={errors.name} autoComplete="off" />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
         <Field label={`${F.make} (${F.optional})`} name="make" defaultValue={vehicle?.make ?? ""} maxLength={60} autoComplete="off" />
         <Field label={`${F.model} (${F.optional})`} name="model" defaultValue={vehicle?.model ?? ""} maxLength={60} autoComplete="off" />
         <Field label={F.year} name="modelYear" inputMode="numeric" defaultValue={vehicle?.modelYear ?? ""} error={errors.modelYear} autoComplete="off" />
         <div className="space-y-1.5">
-          <label htmlFor="f-fuelType" className="block text-sm font-semibold text-ink-800">{F.fuelType}</label>
+          <label htmlFor="f-fuelType" className={labelClass}>{F.fuelType}</label>
           <select id="f-fuelType" value={fuelType} onChange={(e) => isFuelType(e.target.value) && setFuelType(e.target.value)}
-            className="h-12 w-full rounded-xl border border-sand-300 bg-white px-3 text-[0.95rem] outline-none focus:border-ink-700 focus:ring-4 focus:ring-amber-400/25">
+            className={inputClass(false, "h-12 px-3")}>
             {FUEL_TYPES.map((f) => <option key={f} value={f}>{t.garage.fuel[f]}</option>)}
           </select>
         </div>
@@ -75,8 +75,8 @@ export function VehicleForm({ vehicle, suggestDefault, onDone }: { vehicle: Vehi
           defaultValue={formatDecimalTR(vehicle?.tankCapacity, 1)} hint={F.tankHint} error={errors.tankCapacity} />
       </div>
       {!vehicle?.isDefault && (
-        <label className="flex items-center gap-2 text-sm font-semibold">
-          <input type="checkbox" name="makeDefault" defaultChecked={suggestDefault} className="size-4 accent-amber-500" /> {F.makeDefault}
+        <label className="flex items-center gap-2 text-sm font-semibold text-fg">
+          <input type="checkbox" name="makeDefault" defaultChecked={suggestDefault} className="size-4 accent-accent" /> {F.makeDefault}
         </label>
       )}
       <div className="flex justify-end">

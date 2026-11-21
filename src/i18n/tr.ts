@@ -319,6 +319,7 @@ export const tr = {
   },
   trips: {
     listTitle: "Yolculuklarım",
+    listAccent: "yolda biriken.",
     listSubtitle: "Planladığın yolculuklar. Yola çıkmadan önce rotanı, duraklarını ve tarihini burada hazırlarsın.",
     newTrip: "Yeni yolculuk planla",
     planTitle: "Yolculuk Planla",
@@ -371,6 +372,7 @@ export const tr = {
   },
   favorites: {
     title: "Favorilerim",
+    accent: "iz bırakan yerler.",
     subtitle: "Kendi konum arşivin: sevdiğin yerler ve daha sonra gitmek istediklerin.",
     add: "Yer ekle",
     import: "İçe aktar",
@@ -439,6 +441,7 @@ export const tr = {
   },
   importer: {
     title: "Yerleri içe aktar",
+    accent: "tek dosyayla.",
     subtitle: "Google Maps listelerini, KML/KMZ, GPX veya CSV dosyalarını ROVIA'ya taşı.",
     howTitle: "Google Maps kayıtlı yerlerim nasıl aktarılır?",
     howWhy:

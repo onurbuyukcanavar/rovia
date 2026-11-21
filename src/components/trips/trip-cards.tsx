@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { ArrowRight, CalendarDays, Clock3, Gauge, MapPin, Trash2 } from "lucide-react";
+import { CalendarDays, Clock3, Gauge, Milestone, Trash2 } from "lucide-react";
 import { deleteTrip } from "@/lib/actions/trips";
 import type { TripListItem } from "@/lib/queries/trips";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDistance, formatDuration } from "@/lib/format";
+import { OdometerValue, RouteEnds, RouteLine } from "./route-motif";
 import { t } from "@/i18n";
 
 export function TripCards({ trips }: { trips: TripListItem[] }) {
@@ -17,6 +18,7 @@ export function TripCards({ trips }: { trips: TripListItem[] }) {
   );
 }
 
+/** Planlanan yolculuk kartı: rota motifi, gösterge yazısıyla mesafe/süre ve eylemler. */
 function TripCard({ trip }: { trip: TripListItem }) {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,67 +34,75 @@ function TripCard({ trip }: { trip: TripListItem }) {
     });
 
   return (
-    <li className="card flex flex-col p-5" data-testid="trip-card">
-      <div className="flex items-start justify-between gap-3">
-        <Link href={`/planla/${trip.id}`} className="min-w-0 text-lg leading-snug font-bold hover:underline">
-          {trip.title}
-        </Link>
-        <Badge>{t.trips.status[trip.status] ?? trip.status}</Badge>
+    <li className="card group flex min-w-0 flex-col p-5 transition-colors hover:border-accent/40" data-testid="trip-card">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-xs text-fg-subtle">
+            <CalendarDays className="size-3.5 shrink-0" aria-hidden />
+            <span className="sr-only">{t.trips.date}: </span>
+            {trip.plannedDate ? formatDate(trip.plannedDate) : t.trips.noDate}
+          </p>
+          <Link href={`/planla/${trip.id}`} className="mt-1 block text-lg leading-snug font-medium tracking-tight break-words text-fg hover:text-accent-ink">
+            {trip.title}
+          </Link>
+        </div>
+        <Badge tone="accent" className="shrink-0">{t.trips.status[trip.status] ?? trip.status}</Badge>
       </div>
 
-      {trip.origin && trip.destination && (
-        <p className="mt-2 flex items-center gap-1.5 text-sm text-stone-700">
-          <MapPin className="size-4 shrink-0 text-amber-600" aria-hidden />
-          <span className="truncate">{trip.origin}</span>
-          <ArrowRight className="size-3.5 shrink-0" aria-hidden />
-          <span className="truncate">{trip.destination}</span>
-        </p>
-      )}
+      <div className="mt-5">
+        {trip.origin && trip.destination ? (
+          <RouteEnds from={trip.origin} to={trip.destination} />
+        ) : (
+          <RouteLine muted />
+        )}
+      </div>
 
-      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-stone-600">
-        <div className="col-span-2 flex items-center gap-1.5">
-          <CalendarDays className="size-4" aria-hidden />
-          <dt className="sr-only">{t.trips.date}</dt>
-          <dd>{trip.plannedDate ? formatDate(trip.plannedDate) : t.trips.noDate}</dd>
+      <dl className="mt-5 flex flex-wrap items-end gap-x-6 gap-y-3">
+        <div className="min-w-0">
+          <dt className="flex items-center gap-1 text-[0.65rem] font-semibold tracking-[0.16em] text-fg-subtle uppercase">
+            <Gauge className="size-3 shrink-0" aria-hidden /> {t.maps.distance}
+          </dt>
+          <dd className="mt-1 text-2xl leading-none font-extralight tracking-[-0.03em] tabular-nums">
+            {trip.distanceMeters !== null ? <OdometerValue value={formatDistance(trip.distanceMeters)} accent /> : <span className="text-base text-fg-muted">{t.trips.noRoute}</span>}
+          </dd>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Gauge className="size-4" aria-hidden />
-          <dt className="sr-only">{t.maps.distance}</dt>
-          <dd className="tabular-nums">{trip.distanceMeters !== null ? formatDistance(trip.distanceMeters) : t.trips.noRoute}</dd>
+        <div className="min-w-0">
+          <dt className="flex items-center gap-1 text-[0.65rem] font-semibold tracking-[0.16em] text-fg-subtle uppercase">
+            <Clock3 className="size-3 shrink-0" aria-hidden /> {t.maps.duration}
+          </dt>
+          <dd className="mt-1 text-2xl leading-none font-extralight tracking-[-0.03em] tabular-nums">
+            {trip.durationSeconds !== null ? <OdometerValue value={formatDuration(trip.durationSeconds)} /> : <span className="text-base text-fg-muted">—</span>}
+          </dd>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Clock3 className="size-4" aria-hidden />
-          <dt className="sr-only">{t.maps.duration}</dt>
-          <dd className="tabular-nums">{trip.durationSeconds !== null ? formatDuration(trip.durationSeconds) : "—"}</dd>
-        </div>
-        <div className="col-span-2 text-xs">
+        <div className="ml-auto min-w-0 text-right">
           <dt className="sr-only">Durak</dt>
-          <dd>{t.trips.stops(trip.stopCount)}</dd>
+          <dd className="inline-flex items-center gap-1 text-xs text-fg-muted">
+            <Milestone className="size-3.5 shrink-0 text-fg-subtle" aria-hidden /> {t.trips.stops(trip.stopCount)}
+          </dd>
         </div>
       </dl>
 
       {error && <p className="mt-3 text-sm text-danger" role="alert">{error}</p>}
 
-      <div className="mt-5 flex items-center justify-end gap-2 border-t border-sand-200 pt-4">
-        {confirming ? (
-          <>
-            <span className="mr-auto text-sm font-semibold">{t.trips.deleteConfirm}</span>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setConfirming(false)} disabled={pending}>{t.common.cancel}</Button>
-            <Button type="button" size="sm" variant="danger" onClick={remove} disabled={pending}>{t.trips.deleteYes}</Button>
-          </>
-        ) : (
-          <>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setConfirming(true)} aria-label={`${t.trips.delete}: ${trip.title}`}>
-              <Trash2 className="size-4" aria-hidden /> {t.trips.delete}
-            </Button>
-            <Link href={`/kayit-modu?yolculuk=${trip.id}`} className="inline-flex h-9 items-center rounded-full border border-sand-300 px-4 text-sm font-semibold hover:bg-sand-100">
-              {t.trips.startRecording}
-            </Link>
-            <Link href={`/planla/${trip.id}`} className="inline-flex h-9 items-center rounded-full bg-ink-900 px-4 text-sm font-semibold text-paper hover:bg-ink-800">
-              {t.trips.edit}
-            </Link>
-          </>
-        )}
+      <div className="mt-auto pt-5">
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4">
+          {confirming ? (
+            <>
+              <span className="mr-auto text-sm font-semibold text-fg">{t.trips.deleteConfirm}</span>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setConfirming(false)} disabled={pending}>{t.common.cancel}</Button>
+              <Button type="button" size="sm" variant="danger" onClick={remove} disabled={pending}>{t.trips.deleteYes}</Button>
+            </>
+          ) : (
+            <>
+              <Button type="button" size="sm" variant="ghost" className="mr-auto w-9 shrink-0 px-0 text-fg-muted hover:text-danger" onClick={() => setConfirming(true)}
+                aria-label={`${t.trips.delete}: ${trip.title}`} title={t.trips.delete}>
+                <Trash2 className="size-4 shrink-0" aria-hidden />
+              </Button>
+              <ButtonLink href={`/kayit-modu?yolculuk=${trip.id}`} size="sm" variant="secondary">{t.trips.startRecording}</ButtonLink>
+              <ButtonLink href={`/planla/${trip.id}`} size="sm" variant="primary">{t.trips.edit}</ButtonLink>
+            </>
+          )}
+        </div>
       </div>
     </li>
   );

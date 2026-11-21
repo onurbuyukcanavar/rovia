@@ -49,19 +49,19 @@ export function SummaryActions({ tripId, recordingId, hasRawPoints }: { tripId: 
 
   return (
     <div className="space-y-3" data-testid="summary-actions">
-      {message && <p className="text-sm text-stone-600" role="status">{message}</p>}
+      {message && <p className="text-sm text-fg-muted" role="status">{message}</p>}
       {confirming ? (
         <div className="card space-y-3 p-4" role="alertdialog" aria-labelledby="summary-confirm">
-          <p id="summary-confirm" className="text-sm font-semibold">
+          <p id="summary-confirm" className="text-sm font-semibold text-fg">
             {confirming === "raw" ? t.tripSummary.deleteRawConfirm : t.tripSummary.deleteTripConfirm}
           </p>
           {confirming === "trip" && (
             <div className="space-y-1">
               <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" className="size-4 accent-amber-600" checked={withJournal} onChange={(e) => setWithJournal(e.target.checked)} />
+                <input type="checkbox" className="size-4 accent-accent" checked={withJournal} onChange={(e) => setWithJournal(e.target.checked)} />
                 {t.archive.deleteWithJournal}
               </label>
-              {!withJournal && <p className="text-xs text-stone-600">{t.archive.keepJournalNote}</p>}
+              {!withJournal && <p className="text-xs text-fg-muted">{t.archive.keepJournalNote}</p>}
             </div>
           )}
           <div className="flex justify-end gap-2">
