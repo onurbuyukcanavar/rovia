@@ -936,10 +936,10 @@ export type Database = {
           default_visibility: string;
           gps_raw_retention_days: number | null;
           share_privacy_radius_m: number;
-          theme: string | null;
           created_at: string;
           updated_at: string;
           cost_defaults: Json | null;
+          theme: string | null;
         };
         Insert: {
           user_id: string;
@@ -948,10 +948,10 @@ export type Database = {
           default_visibility?: string;
           gps_raw_retention_days?: number | null;
           share_privacy_radius_m?: number;
-          theme?: string | null;
           created_at?: string;
           updated_at?: string;
           cost_defaults?: Json | null;
+          theme?: string | null;
         };
         Update: {
           user_id?: string;
@@ -960,10 +960,10 @@ export type Database = {
           default_visibility?: string;
           gps_raw_retention_days?: number | null;
           share_privacy_radius_m?: number;
-          theme?: string | null;
           created_at?: string;
           updated_at?: string;
           cost_defaults?: Json | null;
+          theme?: string | null;
         };
         Relationships: [];
       };
