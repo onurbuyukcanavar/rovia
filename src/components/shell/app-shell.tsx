@@ -14,7 +14,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link href="/panel" className="px-2" aria-label="ROVIA panel">
           <Logo inverted />
         </Link>
-        <nav aria-label="Ana menü" className="mt-8 flex-1 space-y-0.5 overflow-y-auto">
+        <nav aria-label="Ana menü" className="scroll-quiet mt-8 flex-1 space-y-0.5 overflow-y-auto">
           <Suspense fallback={<SidebarNav pathname={null} />}>
             <SidebarNavLive />
           </Suspense>

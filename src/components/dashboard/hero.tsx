@@ -16,8 +16,8 @@ export function PanelNight({ children }: { children: ReactNode }) {
  * Karşılama alanı: ana sayfanın gece yolu sahnesinin hafif, durağan bir yorumu.
  * WebGL yok; ufuk ışıltısı CSS, ufka uzanan yol SVG. Şerit çizgisi akar, hareket azaltma tercihinde durur.
  */
-export function PanelHero({ eyebrow, title, accent, body, cta }: {
-  eyebrow: string; title: string; accent: string; body: string; cta: ReactNode;
+export function PanelHero({ eyebrow, title, accent, body, cta, aside }: {
+  eyebrow: string; title: string; accent: string; body: string; cta: ReactNode; aside?: ReactNode;
 }) {
   return (
     <section className="panel-hero-sky relative isolate overflow-hidden rounded-[2rem] border border-paper/[0.08] px-5 pt-8 pb-36 sm:px-10 sm:pt-12 lg:min-h-[26rem] lg:pb-12">
@@ -34,7 +34,9 @@ export function PanelHero({ eyebrow, title, accent, body, cta }: {
         </h1>
         <p className="mt-5 max-w-lg leading-relaxed text-paper/75 sm:text-lg">{body}</p>
         <div className="mt-7 flex flex-wrap items-center gap-3">{cta}</div>
+        {aside && <div className="mt-5 xl:hidden">{aside}</div>}
       </div>
+      {aside && <div className="absolute top-12 right-10 hidden xl:block">{aside}</div>}
     </section>
   );
 }

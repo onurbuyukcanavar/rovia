@@ -6,9 +6,9 @@ import {
   EntryList, Panel, QuickActions, SavedPlaceList, StatsGrid, TripList,
 } from "@/components/dashboard/sections";
 import { PanelHero, PanelNight } from "@/components/dashboard/hero";
+import { HeroConditions } from "@/components/dashboard/hero-conditions";
 import { firstName, requireUser } from "@/lib/dal";
 import { getDashboardData } from "@/lib/queries/dashboard";
-import { formatDayLong } from "@/lib/format";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.nav.overview };
@@ -33,7 +33,8 @@ async function Greeting() {
   const user = await requireUser();
   return (
     <PanelHero
-      eyebrow={`${t.nav.overview} · ${formatDayLong()}`}
+      eyebrow={t.nav.overview}
+      aside={<HeroConditions />}
       title={t.dashboard.greeting(firstName(user))}
       accent={t.dashboard.welcomeBody}
       body={t.dashboard.hero.body}

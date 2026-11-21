@@ -406,3 +406,55 @@ label:has(> input.sr-only) {
     animation: none;
   }
 }
+
+/* Kaydırma çubukları (fare/izleme dörtgeni olan cihazlar): ince, yuvarlak, zemine karışan; üzerine gelince amber.
+ * Standart özellikler Chrome/Edge/Firefox'ta, ::-webkit-scrollbar Safari'de geçerlidir. */
+@media (pointer: fine) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(120 132 156 / 0.45) transparent;
+  }
+  html:hover {
+    scrollbar-color: rgb(120 132 156 / 0.6) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: rgb(120 132 156 / 0.45) padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(240 169 74 / 0.8) padding-box;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Kenar menüsü: çubuk yalnızca menünün üzerine gelince belirir */
+  .scroll-quiet {
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.2s;
+  }
+  .scroll-quiet:hover,
+  .scroll-quiet:focus-within {
+    scrollbar-color: rgb(247 245 240 / 0.22) transparent;
+  }
+  .scroll-quiet::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+  .scroll-quiet:hover::-webkit-scrollbar-thumb {
+    background: rgb(247 245 240 / 0.22) padding-box;
+  }
+}
+
+/* Panelin gece zemini sayfa kaydırma çubuğunun arkasına da uzansın (açık şerit görünmesin) */
+html:has(.panel-night) {
+  background-color: #0b111c;
+  color-scheme: dark;
+}
