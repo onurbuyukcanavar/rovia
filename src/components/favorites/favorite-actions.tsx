@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { inputClass } from "@/components/ui/field";
 import { savePlaces } from "@/lib/actions/favorites";
 import type { FavoriteStopItem, ListType } from "@/lib/favorites/types";
 import type { FoundPlace } from "@/lib/maps/types";
@@ -48,7 +49,7 @@ export function FavoriteActions({ place, saved, onSaved }: { place: FoundPlace; 
       {saved ? (
         <p className="flex items-center gap-2 text-sm font-semibold text-success">
           <Check className="size-4" aria-hidden /> {t.favorites.savedState(t.favorites.lists[saved])}
-          <Link href="/favoriler" className="font-normal text-stone-600 underline">{t.favorites.title}</Link>
+          <Link href="/favoriler" className="font-normal text-fg-muted underline underline-offset-2 hover:text-fg">{t.favorites.title}</Link>
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-2">
@@ -78,31 +79,31 @@ export function FavoritePicker({ favorites, onPick, disabled }: { favorites: Fav
   }, [favorites, query]);
 
   return (
-    <details className="rounded-2xl border border-sand-200 bg-paper-50" open={open} onToggle={(e) => setOpen(e.currentTarget.open)} data-testid="favorite-picker">
-      <summary className="flex cursor-pointer items-center gap-2 px-4 py-3 text-sm font-semibold">
-        <Heart className="size-4 text-amber-600" aria-hidden /> {t.favorites.fromFavorites}
-        <span className="ml-auto text-xs font-normal text-stone-500 tabular-nums">{favorites.length}</span>
+    <details className="card overflow-hidden" open={open} onToggle={(e) => setOpen(e.currentTarget.open)} data-testid="favorite-picker">
+      <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 py-3 text-sm font-semibold text-fg hover:bg-fg/[0.04]">
+        <Heart className="size-4 text-accent-ink" aria-hidden /> {t.favorites.fromFavorites}
+        <span className="ml-auto text-xs font-normal text-fg-subtle tabular-nums">{favorites.length}</span>
       </summary>
       <div className="space-y-2 px-4 pb-4">
         {favorites.length === 0 ? (
-          <p className="text-sm text-stone-600">{t.favorites.fromFavoritesEmpty}</p>
+          <p className="text-sm text-fg-muted">{t.favorites.fromFavoritesEmpty}</p>
         ) : (
           <>
             {favorites.length > 8 && (
               <div className="relative">
-                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-500" aria-hidden />
+                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-subtle" aria-hidden />
                 <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} aria-label={t.favorites.searchInList}
                   placeholder={t.favorites.searchInList}
-                  className="h-10 w-full rounded-xl border border-sand-300 bg-white pr-3 pl-9 text-sm outline-none focus:border-ink-700" />
+                  className={inputClass(false, "h-10 pr-3 pl-9")} />
               </div>
             )}
             <ul className="max-h-64 space-y-1 overflow-y-auto">
               {shown.map((f) => (
-                <li key={f.id} className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-white">
-                  <span className={cn("size-2.5 shrink-0 rounded-full", f.listType === "want_to_go" ? "bg-[#1d3557]" : "bg-amber-500")} aria-hidden />
+                <li key={f.id} className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-fg/[0.05]">
+                  <span className={cn("size-2.5 shrink-0 rounded-full", f.listType === "want_to_go" ? "bg-fg-muted" : "bg-accent")} aria-hidden />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">{f.name}</span>
-                    {f.address && <span className="block truncate text-xs text-stone-600">{f.address}</span>}
+                    <span className="block truncate text-sm font-semibold text-fg">{f.name}</span>
+                    {f.address && <span className="block truncate text-xs text-fg-subtle">{f.address}</span>}
                   </span>
                   <Button type="button" size="sm" variant="secondary" disabled={disabled} onClick={() => onPick(f)}
                     aria-label={`${f.name}: ${t.favorites.addAsStop}`}>

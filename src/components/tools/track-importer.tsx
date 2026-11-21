@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import { useId, useMemo, useRef, useState, useTransition } from "react";
 import { TrackMap, type MapPin as Pin } from "@/components/recording/track-map";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
+import { Button, buttonClass } from "@/components/ui/button";
+import { Field, inputClass } from "@/components/ui/field";
+import { SectionEyebrow } from "@/components/ui/section-eyebrow";
+import { OdometerValue } from "@/components/trips/route-motif";
 import { importTrack } from "@/lib/actions/trip-tools";
 import { parseTrackFile, toLatLngs, trackStats, TrackImportError, type ParsedTrack } from "@/lib/import/track";
 import { buildImportPayload, MAX_IMPORT_WAYPOINTS } from "@/lib/import/track-plan";
@@ -106,14 +108,17 @@ export function TrackImporter({ styleUrl, targets }: { styleUrl: string; targets
             if (f) void readFile(f);
           }}
           className={cn(
-            "flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-6 py-12 text-center transition",
-            dragging ? "border-amber-500 bg-amber-50" : "border-sand-300 bg-paper-50 hover:border-stone-500",
+            "group relative isolate flex cursor-pointer flex-col items-center gap-3 overflow-hidden rounded-[var(--radius-card)] border-2 border-dashed px-6 py-12 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus",
+            dragging ? "border-accent bg-accent-soft" : "border-line-strong bg-raised hover:border-accent/50",
           )}
           data-testid="track-dropzone"
         >
-          {reading ? <LoaderCircle className="size-8 animate-spin text-stone-500" aria-hidden /> : <FileUp className="size-8 text-amber-600" aria-hidden />}
-          <span className="font-semibold">{reading ? T.reading : T.drop}</span>
-          <span className="inline-flex h-9 items-center rounded-full bg-ink-900 px-4 text-sm font-semibold text-paper">{T.choose}</span>
+          <DropRoad />
+          <span className="grid size-14 place-items-center rounded-2xl border border-line bg-raised text-accent-ink">
+            {reading ? <LoaderCircle className="size-7 animate-spin" aria-hidden /> : <FileUp className="size-7" aria-hidden />}
+          </span>
+          <span className="text-lg font-light tracking-tight text-fg">{reading ? T.reading : T.drop}</span>
+          <span className={buttonClass("primary", "sm")}>{T.choose}</span>
           <input
             ref={inputRef}
             id={inputId}
@@ -127,7 +132,7 @@ export function TrackImporter({ styleUrl, targets }: { styleUrl: string; targets
             }}
           />
         </label>
-        <p className="text-sm text-stone-600">{T.limits}</p>
+        <p className="text-sm text-fg-subtle">{T.limits}</p>
       </div>
     );
   }
@@ -136,7 +141,7 @@ export function TrackImporter({ styleUrl, targets }: { styleUrl: string; targets
   const canSave = hasTrack && !saving && (target === "new" || !!tripId);
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_22rem]" data-testid="track-preview">
-      <div className="relative h-[50vh] min-h-80 overflow-hidden rounded-2xl border border-sand-200 lg:h-[34rem]">
+      <div className="relative h-[50vh] min-h-80 overflow-hidden rounded-[var(--radius-card)] border border-line shadow-[var(--shadow-card)] lg:h-[34rem]">
         <TrackMap styleUrl={styleUrl} paths={paths} showEndpoints pins={pins} className="relative h-full w-full" />
       </div>
       <div className="space-y-5">
@@ -144,7 +149,7 @@ export function TrackImporter({ styleUrl, targets }: { styleUrl: string; targets
         {!hasTrack && <Alert tone="error">{T.noTrack}</Alert>}
         {stats && hasTrack && (
           <>
-            <dl className="grid grid-cols-2 gap-3" data-testid="import-stats">
+            <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line [&>:last-child:nth-child(odd)]:col-span-2" data-testid="import-stats">
               <Stat label={T.stats.distance} value={formatDistance(stats.distanceM)} testId="import-distance" />
               <Stat label={T.stats.duration} value={stats.elapsedS !== null ? formatDuration(stats.elapsedS) : T.stats.noTime} testId="import-duration" />
               {stats.movingS !== null && <Stat label={T.stats.moving} value={formatDuration(stats.movingS)} testId="import-moving" />}
@@ -156,33 +161,33 @@ export function TrackImporter({ styleUrl, targets }: { styleUrl: string; targets
           </>
         )}
         {track.waypoints.length > 0 && (
-          <details className="rounded-xl border border-sand-200 bg-white p-3 text-sm">
-            <summary className="cursor-pointer font-semibold">{T.waypointsTitle} ({formatCount(track.waypoints.length)})</summary>
+          <details className="card p-4 text-sm">
+            <summary className="cursor-pointer font-semibold text-fg">{T.waypointsTitle} ({formatCount(track.waypoints.length)})</summary>
             <ul className="mt-2 space-y-1">
               {track.waypoints.slice(0, WAYPOINT_LIST_LIMIT).map((w, i) => (
                 <li key={i} className="flex gap-2">
-                  <MapPin className="mt-1 size-3.5 shrink-0 text-stone-500" aria-hidden />
-                  <span>{w.name}{w.description && <span className="text-stone-500"> — {w.description}</span>}</span>
+                  <MapPin className="mt-1 size-3.5 shrink-0 text-accent-ink" aria-hidden />
+                  <span className="min-w-0 break-words text-fg-muted">{w.name}{w.description && <span className="text-fg-subtle"> — {w.description}</span>}</span>
                 </li>
               ))}
-              {track.waypoints.length > WAYPOINT_LIST_LIMIT && <li className="text-stone-500">{T.waypointsMore(track.waypoints.length - WAYPOINT_LIST_LIMIT)}</li>}
+              {track.waypoints.length > WAYPOINT_LIST_LIMIT && <li className="text-fg-subtle">{T.waypointsMore(track.waypoints.length - WAYPOINT_LIST_LIMIT)}</li>}
             </ul>
-            <p className="mt-2 text-xs text-stone-500">{T.waypointsNote(MAX_IMPORT_WAYPOINTS)}</p>
+            <p className="mt-2 text-xs text-fg-subtle">{T.waypointsNote(MAX_IMPORT_WAYPOINTS)}</p>
           </details>
         )}
 
         {hasTrack && (
           <fieldset className="space-y-3" disabled={saving}>
-            <legend className="mb-2 font-bold">{T.target}</legend>
-            <label className="flex items-center gap-2 text-sm font-semibold">
-              <input type="radio" name="target" checked={target === "new"} onChange={() => setTarget("new")} data-testid="target-new" />
+            <legend className="mb-2"><SectionEyebrow as="span">{T.target}</SectionEyebrow></legend>
+            <label className="flex items-center gap-2 text-sm font-semibold text-fg">
+              <input type="radio" name="target" className="size-4 accent-accent" checked={target === "new"} onChange={() => setTarget("new")} data-testid="target-new" />
               {T.asNew}
             </label>
             {target === "new" && (
               <Field label={T.titleLabel} name="title" value={title} maxLength={160} onChange={(e) => setTitle(e.target.value)} placeholder={T.defaultTitle} />
             )}
-            <label className="flex items-center gap-2 text-sm font-semibold">
-              <input type="radio" name="target" checked={target === "attach"} onChange={() => setTarget("attach")} data-testid="target-attach" />
+            <label className="flex items-center gap-2 text-sm font-semibold text-fg">
+              <input type="radio" name="target" className="size-4 accent-accent" checked={target === "attach"} onChange={() => setTarget("attach")} data-testid="target-attach" />
               {T.attach}
             </label>
             {target === "attach" && (
@@ -192,7 +197,7 @@ export function TrackImporter({ styleUrl, targets }: { styleUrl: string; targets
                     aria-label={T.pickTrip}
                     value={tripId}
                     onChange={(e) => setTripId(e.target.value)}
-                    className="h-12 w-full rounded-xl border border-sand-300 bg-white px-3 text-[0.95rem]"
+                    className={inputClass(false, "h-12 px-3")}
                     data-testid="target-trip"
                   >
                     <option value="">{T.pickTrip}</option>
@@ -201,9 +206,9 @@ export function TrackImporter({ styleUrl, targets }: { styleUrl: string; targets
                     ))}
                   </select>
                 ) : (
-                  <p className="text-sm text-stone-600">{T.noTrips}</p>
+                  <p className="text-sm text-fg-muted">{T.noTrips}</p>
                 )}
-                <p className="text-xs text-stone-600">{mode === "recording" ? T.attachRecordingHint : T.attachRouteHint}</p>
+                <p className="text-xs text-fg-subtle">{mode === "recording" ? T.attachRecordingHint : T.attachRouteHint}</p>
               </div>
             )}
           </fieldset>
@@ -226,9 +231,22 @@ export function TrackImporter({ styleUrl, targets }: { styleUrl: string; targets
 
 function Stat({ label, value, testId }: { label: string; value: string; testId: string }) {
   return (
-    <div className="rounded-xl border border-sand-200 bg-white p-3">
-      <dt className="text-[0.7rem] font-semibold tracking-wide text-stone-500 uppercase">{label}</dt>
-      <dd className="mt-1 text-lg font-bold tabular-nums" data-testid={testId}>{value}</dd>
+    <div className="min-w-0 bg-surface p-3.5">
+      <dt className="text-[0.65rem] font-semibold tracking-[0.16em] break-words text-fg-subtle uppercase">{label}</dt>
+      <dd className="mt-1.5 text-xl leading-none font-extralight tracking-[-0.03em] break-words tabular-nums" data-testid={testId}>
+        <OdometerValue value={value} accent={testId === "import-distance"} />
+      </dd>
     </div>
+  );
+}
+
+/** Bırakma alanının arkasında ufka uzanan iki yol çizgisi (durağan süs). */
+function DropRoad() {
+  return (
+    <svg aria-hidden viewBox="0 0 200 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 -z-10 size-full opacity-50">
+      <path d="M0 100 C 60 70 80 40 100 0" className="stroke-fg/15" strokeWidth="1" fill="none" vectorEffect="non-scaling-stroke" />
+      <path d="M200 100 C 140 70 120 40 100 0" className="stroke-fg/15" strokeWidth="1" fill="none" vectorEffect="non-scaling-stroke" />
+      <path d="M100 100 C 100 60 100 30 100 0" className="stroke-accent/50" strokeWidth="1.5" strokeDasharray="6 7" fill="none" vectorEffect="non-scaling-stroke" />
+    </svg>
   );
 }

@@ -5,6 +5,7 @@ import { useId, useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 import { matchPlaceNames, savePlaces, type NameMatch } from "@/lib/actions/favorites";
 import { ImportError, parseImportFile, type ImportSource, type ParsedFile, type ParsedPlace } from "@/lib/import/parsers";
 import type { PlaceInput } from "@/lib/favorites/types";
@@ -148,14 +149,14 @@ export function Importer() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-8 sm:py-10">
-      <header className="space-y-2">
-        <Link href="/favoriler" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
+    <div data-themed className="page-backdrop min-h-full">
+    <div className="mx-auto max-w-3xl space-y-8 px-4 py-6 sm:px-8 sm:py-10">
+      <div className="space-y-6">
+        <Link href="/favoriler" className="inline-flex items-center gap-1 text-sm font-semibold text-fg-muted transition-colors hover:text-fg">
           <ArrowLeft className="size-4" aria-hidden /> {t.favorites.title}
         </Link>
-        <h1 className="text-3xl font-extrabold tracking-tight">{t.importer.title}</h1>
-        <p className="text-stone-600">{t.importer.subtitle}</p>
-      </header>
+        <PageHeader eyebrow={t.favorites.import} index={1} title={t.importer.title} accent={t.importer.accent} description={t.importer.subtitle} />
+      </div>
 
       {error && <Alert tone="error">{error}</Alert>}
 
@@ -172,21 +173,23 @@ export function Importer() {
               if (f && phase.kind === "idle") void readFile(f);
             }}
             className={cn(
-              "flex cursor-pointer flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-6 py-10 text-center transition",
-              dragging ? "border-amber-500 bg-amber-50" : "border-sand-300 bg-paper-50 hover:border-stone-500",
+              "flex cursor-pointer flex-col items-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed px-6 py-10 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus",
+              dragging ? "border-accent bg-accent-soft" : "border-line-strong bg-raised hover:border-accent/50",
             )}
             data-testid="import-drop"
           >
-            {phase.kind === "idle" ? <FileUp className="size-8 text-stone-500" aria-hidden /> : <LoaderCircle className="size-8 animate-spin text-amber-600" aria-hidden />}
-            <span className="font-semibold">
+            <span className="grid size-14 place-items-center rounded-2xl border border-line bg-raised text-accent-ink">
+              {phase.kind === "idle" ? <FileUp className="size-7" aria-hidden /> : <LoaderCircle className="size-7 animate-spin" aria-hidden />}
+            </span>
+            <span className="text-lg font-light tracking-tight text-fg">
               {phase.kind === "reading" ? t.importer.reading : phase.kind === "matching" ? t.importer.matching : t.importer.drop}
             </span>
-            <span className="text-xs text-stone-600">{t.importer.formats}</span>
+            <span className="text-xs text-fg-subtle">{t.importer.formats}</span>
             <input id={inputId} ref={inputRef} type="file" className="sr-only" disabled={phase.kind !== "idle"}
               accept=".zip,.json,.geojson,.csv,.kml,.kmz,.gpx,application/zip,application/json,text/csv,application/vnd.google-earth.kml+xml,application/gpx+xml"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) void readFile(f); }} data-testid="import-input" />
           </label>
-          <p className="flex items-start gap-2 text-sm text-stone-600">
+          <p className="flex items-start gap-2 text-sm text-fg-muted">
             <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden /> {t.importer.privacy}
           </p>
           <TakeoutHelp />
@@ -196,8 +199,8 @@ export function Importer() {
       {phase.kind === "preview" && (
         <section className="space-y-4" aria-labelledby="preview-title" data-testid="import-preview">
           <div className="space-y-1">
-            <h2 id="preview-title" className="text-lg font-bold">{t.importer.summary(stats.total, stats.ready)}</h2>
-            <p className="text-sm text-stone-600">{t.importer.fileCount(files.length)} · {files.map((f) => f.fileName).join(", ")}</p>
+            <h2 id="preview-title" className="text-xl font-light tracking-tight text-fg">{t.importer.summary(stats.total, stats.ready)}</h2>
+            <p className="text-sm break-words text-fg-muted">{t.importer.fileCount(files.length)} · {files.map((f) => f.fileName).join(", ")}</p>
           </div>
           {stats.missing > 0 && (
             <Alert>
@@ -214,50 +217,51 @@ export function Importer() {
               {t.importer.importN(selected.size)}
             </Button>
           </div>
-          <ul className="divide-y divide-sand-100 overflow-hidden rounded-2xl border border-sand-200 bg-white" data-testid="import-rows">
+          <ul className="card divide-y divide-line overflow-hidden" data-testid="import-rows">
             {rows.slice(0, ROW_RENDER_LIMIT).map((r) => (
               <li key={r.key}>
-                <label className={cn("flex items-start gap-3 px-4 py-3", r.status === "missing" ? "opacity-60" : "cursor-pointer hover:bg-paper-50")}>
-                  <input type="checkbox" className="mt-1 size-4 accent-amber-600" checked={selected.has(r.key)} disabled={r.status === "missing"}
+                <label className={cn("flex min-w-0 items-start gap-3 px-4 py-3", r.status === "missing" ? "opacity-60" : "cursor-pointer hover:bg-fg/[0.04]")}>
+                  <input type="checkbox" className="mt-1 size-4 shrink-0 accent-accent" checked={selected.has(r.key)} disabled={r.status === "missing"}
                     onChange={() => toggle(r.key)} aria-label={r.place.name} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold">{r.place.name}</span>
-                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-stone-600">
+                    <span className="block truncate font-medium text-fg">{r.place.name}</span>
+                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-subtle">
                       <StatusLabel row={r} />
                       {r.place.listName && <span>· {r.place.listName}</span>}
                     </span>
                   </span>
-                  <Badge className={r.place.listType === "want_to_go" ? "bg-[#1d3557] text-white" : ""}>
+                  <Badge tone={r.place.listType === "want_to_go" ? "neutral" : "accent"} className="shrink-0">
                     {t.favorites.lists[r.place.listType ?? "favorite"]}
                   </Badge>
                 </label>
               </li>
             ))}
           </ul>
-          {rows.length > ROW_RENDER_LIMIT && <p className="text-xs text-stone-500">{t.importer.moreRows(rows.length - ROW_RENDER_LIMIT)}</p>}
+          {rows.length > ROW_RENDER_LIMIT && <p className="text-xs text-fg-subtle">{t.importer.moreRows(rows.length - ROW_RENDER_LIMIT)}</p>}
         </section>
       )}
 
       {phase.kind === "importing" && (
-        <div className="space-y-3 rounded-2xl border border-sand-200 bg-white p-6" role="status">
-          <p className="flex items-center gap-2 font-semibold"><LoaderCircle className="size-5 animate-spin" aria-hidden /> {t.importer.importing(phase.done, phase.total)}</p>
-          <div className="h-2 overflow-hidden rounded-full bg-sand-100">
-            <div className="h-full bg-amber-500 transition-[width]" style={{ width: `${Math.round((phase.done / Math.max(1, phase.total)) * 100)}%` }} />
+        <div className="card space-y-3 p-6" role="status">
+          <p className="flex items-center gap-2 font-semibold text-fg"><LoaderCircle className="size-5 animate-spin text-accent-ink" aria-hidden /> {t.importer.importing(phase.done, phase.total)}</p>
+          <div className="h-2 overflow-hidden rounded-full bg-sunken">
+            <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${Math.round((phase.done / Math.max(1, phase.total)) * 100)}%` }} />
           </div>
         </div>
       )}
 
       {phase.kind === "done" && (
-        <section className="space-y-4 rounded-2xl border border-sand-200 bg-white p-6" data-testid="import-result">
+        <section className="card space-y-4 p-6" data-testid="import-result">
           {phase.failed && <Alert tone="error">{phase.failed}</Alert>}
-          <p className="flex items-start gap-2 text-lg font-bold"><CircleCheck className="mt-1 size-5 shrink-0 text-success" aria-hidden /> {t.importer.result(phase.imported, phase.duplicates)}</p>
-          {phase.invalid > 0 && <p className="text-sm text-stone-600">{t.importer.invalidSkipped(phase.invalid)}</p>}
+          <p className="flex items-start gap-2 text-xl font-light tracking-tight text-fg"><CircleCheck className="mt-1 size-5 shrink-0 text-success" aria-hidden /> {t.importer.result(phase.imported, phase.duplicates)}</p>
+          {phase.invalid > 0 && <p className="text-sm text-fg-muted">{t.importer.invalidSkipped(phase.invalid)}</p>}
           <div className="flex flex-wrap gap-2">
             <ButtonLink href="/favoriler" variant="primary">{t.importer.goFavorites}</ButtonLink>
             <Button type="button" variant="secondary" onClick={reset}>{t.importer.another}</Button>
           </div>
         </section>
       )}
+    </div>
     </div>
   );
 }
@@ -278,21 +282,26 @@ function StatusLabel({ row }: { row: Row }) {
   if (row.status === "ok") return <span className="inline-flex items-center gap-1 text-success"><CircleCheck className="size-3.5" aria-hidden /> {t.importer.statusOk}</span>;
   if (row.status === "estimated" && row.match) {
     const where = [row.match.name, row.match.admin].filter(Boolean).join(", ");
-    return <span className="inline-flex items-center gap-1 text-amber-700"><CircleHelp className="size-3.5" aria-hidden /> {t.importer.statusEstimated(where)}</span>;
+    return <span className="inline-flex items-center gap-1 text-accent-ink"><CircleHelp className="size-3.5" aria-hidden /> {t.importer.statusEstimated(where)}</span>;
   }
   return <span className="inline-flex items-center gap-1 text-danger"><MapPinOff className="size-3.5" aria-hidden /> {t.importer.statusMissing}</span>;
 }
 
 function TakeoutHelp() {
   return (
-    <section className="space-y-3 rounded-2xl border border-sand-200 bg-white p-5" aria-labelledby="takeout-help">
-      <h2 id="takeout-help" className="text-lg font-bold">{t.importer.howTitle}</h2>
-      <p className="text-sm text-stone-600">{t.importer.howWhy}</p>
-      <ol className="list-decimal space-y-1.5 pl-5 text-sm text-ink-800">
-        {t.importer.steps.map((s) => <li key={s}>{s}</li>)}
+    <section className="card space-y-4 p-5 sm:p-6" aria-labelledby="takeout-help">
+      <h2 id="takeout-help" className="text-lg font-semibold tracking-tight text-fg">{t.importer.howTitle}</h2>
+      <p className="text-sm leading-relaxed text-fg-muted">{t.importer.howWhy}</p>
+      <ol className="space-y-2.5 text-sm text-fg">
+        {t.importer.steps.map((s, i) => (
+          <li key={s} className="flex min-w-0 gap-3">
+            <span aria-hidden className="mt-px grid size-6 shrink-0 place-items-center rounded-full border border-line text-[0.7rem] font-semibold text-accent-ink tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+            <span className="min-w-0 break-words">{s}</span>
+          </li>
+        ))}
       </ol>
       <a href="https://takeout.google.com/" target="_blank" rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-sm font-semibold text-ink-900 underline">
+        className="inline-flex items-center gap-1 text-sm font-semibold text-accent-ink underline underline-offset-2">
         {t.importer.takeoutLink} <ExternalLink className="size-3.5" aria-hidden />
       </a>
     </section>

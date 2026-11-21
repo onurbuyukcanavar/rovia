@@ -7,7 +7,10 @@
  * content-security-policy.md, "Static vs Dynamic Rendering with CSP"). Next.js RSC verisini satır içi
  * <script> ile aktardığı için nonce olmadan script-src 'unsafe-inline' gerekir. Bunu dengeleyen ölçüler:
  * dış betik kaynağı yok (yalnızca 'self'), object-src 'none', base-uri 'self', frame-ancestors 'none',
- * dangerouslySetInnerHTML kullanılmıyor ve kullanıcı içeriği React ile kaçışlanarak çiziliyor.
+ * kullanıcı içeriği React ile kaçışlanarak çiziliyor ve dangerouslySetInnerHTML yalnızca tek bir sabit dizge için
+ * kullanılıyor: kök düzendeki tema betiği (src/lib/theme/theme.ts → THEME_SCRIPT; kullanıcı girdisi içermez).
+ * Not: script-src'ye bu betiğin sha256 özeti EKLENMEZ — özet/nonce bulunan bir politikada tarayıcılar
+ * 'unsafe-inline'ı yok sayar ve Next.js'in satır içi RSC betikleri engellenirdi.
  */
 
 export type CspInput = {

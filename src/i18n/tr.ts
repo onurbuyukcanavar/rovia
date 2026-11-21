@@ -11,6 +11,7 @@ import { share } from "./share";
 import { account } from "./account";
 import { install } from "./install";
 import { landing } from "./landing";
+import { theme } from "./theme";
 
 export const tr = {
   brand: {
@@ -134,7 +135,41 @@ export const tr = {
       favorites: "Favorilerim",
       write: "Seyahatname Yaz",
     },
+    hero: {
+      body: "Rotanı çiz, yol üstündeki güzellikleri keşfet, kaydı başlat. Gerisini ROVIA biriktirir.",
+    },
+    conditions: {
+      label: "Tarih, saat ve hava durumu",
+      nearYou: "Bulunduğun yer",
+      weatherUnavailable: "Hava durumu şu an alınamadı",
+      /** WMO hava kodu → kısa açıklama */
+      weather: (code: number, isDay: boolean): string => {
+        if (code === 0) return isDay ? "Güneşli" : "Açık";
+        if (code === 1) return "Az bulutlu";
+        if (code === 2) return "Parçalı bulutlu";
+        if (code === 3) return "Kapalı";
+        if (code === 45 || code === 48) return "Sisli";
+        if (code >= 51 && code <= 57) return "Çisenti";
+        if (code >= 61 && code <= 67) return "Yağmurlu";
+        if (code >= 71 && code <= 77) return "Karlı";
+        if (code >= 80 && code <= 82) return "Sağanak";
+        if (code === 85 || code === 86) return "Kar sağanağı";
+        if (code >= 95) return "Gök gürültülü";
+        return "Değişken";
+      },
+    },
+    /** Hızlı işlem kartlarının alt satırları */
+    actionHints: {
+      explore: "Rotanın çevresindeki tarihî yapıları, doğayı ve molaları bul.",
+      record: "GPS ile kilometre kilometre kaydet",
+      map: "Çevrendeki yerleri haritada gör",
+      favorites: "Kaydettiğin yerler bir arada",
+      write: "Yolu bir hikâyeye dönüştür",
+    },
     stats: "İstatistikler",
+    statsCaption: "Yolda biriktirdiklerin",
+    routeFrom: "Başlangıç",
+    routeTo: "Varış",
     statLabels: {
       trips: "Yolculuk",
       distance: "Kat edilen yol",
@@ -284,6 +319,7 @@ export const tr = {
   },
   trips: {
     listTitle: "Yolculuklarım",
+    listAccent: "yolda biriken.",
     listSubtitle: "Planladığın yolculuklar. Yola çıkmadan önce rotanı, duraklarını ve tarihini burada hazırlarsın.",
     newTrip: "Yeni yolculuk planla",
     planTitle: "Yolculuk Planla",
@@ -336,6 +372,7 @@ export const tr = {
   },
   favorites: {
     title: "Favorilerim",
+    accent: "iz bırakan yerler.",
     subtitle: "Kendi konum arşivin: sevdiğin yerler ve daha sonra gitmek istediklerin.",
     add: "Yer ekle",
     import: "İçe aktar",
@@ -404,6 +441,7 @@ export const tr = {
   },
   importer: {
     title: "Yerleri içe aktar",
+    accent: "tek dosyayla.",
     subtitle: "Google Maps listelerini, KML/KMZ, GPX veya CSV dosyalarını ROVIA'ya taşı.",
     howTitle: "Google Maps kayıtlı yerlerim nasıl aktarılır?",
     howWhy:
@@ -661,6 +699,7 @@ export const tr = {
   account,
   install,
   landing,
+  theme,
 } as const;
 
 export type Dictionary = typeof tr;

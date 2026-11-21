@@ -56,7 +56,7 @@ export function AddToTravelogue({ place, size = "sm", variant = "secondary", cla
       </Button>
       <Modal open={open} onClose={() => setOpen(false)} title={T.title} testId="add-to-travelogue-dialog">
         {targets === null ? (
-          <p className="flex items-center gap-2 text-sm text-stone-600"><LoaderCircle className="size-4 animate-spin" aria-hidden /> {T.loading}</p>
+          <p className="flex items-center gap-2 text-sm text-fg-muted"><LoaderCircle className="size-4 animate-spin" aria-hidden /> {T.loading}</p>
         ) : (
           <AddForm place={place} targets={targets} loadError={loadError} />
         )}
@@ -97,9 +97,9 @@ function AddForm({ place, targets, loadError }: { place: TraveloguePlace; target
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <p className="text-sm text-stone-700">{T.intro(place.name)}</p>
+      <p className="text-sm text-fg-muted">{T.intro(place.name)}</p>
       <fieldset className="space-y-1.5">
-        <legend className="mb-1 text-sm font-semibold text-ink-800">{T.choose}</legend>
+        <legend className="mb-1 text-sm font-semibold text-fg">{T.choose}</legend>
         <ul className="max-h-60 space-y-1.5 overflow-y-auto">
           {targets.map((tg) => (
             <li key={tg.id}>
@@ -111,7 +111,7 @@ function AddForm({ place, targets, loadError }: { place: TraveloguePlace; target
       </fieldset>
       {choice === "new" && (
         <div className="space-y-1.5">
-          <label htmlFor="att-title" className="block text-sm font-semibold text-ink-800">{T.newTitle}</label>
+          <label htmlFor="att-title" className="block text-sm font-semibold text-fg">{T.newTitle}</label>
           <input id="att-title" className={cn(fieldClass, "h-11")} value={newTitle} maxLength={200} placeholder={T.newTitlePlaceholder}
             onChange={(e) => setNewTitle(e.target.value)} />
         </div>
@@ -127,11 +127,11 @@ function AddForm({ place, targets, loadError }: { place: TraveloguePlace; target
 function Choice({ checked, onChange, title, sub, testId }: { checked: boolean; onChange: () => void; title: string; sub: string | null; testId?: string }) {
   return (
     <label className={cn("flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm",
-      checked ? "border-ink-900 bg-white" : "border-sand-200 bg-paper-50 hover:bg-white")}>
-      <input type="radio" name="att-target" className="size-4 accent-amber-600" checked={checked} onChange={onChange} data-testid={testId} />
+      checked ? "border-accent/60 bg-accent-soft" : "border-line bg-raised hover:bg-fg/[0.05]")}>
+      <input type="radio" name="att-target" className="size-4 accent-accent" checked={checked} onChange={onChange} data-testid={testId} />
       <span className="min-w-0 flex-1">
         <span className="block truncate font-semibold">{title}</span>
-        {sub && <span className="block truncate text-xs text-stone-600">{sub}</span>}
+        {sub && <span className="block truncate text-xs text-fg-muted">{sub}</span>}
       </span>
     </label>
   );

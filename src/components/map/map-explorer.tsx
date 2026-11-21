@@ -32,6 +32,8 @@ import { RouteBuilder } from "./route-builder";
 import { RouteSummary } from "./route-summary";
 import { RouteDirections, RouteOptionsBar, RouteSuggestions } from "./route-extras";
 import { t } from "@/i18n";
+import { ThemedMapStyle } from "@/components/theme/themed-map-style";
+import { PanelHeading } from "./road-motif";
 
 const TURKEY_CENTER = { lat: 39.0, lng: 35.2 };
 
@@ -292,50 +294,52 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
   }, [selectedRoute, state]);
 
   return (
-    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr] relative lg:overflow-hidden">
+    <div data-themed className="relative flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr] lg:overflow-hidden">
       <MapFrame expanded={mapView.expanded} onExpand={mapView.expand} onCollapse={mapView.collapse}
         className="order-1 h-[45%] shrink-0 lg:order-2 lg:h-full" testId="map">
-        <MapView
-          initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
-          mapStyle={styleUrl}
-          style={{ width: "100%", height: "100%" }}
-          cursor={picking ? "crosshair" : undefined}
-          interactiveLayerIds={routeResult && routeResult.routes.length > 1 ? [ALT_ROUTE_LAYER] : []}
-          onClick={onMapClick}
-          onMoveEnd={(e) => setMapCenter({ lat: e.viewState.latitude, lng: e.viewState.longitude })}
-          onError={(e) => {
-            console.error("[rovia] harita:", e.error?.message);
-            setMapError(true);
-          }}
-          attributionControl={{ compact: true }}
-          dragRotate={false}
-        >
-          <NavigationControl position="top-right" showCompass={false} />
-          <ScaleControl position="bottom-left" unit="metric" />
-          {routeResult && <RouteLines routes={routeResult.routes} selected={selectedIndex} />}
-          <StopMarkers origin={state.origin.stop} waypoints={state.waypoints.map((w) => w.stop)} destination={state.destination.stop} />
-          {results && <ResultMarkers places={results} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
-            setSelectedPlace(p);
-            // Tam ekranda yer seçilince ayrıntısı görünsün
-            if (mapView.expanded) mapView.collapse();
-          }} />}
-          <MyLocationMarker position={geo.position} />
-          <FitBounds points={fitPoints} deps={fitKey} />
-          <SuggestionMarkers places={suggested} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
-            setSelectedPlace(p);
-            if (mapView.expanded) mapView.collapse();
-          }} />
-          <FocusMarker position={focus} />
-          <PanTo position={selectedPlace?.location ?? focus} />
-        </MapView>
+        <ThemedMapStyle styleUrl={styleUrl}>{(mapStyle, theme) => (
+          <MapView
+            initialViewState={{ longitude: TURKEY_CENTER.lng, latitude: TURKEY_CENTER.lat, zoom: 5.2 }}
+            mapStyle={mapStyle}
+            style={{ width: "100%", height: "100%" }}
+            cursor={picking ? "crosshair" : undefined}
+            interactiveLayerIds={routeResult && routeResult.routes.length > 1 ? [ALT_ROUTE_LAYER] : []}
+            onClick={onMapClick}
+            onMoveEnd={(e) => setMapCenter({ lat: e.viewState.latitude, lng: e.viewState.longitude })}
+            onError={(e) => {
+              console.error("[rovia] harita:", e.error?.message);
+              setMapError(true);
+            }}
+            attributionControl={{ compact: true }}
+            dragRotate={false}
+          >
+            <NavigationControl position="top-right" showCompass={false} />
+            <ScaleControl position="bottom-left" unit="metric" />
+            {routeResult && <RouteLines routes={routeResult.routes} selected={selectedIndex} theme={theme} />}
+            <StopMarkers origin={state.origin.stop} waypoints={state.waypoints.map((w) => w.stop)} destination={state.destination.stop} />
+            {results && <ResultMarkers places={results} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
+              setSelectedPlace(p);
+              // Tam ekranda yer seçilince ayrıntısı görünsün
+              if (mapView.expanded) mapView.collapse();
+            }} />}
+            <MyLocationMarker position={geo.position} />
+            <FitBounds points={fitPoints} deps={fitKey} />
+            <SuggestionMarkers places={suggested} selectedId={selectedPlace?.id ?? null} onSelect={(p) => {
+              setSelectedPlace(p);
+              if (mapView.expanded) mapView.collapse();
+            }} />
+            <FocusMarker position={focus} />
+            <PanTo position={selectedPlace?.location ?? focus} />
+          </MapView>
+        )}</ThemedMapStyle>
         {mapError && (
-          <div className="absolute inset-x-3 top-14 z-10">
+          <div className="absolute inset-x-3 top-14 z-10 rounded-xl bg-overlay shadow-[var(--shadow-overlay)]">
             <Alert tone="error">{t.maps.loadError}</Alert>
           </div>
         )}
       </MapFrame>
 
-      <aside className="order-2 min-h-0 flex-1 overflow-y-auto border-t border-sand-200 bg-paper px-4 py-4 lg:order-1 lg:border-t-0 lg:border-r lg:px-5 lg:py-6">
+      <aside className="order-2 min-h-0 flex-1 overflow-y-auto border-t border-line bg-surface px-4 py-4 lg:order-1 lg:border-t-0 lg:border-r lg:px-6 lg:py-7">
         {selectedPlace ? (
           <PlaceDetail
             key={selectedPlace.id}
@@ -358,18 +362,14 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
         ) : (
           <div className="space-y-6">
             {planOpen ? (
-              <header className="space-y-1">
-                <Link href="/yolculuklar" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
+              <div className="space-y-4">
+                <Link href="/yolculuklar" className="-ml-1 inline-flex min-h-9 items-center gap-1.5 rounded-full px-1 text-sm font-semibold text-fg-muted transition-colors hover:text-fg">
                   <ArrowLeft className="size-4" aria-hidden /> {t.trips.backToList}
                 </Link>
-                <h1 className="text-2xl font-extrabold tracking-tight">{saved.id ? t.trips.editTitle : t.trips.planTitle}</h1>
-                <p className="text-sm text-stone-600">{t.trips.planSubtitle}</p>
-              </header>
+                <PanelHeading eyebrow={t.maps.route} title={saved.id ? t.trips.editTitle : t.trips.planTitle} description={t.trips.planSubtitle} />
+              </div>
             ) : (
-              <header className="hidden lg:block">
-                <h1 className="text-2xl font-extrabold tracking-tight">{t.maps.title}</h1>
-                <p className="text-sm text-stone-600">{t.maps.subtitle}</p>
-              </header>
+              <PanelHeading className="hidden lg:block" eyebrow={t.nav.mapShort} title={t.maps.title} description={t.maps.subtitle} />
             )}
             {insertResult && (
               <Alert tone={insertResult.reason === "full" ? "error" : "info"}>
@@ -379,9 +379,9 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
             )}
             {geo.error && <Alert tone="error">{geo.error}</Alert>}
             {planOpen && (
-              <TripDetailsForm fields={fields} onChange={setFields} titleSuggestion={titleSuggestion} fieldErrors={fieldErrors} />
+              <TripDetailsForm index={1} fields={fields} onChange={setFields} titleSuggestion={titleSuggestion} fieldErrors={fieldErrors} />
             )}
-            <RouteBuilder state={state} dispatch={dispatch} bias={geo.position ?? undefined} picking={picking}
+            <RouteBuilder index={planOpen ? 2 : 1} state={state} dispatch={dispatch} bias={geo.position ?? undefined} picking={picking}
               onPick={setPicking} onLocate={onLocate} locating={geo.status === "locating"} />
             {(planOpen || favorites.length > 0) && (
               <FavoritePicker favorites={favorites} disabled={!!state.origin.stop && !!state.destination.stop && state.waypoints.length >= MAX_WAYPOINTS}
@@ -397,7 +397,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
                   }
                 }} />
             )}
-            <RouteOptionsBar options={state.options} onChange={(o) => dispatch({ type: "setOptions", options: o })} />
+            <RouteOptionsBar index={planOpen ? 3 : 2} options={state.options} onChange={(o) => dispatch({ type: "setOptions", options: o })} />
             <RouteSummary result={routeResult} selected={selectedIndex} onSelect={selectRoute}
               loading={routePending} error={usingSavedRoute ? null : (route.error ?? null)} hasWaypoints={state.waypoints.length > 0} />
             {selectedRoute?.steps && <RouteDirections steps={selectedRoute.steps} onFocus={setFocus} />}
@@ -408,7 +408,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
                 onDetails={setSelectedPlace} />
             )}
             {saved.id && selectedRoute && (
-              <Link href={`/kesfet?yolculuk=${saved.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:underline"
+              <Link href={`/kesfet?yolculuk=${saved.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-ink underline-offset-4 hover:underline"
                 data-testid="explore-along">
                 <Compass className="size-4" aria-hidden /> {t.explore.planner.exploreAlong}
               </Link>
@@ -418,7 +418,7 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
                 <BookmarkPlus className="size-4" aria-hidden /> {t.trips.saveAsTrip}
               </Button>
             )}
-            <DiscoverPanel hasRoute={!!polyline} category={category} onCategory={chooseCategory} radius={radius} onRadius={setRadius}
+            <DiscoverPanel index={planOpen ? 4 : 3} hasRoute={!!polyline} category={category} onCategory={chooseCategory} radius={radius} onRadius={setRadius}
               results={results} loading={search.loading} error={search.error ?? null} selectedId={null} onSelect={setSelectedPlace} />
             {planOpen && (
               <SaveBar isNew={!saved.id} dirty={dirty} saving={saving} savedAt={saved.savedAt} blockedReason={blockedReason}

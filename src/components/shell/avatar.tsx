@@ -8,5 +8,5 @@ export function Avatar({ name, url, size = "md" }: { name: string | null; url: s
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={url} alt="" className={cls} referrerPolicy="no-referrer" />;
   }
-  return <span className={cn(cls, "grid place-items-center bg-amber-500 font-bold text-ink-950")} aria-hidden>{initials}</span>;
+  return <span className={cn(cls, "grid place-items-center bg-accent font-bold text-accent-fg")} aria-hidden>{initials}</span>;
 }

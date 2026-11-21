@@ -6,9 +6,8 @@ import { cityOf, osmUrl, safeUrl, tripadvisorUrl, wikidataUrl, wikipediaUrl } fr
 import { placeToSearchParams } from "@/lib/explore/place-param";
 import type { ExplorePlace } from "@/lib/explore/types";
 import { ButtonLink } from "@/components/ui/button";
-import { fieldClass } from "@/components/journal/note-editor";
+import { inputClass } from "@/components/ui/field";
 import { AddToTravelogue } from "@/components/travelogue/add-to-travelogue";
-import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
 import { CATEGORY_ICONS } from "./category-chips";
 import { TripadvisorLink, WikiSection } from "./wiki-section";
@@ -40,27 +39,29 @@ export function PlacePanel({ place, category, distanceText, plannedTrips, favori
 
   return (
     <article aria-labelledby="explore-place-title" className="space-y-4" data-testid="explore-place">
-      <button type="button" onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-semibold text-stone-700 hover:text-ink-900">
+      <button type="button" onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg-muted transition-colors hover:text-fg">
         <ArrowLeft className="size-4" aria-hidden /> {T.back}
       </button>
 
-      <header className="space-y-1">
-        <p className="eyebrow flex items-center gap-1.5">
-          <Icon className="size-3.5" style={{ color: CATEGORY_COLORS[category] }} aria-hidden />
-          {[place.typeLabel, t.explore.categories[category]].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(" · ")}
+      <header className="min-w-0 space-y-3">
+        <p className="flex min-w-0 items-center gap-2.5 text-xs font-semibold tracking-[0.2em] text-accent-ink uppercase">
+          <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-full text-white" style={{ backgroundColor: CATEGORY_COLORS[category] }}>
+            <Icon className="size-3.5" />
+          </span>
+          <span className="min-w-0 break-words">{[place.typeLabel, t.explore.categories[category]].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(" · ")}</span>
         </p>
-        <h2 id="explore-place-title" className="text-xl font-extrabold tracking-tight">{place.name}</h2>
+        <h2 id="explore-place-title" className="text-[2rem] leading-[1.08] font-extralight tracking-[-0.03em] break-words text-fg">{place.name}</h2>
       </header>
 
-      <dl className="space-y-2.5 text-sm">
+      <dl className="space-y-2.5 text-sm text-fg">
         {place.admin && (
           <Row icon={MapPin} label={T.admin}>{place.admin}</Row>
         )}
-        {distanceText && <Row icon={Route} label={T.distance}><span className="font-semibold">{distanceText}</span></Row>}
+        {distanceText && <Row icon={Route} label={T.distance}><span className="font-semibold text-accent-ink tabular-nums">{distanceText}</span></Row>}
         {ele !== null && <Row icon={Mountain} label={T.elevation}>{T.elevation}: {ele.toLocaleString("tr-TR")} m</Row>}
         {tags.opening_hours && (
           <Row icon={Clock3} label={T.hours}>
-            <span className="text-stone-500">{T.hours}: </span>
+            <span className="text-fg-subtle">{T.hours}: </span>
             <span className="break-words">{tags.opening_hours === "24/7" ? "7 gün 24 saat" : tags.opening_hours}</span>
           </Row>
         )}
@@ -74,15 +75,15 @@ export function PlacePanel({ place, category, distanceText, plannedTrips, favori
       <WikiSection place={place} />
 
       {description && (
-        <section className="rounded-2xl border border-dashed border-sand-300 bg-sand-50 p-3 text-sm" data-testid="explore-unverified">
-          <h3 className="flex items-center gap-1.5 text-xs font-bold tracking-wide text-stone-600 uppercase">
+        <section className="rounded-2xl border border-dashed border-line-strong bg-sunken p-3.5 text-sm text-fg" data-testid="explore-unverified">
+          <h3 className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.14em] text-fg-muted uppercase">
             <Info className="size-3.5" aria-hidden /> {T.osmDescription} · {T.unverified}
           </h3>
           <p className="mt-1.5 break-words whitespace-pre-line">{description.slice(0, 600)}</p>
-          <p className="mt-1.5 text-xs text-stone-500">{T.unverifiedNote}</p>
+          <p className="mt-1.5 text-xs text-fg-subtle">{T.unverifiedNote}</p>
         </section>
       )}
-      {!hasInfo && <p className="text-xs text-stone-600">{T.noInfo}</p>}
+      {!hasInfo && <p className="text-xs text-fg-subtle">{T.noInfo}</p>}
       <TripadvisorLink href={tripadvisorUrl(place.name, cityOf(place.admin))} />
 
       {favoriteActions}
@@ -90,8 +91,8 @@ export function PlacePanel({ place, category, distanceText, plannedTrips, favori
         place={{ name: place.name, address: place.admin, lat: place.location.lat, lng: place.location.lng, osmRef: place.id }} />
       <AddToTrip params={params} trips={plannedTrips} />
 
-      <section className="space-y-1.5 rounded-2xl border border-sand-200 bg-paper-50 p-3 text-sm" aria-labelledby="explore-source" data-testid="explore-source">
-        <h3 id="explore-source" className="flex items-center gap-1.5 text-xs font-bold tracking-wide text-stone-600 uppercase">
+      <section className="card space-y-1.5 p-3.5 text-sm text-fg-muted" aria-labelledby="explore-source" data-testid="explore-source">
+        <h3 id="explore-source" className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.14em] text-fg-subtle uppercase">
           <Database className="size-3.5" aria-hidden /> {T.sourceTitle}
         </h3>
         <p>
@@ -100,7 +101,7 @@ export function PlacePanel({ place, category, distanceText, plannedTrips, favori
             <>
               {" · "}
               <a href={osm} target="_blank" rel="noopener noreferrer" data-testid="explore-osm-link"
-                className="inline-flex items-center gap-1 font-semibold text-amber-700 hover:underline">
+                className="inline-flex items-center gap-1 font-semibold text-accent-ink hover:underline">
                 {T.sourceOsmLink} <ExternalLink className="size-3" aria-hidden />
               </a>
             </>
@@ -108,20 +109,20 @@ export function PlacePanel({ place, category, distanceText, plannedTrips, favori
         </p>
         {(wiki || wikidata) && (
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="text-stone-500">{T.sourceWiki}:</span>
+            <span className="text-fg-subtle">{T.sourceWiki}:</span>
             {wiki && (
-              <a href={wiki} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold text-amber-700 hover:underline">
+              <a href={wiki} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold text-accent-ink hover:underline">
                 <BookOpen className="size-3.5" aria-hidden /> {T.wikipedia}
               </a>
             )}
             {wikidata && (
-              <a href={wikidata} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold text-amber-700 hover:underline">
+              <a href={wikidata} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold text-accent-ink hover:underline">
                 {T.wikidata} <ExternalLink className="size-3" aria-hidden />
               </a>
             )}
           </p>
         )}
-        <p className="text-xs text-stone-500">{T.sourceNote}</p>
+        <p className="text-xs text-fg-subtle">{T.sourceNote}</p>
       </section>
     </article>
   );
@@ -131,7 +132,7 @@ function Row({ icon: Icon, label, children }: { icon: typeof MapPin; label: stri
   return (
     <div className="flex gap-2.5">
       <dt className="sr-only">{label}</dt>
-      <Icon className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+      <Icon className="mt-0.5 size-4 shrink-0 text-fg-subtle" aria-hidden />
       <dd className="min-w-0">{children}</dd>
     </div>
   );
@@ -142,14 +143,14 @@ function AddToTrip({ params, trips }: { params: string; trips: { id: string; tit
   const A = t.explore.addToTrip;
   const [tripId, setTripId] = useState(trips[0]?.id ?? "");
   return (
-    <section className="space-y-2 rounded-2xl border border-ink-900/15 bg-ink-900/[0.03] p-3" aria-labelledby="explore-add-trip" data-testid="explore-add-trip">
-      <h3 id="explore-add-trip" className="flex items-center gap-1.5 text-sm font-bold"><CalendarPlus className="size-4" aria-hidden /> {A.title}</h3>
+    <section className="card space-y-2.5 p-4" aria-labelledby="explore-add-trip" data-testid="explore-add-trip">
+      <h3 id="explore-add-trip" className="flex items-center gap-2 text-sm font-semibold text-fg"><CalendarPlus className="size-4 text-accent-ink" aria-hidden /> {A.title}</h3>
       {trips.length > 0 ? (
         <>
-          <p className="text-xs text-stone-600">{A.body}</p>
+          <p className="text-xs text-fg-muted">{A.body}</p>
           <label className="block">
             <span className="sr-only">{A.select}</span>
-            <select className={cn(fieldClass, "h-10 text-sm")} value={tripId} onChange={(e) => setTripId(e.target.value)} aria-label={A.select}>
+            <select className={inputClass(false, "h-10 px-3 text-sm")} value={tripId} onChange={(e) => setTripId(e.target.value)} aria-label={A.select}>
               {trips.map((tr) => <option key={tr.id} value={tr.id}>{tr.title}</option>)}
             </select>
           </label>
@@ -158,7 +159,7 @@ function AddToTrip({ params, trips }: { params: string; trips: { id: string; tit
         </>
       ) : (
         <>
-          <p className="text-xs text-stone-600">{A.noTrips}</p>
+          <p className="text-xs text-fg-muted">{A.noTrips}</p>
           <ButtonLink href={`/planla?${params}`} size="sm" variant="secondary" className="w-full">{A.newPlan}</ButtonLink>
         </>
       )}

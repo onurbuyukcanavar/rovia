@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { CalendarDays, MapPin, NotebookPen, ShieldCheck, UserRound } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
+import { SectionEyebrow, SectionTitle } from "@/components/ui/section-eyebrow";
 import { BookView } from "@/components/travelogue/book/book-view";
 import { CopyRoute } from "@/components/share/public/copy-route";
 import { ShareGallery } from "@/components/share/public/share-gallery";
@@ -38,20 +39,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default function SharePage({ params }: Props) {
   return (
-    <div className="min-h-dvh bg-paper-50 text-ink-900">
-      <header className="border-b border-sand-200 bg-paper-50/90">
+    // Tema: ziyaretçinin tercihi (çerez yoksa varsayılan koyu) — kök düzendeki tema betiği belirler
+    <div className="page-backdrop min-h-dvh text-fg">
+      <header className="border-b border-line bg-chrome pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
           <Link href="/" aria-label={t.brand.name}><Logo /></Link>
         </div>
       </header>
-      <Suspense fallback={<div className="mx-auto h-[60dvh] max-w-5xl animate-pulse bg-sand-100" aria-label={t.common.loading} />}>
+      <Suspense fallback={<div className="mx-auto h-[60dvh] max-w-5xl animate-pulse rounded-b-[var(--radius-card)] bg-sunken" aria-label={t.common.loading} />}>
         <ShareContent params={params} />
       </Suspense>
-      <footer className="border-t border-sand-200 py-10 text-center">
-        <Link href="/" className="inline-flex flex-col items-center gap-2" data-testid="share-footer">
+      <footer className="border-t border-line py-12 pb-[calc(3rem+env(safe-area-inset-bottom))] text-center">
+        <Link href="/" className="group inline-flex flex-col items-center gap-2 rounded-xl px-4 py-2" data-testid="share-footer">
           <Logo />
-          <span className="text-sm font-semibold">{P.footer}</span>
-          <span className="text-sm text-stone-600 underline underline-offset-2">{P.footerCta}</span>
+          <span className="mt-1 text-sm font-semibold text-fg">{P.footer}</span>
+          <span className="text-sm text-accent-ink underline decoration-accent/50 underline-offset-4 group-hover:decoration-current">{P.footerCta}</span>
         </Link>
       </footer>
     </div>
@@ -71,7 +73,7 @@ async function ShareContent({ params }: Props) {
   const showMap = isTrip && (view.paths.length > 0 || pins.length > 0);
 
   return (
-    <main id="icerik" data-testid="share-page" data-kind={view.kind}>
+    <main id="icerik" data-themed data-testid="share-page" data-kind={view.kind}>
       {isTrip ? <Hero view={view} /> : <CompactHeader view={view} />}
 
       {isTrip && (
@@ -80,20 +82,20 @@ async function ShareContent({ params }: Props) {
             <section aria-labelledby="share-map-title" className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
               <h2 id="share-map-title" className="sr-only">{P.mapTitle}</h2>
               {showMap && (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-sand-200 bg-sand-100 lg:aspect-auto lg:min-h-[28rem]" data-testid="share-map">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] border border-line bg-sunken shadow-[var(--shadow-card)] lg:aspect-auto lg:min-h-[28rem]" data-testid="share-map">
                   <ShareMap styleUrl={mapStyleUrl()} paths={view.paths} pins={pins} />
                 </div>
               )}
               {view.stops.length > 0 && (
                 <div>
-                  <h3 className="mb-3 text-sm font-bold tracking-wide text-stone-600 uppercase">{P.stopsTitle}</h3>
+                  <SectionEyebrow as="h3" className="mb-4">{P.stopsTitle}</SectionEyebrow>
                   <ol className="space-y-2" data-testid="share-stops">
                     {view.stops.map((s, i) => (
-                      <li key={`${i}-${s.name}`} className="flex items-start gap-3 rounded-xl border border-sand-200 bg-white p-3">
-                        <MapPin className={s.kind === "destination" ? "mt-0.5 size-4 shrink-0 text-amber-600" : "mt-0.5 size-4 shrink-0 text-ink-700"} aria-hidden />
+                      <li key={`${i}-${s.name}`} className="flex items-start gap-3 rounded-xl border border-line bg-raised p-3 shadow-[var(--shadow-card)]">
+                        <MapPin className={s.kind === "destination" ? "mt-0.5 size-4 shrink-0 text-accent-ink" : "mt-0.5 size-4 shrink-0 text-fg-muted"} aria-hidden />
                         <span className="min-w-0">
-                          <span className="block font-semibold">{s.name}</span>
-                          <span className="text-xs text-stone-500">{P.stopKinds[s.kind] ?? s.kind}</span>
+                          <span className="block font-semibold break-words text-fg">{s.name}</span>
+                          <span className="text-xs text-fg-subtle">{P.stopKinds[s.kind] ?? s.kind}</span>
                         </span>
                       </li>
                     ))}
@@ -104,27 +106,27 @@ async function ShareContent({ params }: Props) {
           )}
 
           {view.photos.length > 0 && (
-            <section aria-labelledby="share-gallery-title">
-              <h2 id="share-gallery-title" className="mb-4 font-serif text-2xl font-semibold">{P.galleryTitle}</h2>
+            <section aria-labelledby="share-gallery-title" className="space-y-5">
+              <SectionTitle id="share-gallery-title" index={2}>{P.galleryTitle}</SectionTitle>
               <ShareGallery photos={view.photos} />
             </section>
           )}
 
           {view.notes.length > 0 && (
-            <section aria-labelledby="share-notes-title">
-              <h2 id="share-notes-title" className="mb-4 font-serif text-2xl font-semibold">{P.notesTitle}</h2>
-              <ol className="relative space-y-6 border-l-2 border-sand-300 pl-6" data-testid="share-notes">
+            <section aria-labelledby="share-notes-title" className="space-y-6">
+              <SectionTitle id="share-notes-title" index={3}>{P.notesTitle}</SectionTitle>
+              <ol className="relative space-y-7 border-l border-line-strong pl-6" data-testid="share-notes">
                 {view.notes.map((n, i) => (
                   <li key={`${i}-${n.notedAt}`} className="relative">
-                    <span className="absolute top-1 -left-[1.95rem] grid size-5 place-items-center rounded-full border-2 border-paper-50 bg-amber-500" aria-hidden>
-                      <NotebookPen className="size-2.5 text-ink-950" />
+                    <span className="absolute top-1 -left-[1.85rem] grid size-5 place-items-center rounded-full border-2 border-surface bg-accent" aria-hidden>
+                      <NotebookPen className="size-2.5 text-accent-fg" />
                     </span>
-                    <p className="text-xs font-semibold text-stone-500">
+                    <p className="text-xs font-semibold text-fg-subtle">
                       {formatDate(n.notedAt)} · {formatTime(n.notedAt)} · {t.journal.kinds[n.kind] ?? n.kind}
                       {n.locationName ? ` · ${n.locationName}` : ""}
                     </p>
-                    {n.title && <h3 className="mt-1 font-semibold">{n.title}</h3>}
-                    {n.body && <p className="mt-1 whitespace-pre-line text-stone-700">{n.body}</p>}
+                    {n.title && <h3 className="mt-1 text-lg font-semibold tracking-tight text-fg">{n.title}</h3>}
+                    {n.body && <p className="mt-1.5 max-w-prose font-serif text-[1.08rem] leading-relaxed whitespace-pre-line text-fg/90">{n.body}</p>}
                   </li>
                 ))}
               </ol>
@@ -137,8 +139,8 @@ async function ShareContent({ params }: Props) {
       )}
 
       {travelogue && (
-        <section aria-label={P.travelogueTitle} className={isTrip ? "border-t border-sand-200 bg-paper pt-6" : undefined}>
-          {isTrip && <p className="eyebrow mx-auto max-w-3xl px-5 sm:px-10">{P.travelogueTitle}</p>}
+        <section aria-label={P.travelogueTitle} className={isTrip ? "border-t border-line pt-10" : undefined}>
+          {isTrip && <SectionEyebrow index={4} className="mx-auto max-w-3xl px-5 sm:px-0">{P.travelogueTitle}</SectionEyebrow>}
           <BookView travelogue={travelogue} />
         </section>
       )}
@@ -154,7 +156,7 @@ async function ShareContent({ params }: Props) {
 }
 
 function Meta({ view, light = false }: { view: ShareView; light?: boolean }) {
-  const cls = light ? "text-paper/85" : "text-stone-600";
+  const cls = light ? "text-fg" : "text-fg-muted";
   return (
     <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-sm ${cls}`}>
       {view.ownerName && <span className="inline-flex items-center gap-1.5" data-testid="share-owner"><UserRound className="size-4" aria-hidden /> {P.by(view.ownerName)}</span>}
@@ -168,9 +170,9 @@ function Chips({ view, light = false }: { view: ShareView; light?: boolean }) {
   return (
     <dl className="flex flex-wrap gap-2" data-testid="share-stats">
       {view.chips.map((c) => (
-        <div key={c.key} className={light ? "rounded-xl bg-paper/15 px-3 py-2 backdrop-blur" : "rounded-xl border border-sand-200 bg-white px-3 py-2"}>
-          <dt className={light ? "text-[0.65rem] font-bold tracking-widest text-paper/70 uppercase" : "text-[0.65rem] font-bold tracking-widest text-stone-500 uppercase"}>{c.label}</dt>
-          <dd className="text-lg font-extrabold tabular-nums">{c.value}</dd>
+        <div key={c.key} className={light ? "glass rounded-xl px-3.5 py-2" : "rounded-xl border border-line bg-raised px-3.5 py-2 shadow-[var(--shadow-card)]"}>
+          <dt className={light ? "text-[0.65rem] font-bold tracking-widest text-fg-muted uppercase" : "text-[0.65rem] font-bold tracking-widest text-fg-subtle uppercase"}>{c.label}</dt>
+          <dd className="text-xl font-light tracking-[-0.02em] text-fg tabular-nums">{c.value}</dd>
         </div>
       ))}
     </dl>
@@ -179,13 +181,23 @@ function Chips({ view, light = false }: { view: ShareView; light?: boolean }) {
 
 function Hero({ view }: { view: ShareView }) {
   return (
-    <section className="relative isolate overflow-hidden bg-ink-900 text-paper">
-      {view.coverUrl && <img src={view.coverUrl} alt="" className="absolute inset-0 -z-10 size-full object-cover opacity-60" />}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/60 to-ink-950/10" aria-hidden />
-      <div className="mx-auto flex min-h-[22rem] max-w-5xl flex-col justify-end gap-4 px-4 pt-24 pb-10 sm:px-6">
-        <p className="text-xs font-bold tracking-[0.25em] text-amber-400 uppercase">{P.tripEyebrow}</p>
-        <h1 className="font-serif text-4xl leading-tight font-semibold text-balance sm:text-5xl" data-testid="share-title">{view.title}</h1>
-        {view.description && <p className="max-w-2xl text-lg text-paper/85">{view.description}</p>}
+    // Kapak her temada gecedir (fotoğraf/gök üzerinde açık yazı): koyu tema adası
+    <section data-theme="dark" className="relative isolate overflow-hidden bg-sunken text-fg">
+      {view.coverUrl ? (
+        <img src={view.coverUrl} alt="" className="absolute inset-0 -z-10 size-full object-cover opacity-70" />
+      ) : (
+        <div aria-hidden className="panel-hero-sky absolute inset-0 -z-10">
+          <svg viewBox="0 0 800 400" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 size-full opacity-70">
+            <path d="M-300 400 L 596 230 M 1300 400 L 604 230" className="stroke-fg/25" strokeWidth="1.2" fill="none" />
+            <path d="M600 400 L 600 230" className="stroke-accent/60" strokeWidth="2" strokeDasharray="16 20" fill="none" />
+          </svg>
+        </div>
+      )}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-sunken via-sunken/60 to-sunken/10" aria-hidden />
+      <div className="mx-auto flex min-h-[24rem] max-w-5xl flex-col justify-end gap-4 px-4 pt-24 pb-10 sm:min-h-[28rem] sm:px-6 sm:pb-12">
+        <SectionEyebrow index={1}>{P.tripEyebrow}</SectionEyebrow>
+        <h1 className="text-[clamp(2.4rem,9vw,4.25rem)] leading-[1.02] font-extralight tracking-[-0.035em] text-balance break-words" data-testid="share-title">{view.title}</h1>
+        {view.description && <p className="max-w-2xl font-serif text-lg leading-relaxed text-fg-muted italic sm:text-xl">{view.description}</p>}
         <Meta view={view} light />
         <Chips view={view} light />
       </div>
@@ -195,8 +207,8 @@ function Hero({ view }: { view: ShareView }) {
 
 function CompactHeader({ view }: { view: ShareView }) {
   return (
-    <div className="mx-auto max-w-3xl space-y-3 px-5 pt-8 sm:px-10">
-      <p className="eyebrow">{P.travelogueEyebrow}</p>
+    <div className="mx-auto max-w-3xl space-y-3 px-5 pt-8 sm:px-0">
+      <SectionEyebrow>{P.travelogueEyebrow}</SectionEyebrow>
       <p className="sr-only" data-testid="share-title">{view.title}</p>
       <Meta view={view} />
       <Chips view={view} />
@@ -219,7 +231,7 @@ async function CopyGate({ token }: { token: string }) {
 
 function PrivacyNote({ m }: { m: number }) {
   return (
-    <p className="flex items-center gap-2 text-sm text-stone-600" data-testid="share-privacy-note">
+    <p className="flex items-center gap-2 text-sm text-fg-muted" data-testid="share-privacy-note">
       <ShieldCheck className="size-4 shrink-0 text-success" aria-hidden /> {P.privacyNote(m)}
     </p>
   );

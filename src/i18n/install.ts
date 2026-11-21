@@ -23,6 +23,7 @@ export const install = {
   },
   page: {
     title: "ROVIA'yı indir",
+    titleAccent: "yol cebinde.",
     eyebrow: "Telefonunda ROVIA",
     lead: "Ayrı bir mağaza hesabı gerekmez. Android uygulamasını indir ya da ROVIA'yı birkaç dokunuşla ana ekranına ekle.",
     openApp: "Web'de aç",

@@ -32,7 +32,7 @@ export function ShareButton({ kind, targetId, disabledReason, size = "sm", varia
         <Button type="button" size={size} variant={variant} disabled aria-describedby={`share-off-${targetId}`} data-testid="share-button" className={className}>
           <Share2 className="size-4" aria-hidden /> {S.button}
         </Button>
-        <span id={`share-off-${targetId}`} className="text-xs text-stone-500" data-testid="share-disabled-reason">{disabledReason}</span>
+        <span id={`share-off-${targetId}`} className="text-xs text-fg-subtle" data-testid="share-disabled-reason">{disabledReason}</span>
       </span>
     );
   }
@@ -56,7 +56,7 @@ export function ShareButton({ kind, targetId, disabledReason, size = "sm", varia
       </Button>
       <Modal open={open} onClose={() => setOpen(false)} title={S.dialogTitle} testId="share-dialog">
         {error && <Alert tone="error">{error}</Alert>}
-        {!loaded && !error && <p className="text-sm text-stone-600" aria-busy>{S.loading}</p>}
+        {!loaded && !error && <p className="text-sm text-fg-muted" aria-busy>{S.loading}</p>}
         {loaded && (
           <ShareForm key={loaded.version} kind={kind} targetId={targetId} initial={loaded.data} busy={pending}
             onSaved={(r) => setLoaded((prev) => ({ data: r, version: prev?.version ?? 0 }))} />

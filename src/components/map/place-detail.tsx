@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { TripadvisorLink, WikiSection } from "@/components/explore/wiki-section";
 import { cityOf, tripadvisorUrl } from "@/lib/explore/geo";
 import { AddToTravelogue } from "@/components/travelogue/add-to-travelogue";
+import { RoadMotif } from "./road-motif";
 import { t } from "@/i18n";
 
 type RouteContext = { route: RouteOption; origin: Stop; destination: Stop; waypoints: Stop[]; options?: RouteOptions };
@@ -86,84 +87,85 @@ export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoin
 
   return (
     <article aria-labelledby="place-title" className="space-y-4" data-testid="place-detail">
-      <button type="button" onClick={onClose} className="inline-flex items-center gap-1.5 text-sm font-semibold text-stone-700 hover:text-ink-900">
+      <button type="button" onClick={onClose} className="-ml-1 inline-flex min-h-9 items-center gap-1.5 rounded-full px-1 text-sm font-semibold text-fg-muted transition-colors hover:text-fg">
         <ArrowLeft className="size-4" aria-hidden /> {t.common.back}
       </button>
 
       <header>
-        {place.typeLabel && <p className="eyebrow">{place.typeLabel}</p>}
-        <h2 id="place-title" className="mt-1 text-xl font-extrabold tracking-tight">{place.name}</h2>
+        {place.typeLabel && <p className="eyebrow-accent">{place.typeLabel}</p>}
+        <h2 id="place-title" className="mt-2.5 text-[1.75rem] leading-tight font-extralight tracking-[-0.025em] break-words text-fg">{place.name}</h2>
       </header>
       {favoriteActions}
       {favoriteActions && (
         <AddToTravelogue className="w-full" place={{ name: place.name, address: place.address, lat: place.location.lat, lng: place.location.lng, osmRef: place.id }} />
       )}
 
-      <dl className="space-y-2.5 text-sm">
+      <dl className="space-y-2.5 text-sm text-fg-muted">
         {(street || place.address) && (
           <div className="flex gap-2.5">
             <dt className="sr-only">Adres</dt>
-            <MapPin className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+            <MapPin className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
             <dd>{[street, place.address].filter(Boolean).join(", ")}</dd>
           </div>
         )}
         <div className="flex gap-2.5">
           <dt className="sr-only">{t.maps.distance}</dt>
-          <span className="mt-0.5 size-4 shrink-0 text-center text-xs font-black text-stone-500" aria-hidden>↔</span>
-          <dd className="font-semibold">
+          <span className="mt-0.5 size-4 shrink-0 text-center text-xs font-black text-accent-ink" aria-hidden>↔</span>
+          <dd className="font-semibold text-fg">
             {place.alongRoute !== null ? t.maps.fromRoute(formatDistance(place.distanceFromRoute)) : t.maps.fromCenter(formatDistance(place.distanceFromRoute))}
           </dd>
         </div>
         {tags.opening_hours && (
           <div className="flex gap-2.5">
             <dt className="sr-only">{t.maps.hours}</dt>
-            <Clock3 className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+            <Clock3 className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
             <dd className="break-words">{tags.opening_hours === "24/7" ? "7 gün 24 saat açık" : tags.opening_hours}</dd>
           </div>
         )}
         {phone && (
           <div className="flex gap-2.5">
             <dt className="sr-only">{t.maps.phone}</dt>
-            <Phone className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+            <Phone className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
             <dd><a href={`tel:${phone.split(";")[0].replace(/[^\d+]/g, "")}`} className="underline-offset-2 hover:underline">{phone.split(";")[0]}</a></dd>
           </div>
         )}
         {website && (
           <div className="flex gap-2.5">
             <dt className="sr-only">{t.maps.website}</dt>
-            <Globe className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+            <Globe className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
             <dd className="min-w-0 truncate"><a href={website.href} target="_blank" rel="noopener noreferrer nofollow" className="underline-offset-2 hover:underline">{website.hostname}</a></dd>
           </div>
         )}
         {tags.cuisine && (
-          <div className="flex gap-2.5"><dt className="sr-only">Mutfak</dt><Utensils className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden /><dd>{tags.cuisine.replace(/;/g, ", ")}</dd></div>
+          <div className="flex gap-2.5"><dt className="sr-only">Mutfak</dt><Utensils className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden /><dd>{tags.cuisine.replace(/;/g, ", ")}</dd></div>
         )}
         {tags.ele && (
-          <div className="flex gap-2.5"><dt className="sr-only">Yükseklik</dt><Mountain className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden /><dd>{tags.ele} m</dd></div>
+          <div className="flex gap-2.5"><dt className="sr-only">Yükseklik</dt><Mountain className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden /><dd>{tags.ele} m</dd></div>
         )}
         {wiki && (
           <div className="flex gap-2.5">
             <dt className="sr-only">{t.maps.wikipedia}</dt>
-            <BookOpen className="mt-0.5 size-4 shrink-0 text-stone-500" aria-hidden />
+            <BookOpen className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
             <dd><a href={wiki} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">{t.maps.wikipedia}</a></dd>
           </div>
         )}
       </dl>
-      {!hasExtra && <p className="text-xs text-stone-600">{t.maps.noExtraInfo}</p>}
+      {!hasExtra && <p className="text-xs text-fg-subtle">{t.maps.noExtraInfo}</p>}
 
       <WikiSection place={place} />
 
       {routeContext ? (
-        <section className="rounded-2xl border border-ink-900/15 bg-ink-900/[0.03] p-4" aria-live="polite">
-          <h3 className="text-sm font-bold">{t.maps.detourTitle}</h3>
+        <section className="card relative isolate overflow-hidden p-4" aria-live="polite">
+          <RoadMotif className="opacity-50" />
+          <h3 className="eyebrow">{t.maps.detourTitle}</h3>
           {detourReq.loading && detourKey && (
-            <p className="mt-2 flex items-center gap-2 text-sm text-stone-600"><LoaderCircle className="size-4 animate-spin" aria-hidden /> {t.maps.detourCalc}</p>
+            <p className="mt-2 flex items-center gap-2 text-sm text-fg-muted"><LoaderCircle className="size-4 animate-spin" aria-hidden /> {t.maps.detourCalc}</p>
           )}
           {detourReq.error && <p className="mt-2 text-sm text-danger">{detourReq.error}</p>}
           {detour && !detourReq.loading && (
-            <p className="mt-2 text-sm" data-testid="detour">
+            <p className="mt-2 text-sm text-fg" data-testid="detour">
               <span className="font-extrabold tabular-nums">{formatDistance(detour.distanceMeters)} · {formatDuration(detour.durationSeconds)}</span>{" "}
-              <span className="text-stone-600 tabular-nums">
+              <span className="text-fg-muted tabular-nums">
                 ({deltaM >= 0 ? "+" : "−"}{formatDistance(Math.abs(deltaM))}, {deltaS >= 0 ? "+" : "−"}{formatDuration(Math.abs(deltaS))})
               </span>
             </p>
@@ -181,12 +183,12 @@ export function PlaceDetail({ place, routeContext, onAddAsWaypoint, onSetEndpoin
       )}
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-        <a href={osmUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 hover:underline">
+        <a href={osmUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-ink underline-offset-4 hover:underline">
           {t.maps.openInOsm} <ExternalLink className="size-3.5" aria-hidden />
         </a>
         <TripadvisorLink href={tripadvisorUrl(place.name, tags["addr:city"] ?? cityOf(place.address))} />
       </div>
-      <p className="text-[0.65rem] text-stone-500">{t.maps.dataNote}</p>
+      <p className="text-[0.65rem] text-fg-subtle">{t.maps.dataNote}</p>
     </article>
   );
 }

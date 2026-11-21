@@ -10,6 +10,8 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VehicleForm } from "./vehicle-form";
+import { OdometerValue } from "@/components/trips/route-motif";
+import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
 
 const G = t.garage;
@@ -39,15 +41,15 @@ export function GarageView({ vehicles }: { vehicles: Vehicle[] }) {
         <Button type="button" variant="accent" onClick={() => setEditing({ mode: "new" })} disabled={full}>
           <Plus className="size-4" aria-hidden /> {G.add}
         </Button>
-        {full && <p className="text-sm text-stone-600">{G.limitNote(MAX)}</p>}
+        {full && <p className="text-sm text-fg-muted">{G.limitNote(MAX)}</p>}
       </div>
       {error && <Alert tone="error">{error}</Alert>}
 
       {vehicles.length === 0 ? (
-        <section className="card flex flex-col items-center gap-3 p-8 text-center" data-testid="garage-empty">
-          <span className="grid size-14 place-items-center rounded-full bg-amber-100 text-amber-700"><CarFront className="size-7" aria-hidden /></span>
-          <h2 className="text-lg font-bold">{G.empty.title}</h2>
-          <p className="max-w-md text-sm leading-relaxed text-stone-600">{G.empty.body}</p>
+        <section className="flex flex-col items-center rounded-[var(--radius-card)] border border-dashed border-line-strong px-6 py-10 text-center" data-testid="garage-empty">
+          <span className="grid size-14 place-items-center rounded-2xl border border-line bg-raised text-accent-ink"><CarFront className="size-7" aria-hidden /></span>
+          <h2 className="mt-4 text-xl font-light tracking-tight text-fg">{G.empty.title}</h2>
+          <p className="mt-1.5 max-w-md text-sm leading-relaxed text-fg-muted">{G.empty.body}</p>
         </section>
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-testid="vehicle-list">
@@ -70,7 +72,7 @@ export function GarageView({ vehicles }: { vehicles: Vehicle[] }) {
       <Modal open={deleting !== null} onClose={() => setDeleting(null)} title={G.confirmDelete.title} testId="vehicle-delete-modal">
         {deleting && (
           <div className="space-y-4">
-            <p className="text-sm leading-relaxed text-stone-700">{G.confirmDelete.body(deleting.name)}</p>
+            <p className="text-sm leading-relaxed text-fg-muted">{G.confirmDelete.body(deleting.name)}</p>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="ghost" onClick={() => setDeleting(null)}>{t.common.cancel}</Button>
               <Button type="button" variant="danger" disabled={pending}
@@ -92,29 +94,32 @@ function VehicleCard({ v, pending, onEdit, onDelete, onDefault }: {
   const range = estimateRangeKm(v.tankCapacity, v.consumption);
   const subtitle = [v.make, v.model, v.modelYear].filter(Boolean).join(" · ");
   return (
-    <li className="card flex flex-col gap-4 p-5" data-testid="vehicle-card">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="flex flex-wrap items-center gap-2 text-lg font-bold">
-            <span className="truncate">{v.name}</span>
-            {v.isDefault && <Badge className="bg-amber-100 text-amber-900">{G.defaultBadge}</Badge>}
+    <li className={cn("card flex min-w-0 flex-col gap-5 p-5 sm:p-6", v.isDefault && "border-accent/40")} data-testid="vehicle-card">
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-raised text-accent-ink">
+          <CarFront className="size-5" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="flex min-w-0 flex-wrap items-center gap-2 text-xl leading-tight font-light tracking-tight text-fg">
+            <span className="min-w-0 break-words">{v.name}</span>
+            {v.isDefault && <Badge tone="accent">{G.defaultBadge}</Badge>}
           </h2>
-          {subtitle && <p className="truncate text-sm text-stone-600">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 truncate text-sm text-fg-muted">{subtitle}</p>}
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sand-100 px-2.5 py-1 text-xs font-semibold text-stone-700">
-          <Fuel className="size-3.5" aria-hidden /> {G.fuel[v.fuelType]}
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-line bg-fg/[0.04] px-2.5 py-1 text-xs font-semibold text-fg-muted">
+          <Fuel className="size-3.5 text-accent-ink" aria-hidden /> {G.fuel[v.fuelType]}
         </span>
       </div>
-      <dl className="grid grid-cols-3 gap-2 text-sm">
-        <Spec label={G.card.consumption} value={v.consumption === null ? G.card.unknown : `${formatAmount(v.consumption, 2)} ${G.units.per100(unit)}`} />
+      <dl className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-line bg-line min-[400px]:grid-cols-3">
+        <Spec leadOnly label={G.card.consumption} value={v.consumption === null ? G.card.unknown : `${formatAmount(v.consumption, 2)} ${G.units.per100(unit)}`} />
         <Spec label={unit === "kWh" ? G.card.battery : G.card.tank} value={v.tankCapacity === null ? G.card.unknown : `${formatAmount(v.tankCapacity)} ${G.units.capacity(unit)}`} />
-        <Spec label={G.card.range} value={range === null ? G.card.unknown : `≈ ${formatAmount(range, 0)} km`} testId="vehicle-range" />
+        <Spec label={G.card.range} value={range === null ? G.card.unknown : `≈ ${formatAmount(range, 0)} km`} testId="vehicle-range" accent={range !== null} />
       </dl>
-      {range !== null && <p className="flex items-start gap-1.5 text-xs text-stone-500"><Gauge className="mt-0.5 size-3.5 shrink-0" aria-hidden /> {G.card.rangeNote}</p>}
-      <div className="mt-auto flex flex-wrap gap-2">
+      {range !== null && <p className="-mt-2 flex items-start gap-1.5 text-xs text-fg-subtle"><Gauge className="mt-0.5 size-3.5 shrink-0" aria-hidden /> {G.card.rangeNote}</p>}
+      <div className="mt-auto flex flex-wrap gap-2 border-t border-line pt-4">
         <Button type="button" size="sm" variant="secondary" onClick={onEdit}><Pencil className="size-3.5" aria-hidden /> {G.edit}</Button>
         <Button type="button" size="sm" variant="ghost" onClick={onDefault} disabled={pending}>
-          <Star className="size-3.5" aria-hidden /> {v.isDefault ? G.unsetDefault : G.setDefault}
+          <Star className={cn("size-3.5", v.isDefault && "fill-accent text-accent-ink")} aria-hidden /> {v.isDefault ? G.unsetDefault : G.setDefault}
         </Button>
         <Button type="button" size="sm" variant="ghost" onClick={onDelete} className="text-danger"><Trash2 className="size-3.5" aria-hidden /> {G.remove}</Button>
       </div>
@@ -122,11 +127,15 @@ function VehicleCard({ v, pending, onEdit, onDelete, onDefault }: {
   );
 }
 
-function Spec({ label, value, testId }: { label: string; value: string; testId?: string }) {
+/** Gösterge hücresi: küçük etiket, ince rakam, küçük birim. */
+function Spec({ label, value, testId, accent, leadOnly }: { label: string; value: string; testId?: string; accent?: boolean; leadOnly?: boolean }) {
   return (
-    <div className="rounded-xl border border-sand-200 bg-white p-2.5">
-      <dt className="text-[0.65rem] font-semibold tracking-wide text-stone-500 uppercase">{label}</dt>
-      <dd className="mt-0.5 font-bold tabular-nums" data-testid={testId}>{value}</dd>
+    <div className="min-w-0 bg-surface p-3">
+      <div aria-hidden className="panel-gauge-ticks mb-2 h-1 w-full" />
+      <dt className="text-[0.65rem] font-semibold tracking-[0.14em] break-words text-fg-subtle uppercase">{label}</dt>
+      <dd className="mt-1 text-lg leading-tight font-extralight tracking-tight break-words tabular-nums" data-testid={testId}>
+        <OdometerValue value={value} accent={accent} leadOnly={leadOnly} />
+      </dd>
     </div>
   );
 }

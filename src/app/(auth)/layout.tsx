@@ -20,12 +20,12 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </aside>
-      <main className="flex flex-col px-6 py-8 sm:px-10">
+      <main className="page-backdrop flex flex-col px-6 py-8 sm:px-10">
         <Link href="/" className="lg:hidden" aria-label="ROVIA ana sayfa">
           <Logo />
         </Link>
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">{children}</div>
-        <LegalLinks className="mx-auto w-full max-w-sm text-xs text-stone-500" />
+        <LegalLinks className="mx-auto w-full max-w-sm text-xs text-fg-subtle hover:[&_a]:text-fg" />
       </main>
     </div>
   );

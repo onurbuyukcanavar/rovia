@@ -17,16 +17,16 @@ export default function LoginPage({ searchParams }: Props) {
   if (!isSupabaseConfigured) return <SetupNotice />;
   return (
     <>
-      <h1 className="text-3xl font-extrabold tracking-tight">{t.auth.loginTitle}</h1>
-      <p className="mt-2 text-stone-600">{t.auth.loginSubtitle}</p>
+      <h1 className="text-[2.4rem] leading-[1.05] font-extralight tracking-[-0.03em] text-fg">{t.auth.loginTitle}</h1>
+      <p className="mt-2 text-fg-muted">{t.auth.loginSubtitle}</p>
       <div className="mt-8">
         <Suspense fallback={<FormSkeleton />}>
           <LoginBody searchParams={searchParams} />
         </Suspense>
       </div>
-      <p className="mt-8 text-center text-sm text-stone-600">
+      <p className="mt-8 text-center text-sm text-fg-muted">
         {t.auth.noAccount}{" "}
-        <Link href="/kayit" className="font-semibold text-ink-900 underline-offset-4 hover:underline">{t.auth.signup}</Link>
+        <Link href="/kayit" className="font-semibold text-fg underline-offset-4 hover:underline">{t.auth.signup}</Link>
       </p>
     </>
   );
@@ -48,5 +48,5 @@ async function LoginBody({ searchParams }: Props) {
 }
 
 function FormSkeleton() {
-  return <div className="h-80 animate-pulse rounded-2xl bg-sand-100" aria-label={t.common.loading} />;
+  return <div className="h-80 animate-pulse rounded-2xl bg-sunken" aria-label={t.common.loading} />;
 }

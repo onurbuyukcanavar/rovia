@@ -7,12 +7,15 @@ import { LegalLinks } from "@/components/legal/legal-page";
 import { AccountDeletedBanner } from "@/components/account/deleted-banner";
 import { LandingScene } from "@/components/landing/landing-scene";
 import { PhoneMockup } from "@/components/landing/phone-mockup";
+import { DarkOnly } from "@/components/theme/dark-only";
 
 const L = t.landing;
 
 export default function HomePage() {
   return (
-    <div className="min-h-dvh bg-[#05080f] text-paper">
+    // Ana sayfa her zaman koyudur (tema seçiminden bağımsız); aydınlık bölümler kendi tema adasıdır
+    <div data-theme="dark" className="theme-dark-only min-h-dvh bg-[#05080f] text-paper">
+      <DarkOnly />
       <AccountDeletedBanner />
       {/* Sabit üst menü: kaydırmada ekranda kalır */}
       <header className="fixed inset-x-0 top-0 z-30 border-b border-paper/[0.06] bg-[#05080f]/92 pt-[env(safe-area-inset-top)] text-paper backdrop-blur-md">
@@ -30,7 +33,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main id="icerik">
+      <main id="icerik" data-themed>
         <div data-scene-root className="relative">
           <LandingScene />
 
@@ -110,7 +113,7 @@ export default function HomePage() {
         </div>
 
         {/* 5 · Aydınlık bölüm: uygulama */}
-        <section aria-labelledby="yol-arkadasi" className="relative z-20 -mt-10 overflow-hidden rounded-t-[2.5rem] bg-paper text-ink-900">
+        <section aria-labelledby="yol-arkadasi" data-theme="light" className="relative z-20 -mt-10 overflow-hidden rounded-t-[2.5rem] bg-paper text-ink-900">
           <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-5 py-20 sm:px-8 lg:grid-cols-[1.1fr_1fr] lg:gap-20 lg:py-32">
             <div className="min-w-0">
               <p className="eyebrow text-amber-700!">{L.companion.eyebrow}</p>
@@ -135,7 +138,7 @@ export default function HomePage() {
         </section>
 
         {/* 6 · Sık sorulanlar */}
-        <section aria-labelledby="sss" className="bg-paper text-ink-900">
+        <section aria-labelledby="sss" data-theme="light" className="bg-paper text-ink-900">
           <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 border-t border-sand-200 px-5 pt-20 pb-28 sm:px-8 lg:grid-cols-[1fr_1.6fr] lg:pt-28 lg:pb-40">
             <div className="min-w-0">
               <p className="eyebrow">{L.faq.eyebrow}</p>

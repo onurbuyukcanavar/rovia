@@ -138,11 +138,11 @@ export function RichEditor({
     <EditorMediaContext.Provider value={{ byId, waiting: new Set(waiting) }}>
       <div
         className={cn(
-          "rovia-editor rounded-[var(--radius-card)] border border-sand-200 bg-paper-50 transition-colors focus-within:border-amber-400",
+          "rovia-editor rounded-[var(--radius-card)] border border-line bg-raised shadow-[var(--shadow-card)] transition-[border-color,box-shadow] focus-within:border-accent/60 focus-within:ring-4 focus-within:ring-accent/15",
         )}
         data-minimal={minimal || undefined}
       >
-        <div className="sticky top-[var(--mobile-header)] z-20 rounded-t-[var(--radius-card)] border-b border-sand-200 bg-paper-50/95 backdrop-blur lg:top-0">
+        <div className="sticky top-[var(--mobile-header)] z-20 rounded-t-[var(--radius-card)] border-b border-line bg-chrome backdrop-blur lg:top-0">
           {editor ? (
             <EditorToolbar
               editor={editor}
@@ -170,8 +170,8 @@ export function RichEditor({
 
         <EditorContent editor={editor} className={cn("px-4 py-4 sm:px-6", minimal ? "min-h-28" : "min-h-64")} />
 
-        <div className="flex justify-end border-t border-sand-200/70 px-4 py-1.5 sm:px-6">
-          <span className="text-xs text-stone-500 tabular-nums" aria-live="off" data-testid={testId ? `${testId}-words` : undefined}>
+        <div className="flex justify-end border-t border-line px-4 py-1.5 sm:px-6">
+          <span className="text-xs text-fg-subtle tabular-nums" aria-live="off" data-testid={testId ? `${testId}-words` : undefined}>
             {tx.words(words ?? 0)}
           </span>
         </div>

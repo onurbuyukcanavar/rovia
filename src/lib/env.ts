@@ -1,3 +1,4 @@
+import { DEFAULT_MAP_STYLE_LIGHT } from "@/lib/maps/style";
 /**
  * Not: zod burada bilinçli olarak kullanılmıyor — bu modül istemci paketine de girer (≈30 KB gzip tasarruf).
  */
@@ -48,5 +49,6 @@ export const REQUIRED_ENV_VARS = [
 /**
  * Harita stili (MapLibre). Varsayılan: OpenFreeMap "liberty" — anahtarsız, limitsiz, OSM verisi.
  * Kendi karo sunucumuza geçişte yalnızca NEXT_PUBLIC_MAP_STYLE_URL değişir.
+ * Koyu temada istemci tarafında koyu karşılığa geçilir: src/lib/maps/style.ts, <ThemedMapStyle>.
  */
-export const mapStyleUrl = () => publicEnv.mapStyleUrl ?? "https://tiles.openfreemap.org/styles/liberty";
+export const mapStyleUrl = () => publicEnv.mapStyleUrl ?? DEFAULT_MAP_STYLE_LIGHT;

@@ -3,12 +3,23 @@ import { Layer, Marker, Source, useMap } from "react-map-gl/maplibre";
 import { useEffect, useMemo } from "react";
 import { boundsOf, decodePolyline, type LatLng } from "@/lib/geo";
 import type { FoundPlace, RouteOption, Stop } from "@/lib/maps/types";
+import type { ResolvedTheme } from "@/lib/theme/theme";
 import { cn } from "@/lib/cn";
 
 export const ALT_ROUTE_LAYER = "route-alt";
 
-/** Rotalar: seçili rota lacivert kontur + amber dolgu; alternatifler gri ve tıklanabilir (layer id: route-alt). */
-export function RouteLines({ routes, selected }: { routes: RouteOption[]; selected: number }) {
+/**
+ * Harita boya renkleri (MapLibre ifadeleri CSS değişkeni okuyamaz; tasarım dili §5 istisnası).
+ * Aydınlık haritada mürekkep kontur + amber çizgi; koyu haritada mürekkep görünmez: kâğıt kontur + açık amber.
+ */
+export const ROUTE_PAINT: Record<ResolvedTheme, { casing: string; line: string; alt: string; planned: string }> = {
+  light: { casing: "#0e1726", line: "#e8912d", alt: "#7b879b", planned: "#7b879b" },
+  dark: { casing: "#f7f5f0", line: "#f0a94a", alt: "#8a919e", planned: "#b6b9bf" },
+};
+
+/** Rotalar: seçili rota kontur + amber dolgu; alternatifler gri ve tıklanabilir (layer id: route-alt). */
+export function RouteLines({ routes, selected, theme = "light" }: { routes: RouteOption[]; selected: number; theme?: ResolvedTheme }) {
+  const paint = ROUTE_PAINT[theme];
   const data = useMemo(
     () => ({
       type: "FeatureCollection" as const,
@@ -24,13 +35,13 @@ export function RouteLines({ routes, selected }: { routes: RouteOption[]; select
     <Source id="routes" type="geojson" data={data}>
       <Layer id={ALT_ROUTE_LAYER} type="line" filter={["==", ["get", "selected"], false]}
         layout={{ "line-cap": "round", "line-join": "round" }}
-        paint={{ "line-color": "#7b879b", "line-width": 6, "line-opacity": 0.85 }} />
+        paint={{ "line-color": paint.alt, "line-width": 6, "line-opacity": 0.85 }} />
       <Layer id="route-casing" type="line" filter={["==", ["get", "selected"], true]}
         layout={{ "line-cap": "round", "line-join": "round" }}
-        paint={{ "line-color": "#0e1726", "line-width": 9 }} />
+        paint={{ "line-color": paint.casing, "line-width": 9 }} />
       <Layer id="route-main" type="line" filter={["==", ["get", "selected"], true]}
         layout={{ "line-cap": "round", "line-join": "round" }}
-        paint={{ "line-color": "#e8912d", "line-width": 4.5 }} />
+        paint={{ "line-color": paint.line, "line-width": 4.5 }} />
     </Source>
   );
 }
@@ -40,9 +51,9 @@ export function StopPin({ label, tone }: { label: string; tone: "origin" | "wayp
     <span
       className={cn(
         "grid size-8 place-items-center rounded-full border-[3px] text-xs font-extrabold shadow-md",
-        tone === "origin" && "border-paper bg-ink-900 text-paper",
-        tone === "waypoint" && "border-ink-900 bg-paper text-ink-900",
-        tone === "destination" && "border-ink-900 bg-amber-500 text-ink-950",
+        tone === "origin" && "border-surface bg-fg text-surface",
+        tone === "waypoint" && "border-fg bg-surface text-fg",
+        tone === "destination" && "border-fg bg-accent text-accent-fg",
       )}
     >
       {label}
@@ -87,8 +98,8 @@ export function ResultMarkers({ places, selectedId, onSelect }: { places: FoundP
             }}>
             <button type="button" aria-label={p.name} title={p.name}
               className={cn(
-                "block rounded-full border-2 border-ink-900 shadow transition-transform",
-                active ? "size-5 scale-110 bg-amber-500" : "size-3.5 bg-white hover:scale-125",
+                "block rounded-full border-2 border-fg shadow transition-transform",
+                active ? "size-5 scale-110 bg-accent" : "size-3.5 bg-surface hover:scale-125",
               )} />
           </Marker>
         );
@@ -102,8 +113,8 @@ export function MyLocationMarker({ position }: { position: LatLng | null }) {
   return (
     <Marker longitude={position.lng} latitude={position.lat} anchor="center">
       <span className="relative block size-4" title="Konumum">
-        <span className="absolute inset-0 animate-ping rounded-full bg-sky-500/40" />
-        <span className="absolute inset-0 rounded-full border-2 border-white bg-sky-600 shadow" />
+        <span className="absolute inset-0 animate-ping rounded-full bg-location/40 motion-reduce:animate-none" />
+        <span className="absolute inset-0 rounded-full border-2 border-surface bg-location shadow" />
       </span>
     </Marker>
   );
@@ -145,7 +156,7 @@ export function SuggestionMarkers({ places, selectedId, onSelect }: { places: Fo
           }}>
           <button type="button" aria-label={p.name} title={p.name} data-testid="suggestion-marker"
             className={cn(
-              "grid place-items-center rounded-full border-2 border-ink-900 bg-amber-400 text-ink-950 shadow-md transition-transform hover:scale-110",
+              "grid place-items-center rounded-full border-2 border-fg bg-accent text-accent-fg shadow-md transition-transform hover:scale-110",
               p.id === selectedId ? "size-8 scale-110" : "size-6",
             )}>
             <svg viewBox="0 0 24 24" className="size-3.5" fill="currentColor" aria-hidden>
@@ -163,7 +174,7 @@ export function FocusMarker({ position }: { position: LatLng | null }) {
   if (!position) return null;
   return (
     <Marker longitude={position.lng} latitude={position.lat} anchor="center">
-      <span className="block size-4 rounded-full border-[3px] border-white bg-ink-900 shadow-md ring-4 ring-amber-400/60" aria-hidden />
+      <span className="block size-4 rounded-full border-[3px] border-surface bg-fg shadow-md ring-4 ring-accent/60" aria-hidden />
     </Marker>
   );
 }

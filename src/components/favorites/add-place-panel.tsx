@@ -8,6 +8,7 @@ import { previewGoogleLink, savePlaces } from "@/lib/actions/favorites";
 import { FAVORITE_CATEGORIES, type ListType, type PlaceSource } from "@/lib/favorites/types";
 import type { LatLng } from "@/lib/geo";
 import { cn } from "@/lib/cn";
+import { inputClass, labelClass } from "@/components/ui/field";
 import { t } from "@/i18n";
 
 /** Kaydedilmeyi bekleyen yer (aramadan, haritadan ya da Google bağlantısından) */
@@ -24,8 +25,7 @@ export type Candidate = {
 
 const OSM_REF = /^[nwr][0-9]{1,19}$/;
 
-export const inputClass =
-  "h-11 w-full rounded-xl border border-sand-300 bg-white px-3 text-[0.95rem] text-ink-900 outline-none focus:border-ink-700 focus:ring-4 focus:ring-amber-400/25";
+const fieldCls = inputClass(false, "h-11 px-3");
 
 type Props = {
   candidate: Candidate | null;
@@ -57,8 +57,8 @@ export function AddPlacePanel({ candidate, onCandidate, onClose, onSaved }: Prop
   return (
     <section className="space-y-5" aria-labelledby="add-place-title" data-testid="add-place-panel">
       <div className="flex items-center justify-between gap-3">
-        <h2 id="add-place-title" className="text-xl font-extrabold tracking-tight">{t.favorites.addTitle}</h2>
-        <button type="button" onClick={onClose} className="grid size-9 place-items-center rounded-full hover:bg-sand-100" aria-label={t.common.close}>
+        <h2 id="add-place-title" className="text-2xl leading-tight font-extralight tracking-[-0.02em] text-fg">{t.favorites.addTitle}</h2>
+        <button type="button" onClick={onClose} className="grid size-9 shrink-0 place-items-center rounded-full text-fg-muted hover:bg-fg/[0.07] hover:text-fg" aria-label={t.common.close}>
           <X className="size-5" aria-hidden />
         </button>
       </div>
@@ -67,7 +67,7 @@ export function AddPlacePanel({ candidate, onCandidate, onClose, onSaved }: Prop
         <PlaceSearch
           label={t.favorites.addSearch}
           value={null}
-          marker={<MapPin className="size-4 text-stone-500" />}
+          marker={<MapPin className="size-4 text-accent-ink" />}
           onSelect={(s) => {
             if (!s) return;
             onCandidate({
@@ -76,16 +76,16 @@ export function AddPlacePanel({ candidate, onCandidate, onClose, onSaved }: Prop
             });
           }}
         />
-        <p className="text-xs text-stone-600">{t.favorites.addPickHint}</p>
+        <p className="text-xs text-fg-subtle">{t.favorites.addPickHint}</p>
       </div>
 
-      <details className="rounded-2xl border border-sand-200 bg-paper-50 p-4">
-        <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
-          <Link2 className="size-4" aria-hidden /> {t.favorites.addFromLink}
+      <details className="card p-4">
+        <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-fg">
+          <Link2 className="size-4 text-accent-ink" aria-hidden /> {t.favorites.addFromLink}
         </summary>
         <form className="mt-3 space-y-2" onSubmit={(e) => { e.preventDefault(); if (link.trim()) resolveLink(); }}>
-          <label htmlFor="f-google-link" className="block text-sm font-semibold text-ink-800">{t.favorites.link.label}</label>
-          <input id="f-google-link" type="url" inputMode="url" className={inputClass} value={link} maxLength={2048}
+          <label htmlFor="f-google-link" className={labelClass}>{t.favorites.link.label}</label>
+          <input id="f-google-link" type="url" inputMode="url" className={fieldCls} value={link} maxLength={2048}
             placeholder={t.favorites.link.placeholder} onChange={(e) => setLink(e.target.value)} />
           <Button type="submit" variant="secondary" size="sm" disabled={!link.trim() || resolving}>
             {resolving && <LoaderCircle className="size-4 animate-spin" aria-hidden />} {t.favorites.link.resolve}
@@ -129,26 +129,26 @@ function CandidateForm({ candidate, onSaved }: { candidate: Candidate; onSaved: 
   }
 
   return (
-    <form className="space-y-4 rounded-2xl border border-amber-400/60 bg-amber-50/40 p-4" onSubmit={(e) => { e.preventDefault(); save(); }}
+    <form className="space-y-4 rounded-2xl border border-accent/50 bg-accent-soft p-4" onSubmit={(e) => { e.preventDefault(); save(); }}
       data-testid="candidate-form">
       {candidate.estimated && <Alert>{t.favorites.link.estimated}</Alert>}
-      <p className="text-xs text-stone-600 tabular-nums">{candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}{candidate.address ? ` · ${candidate.address}` : ""}</p>
+      <p className="text-xs break-words text-fg-muted tabular-nums">{candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}{candidate.address ? ` · ${candidate.address}` : ""}</p>
       <div className="space-y-1.5">
-        <label htmlFor="f-fav-name" className="block text-sm font-semibold text-ink-800">{t.favorites.name}</label>
-        <input id="f-fav-name" className={inputClass} value={name} maxLength={200} required onChange={(e) => setName(e.target.value)} />
+        <label htmlFor="f-fav-name" className={labelClass}>{t.favorites.name}</label>
+        <input id="f-fav-name" className={fieldCls} value={name} maxLength={200} required onChange={(e) => setName(e.target.value)} />
       </div>
       <ListTypeToggle value={listType} onChange={setListType} />
       <div className="space-y-1.5">
-        <label htmlFor="f-fav-category" className="block text-sm font-semibold text-ink-800">{t.favorites.category}</label>
-        <select id="f-fav-category" className={inputClass} value={category} onChange={(e) => setCategory(e.target.value)}>
+        <label htmlFor="f-fav-category" className={labelClass}>{t.favorites.category}</label>
+        <select id="f-fav-category" className={fieldCls} value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">{t.favorites.autoCategory}</option>
           {FAVORITE_CATEGORIES.map((c) => <option key={c} value={c}>{t.favorites.categories[c]}</option>)}
         </select>
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="f-fav-notes" className="block text-sm font-semibold text-ink-800">{t.favorites.notes}</label>
+        <label htmlFor="f-fav-notes" className={labelClass}>{t.favorites.notes}</label>
         <textarea id="f-fav-notes" rows={2} maxLength={5000} value={notes} placeholder={t.favorites.notesPlaceholder}
-          onChange={(e) => setNotes(e.target.value)} className={cn(inputClass, "h-auto py-2")} />
+          onChange={(e) => setNotes(e.target.value)} className={inputClass(false, "px-3 py-2")} />
       </div>
       {error && <Alert tone="error">{error}</Alert>}
       <Button type="submit" variant="accent" className="w-full" disabled={saving || !name.trim()}>
@@ -162,12 +162,12 @@ export function ListTypeToggle({ value, onChange }: { value: ListType; onChange:
   const name = useId();
   return (
     <fieldset className="space-y-1.5">
-      <legend className="mb-1.5 block text-sm font-semibold text-ink-800">{t.favorites.listType}</legend>
+      <legend className={cn(labelClass, "mb-1.5")}>{t.favorites.listType}</legend>
       <div className="grid grid-cols-2 gap-2">
         {(["favorite", "want_to_go"] as const).map((v) => (
           <label key={v} className={cn(
-            "relative flex h-11 cursor-pointer items-center justify-center rounded-xl border px-3 text-center text-sm font-semibold has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-amber-400/25",
-            value === v ? "border-ink-900 bg-ink-900 text-paper" : "border-sand-300 bg-white text-ink-900",
+            "relative flex h-11 cursor-pointer items-center justify-center rounded-xl border px-3 text-center text-sm font-semibold transition-colors has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent/25",
+            value === v ? "border-fg bg-fg text-surface" : "border-line-strong bg-field text-fg hover:border-fg-subtle",
           )}>
             <input type="radio" className="sr-only" name={name} value={v} checked={value === v} onChange={() => onChange(v)} />
             {t.favorites.lists[v]}

@@ -36,11 +36,14 @@ export function CategoryChips({ value, onChange }: { value: ExploreCategory; onC
           const on = k === value;
           return (
             <label key={k} className={cn(
-              "relative inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold whitespace-nowrap transition select-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-amber-400/25",
-              on ? "border-ink-900 bg-ink-900 text-paper" : "border-sand-300 bg-paper-50 text-ink-900 hover:border-stone-500",
+              "relative inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full border py-1 pr-3.5 pl-1 text-sm font-semibold whitespace-nowrap transition-colors select-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent/30",
+              on ? "border-fg bg-fg text-surface" : "border-line-strong bg-raised text-fg hover:border-accent/50",
             )}>
               <input type="radio" name="explore-category" className="sr-only" checked={on} onChange={() => onChange(k)} />
-              <Icon className="size-4" style={{ color: on ? "#f5b65b" : CATEGORY_COLORS[k] }} aria-hidden />
+              {/* Kategori rengi haritadaki işaretlerle aynı; ikon renkli dolgu üzerinde beyaz (her iki temada görünür) */}
+              <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-full text-white" style={{ backgroundColor: CATEGORY_COLORS[k] }}>
+                <Icon className="size-3.5" />
+              </span>
               {t.explore.categories[k]}
             </label>
           );

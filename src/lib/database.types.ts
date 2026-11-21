@@ -939,6 +939,7 @@ export type Database = {
           created_at: string;
           updated_at: string;
           cost_defaults: Json | null;
+          theme: string | null;
         };
         Insert: {
           user_id: string;
@@ -950,6 +951,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           cost_defaults?: Json | null;
+          theme?: string | null;
         };
         Update: {
           user_id?: string;
@@ -961,6 +963,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
           cost_defaults?: Json | null;
+          theme?: string | null;
         };
         Relationships: [];
       };

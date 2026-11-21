@@ -43,3 +43,8 @@ export function formatTime(value: string | number | Date): string {
 export function formatSpeed(kmh: number | null): string {
   return kmh === null ? "—" : `${kmh.toLocaleString("tr-TR", { maximumFractionDigits: 0 })} km/sa`;
 }
+
+/** Panel üst satırı (İstanbul): 21 Kasım Cumartesi */
+export function formatDayLong(value: string | number | Date = new Date()): string {
+  return new Date(value).toLocaleDateString("tr-TR", { day: "numeric", month: "long", weekday: "long", timeZone: "Europe/Istanbul" });
+}

@@ -13,9 +13,9 @@ export function TripTools({ tripId, title }: { tripId: string; title: string }) 
   const [error, setError] = useState<string | null>(null);
   const href = (format: "gpx" | "kml") => `/api/trips/${tripId}/export?format=${format}`;
   return (
-    <section className="card space-y-3 p-4" aria-labelledby="trip-tools" data-testid="trip-tools">
-      <h2 id="trip-tools" className="flex items-center gap-2 font-bold"><Download className="size-5 text-amber-600" aria-hidden /> {T.export.title}</h2>
-      <p className="text-sm text-stone-600">{T.export.hint}</p>
+    <section className="card space-y-3 p-5" aria-labelledby="trip-tools" data-testid="trip-tools">
+      <h2 id="trip-tools" className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-fg"><Download className="size-5 shrink-0 text-accent-ink" aria-hidden /> {T.export.title}</h2>
+      <p className="text-sm leading-relaxed text-fg-muted">{T.export.hint}</p>
       <div className="flex flex-wrap gap-2">
         <a href={href("gpx")} download className={buttonClass("secondary", "sm")} data-testid="export-gpx">{T.export.gpx}</a>
         <a href={href("kml")} download className={buttonClass("secondary", "sm")} data-testid="export-kml">{T.export.kml}</a>

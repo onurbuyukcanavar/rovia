@@ -4,10 +4,13 @@ import type { Dispatch } from "react";
 import type { LatLng } from "@/lib/geo";
 import { MAX_WAYPOINTS, newKey, type ExplorerAction, type ExplorerState, type SlotRef } from "@/lib/maps/explorer-state";
 import { PlaceSearch } from "./place-search";
+import { SectionEyebrow } from "@/components/ui/section-eyebrow";
 import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
 
 type Props = {
+  /** Numaralı üst başlık sırası */
+  index?: number;
   state: ExplorerState;
   dispatch: Dispatch<ExplorerAction>;
   bias?: LatLng;
@@ -26,8 +29,8 @@ function IconButton({ label, onClick, active, disabled, children }: {
   return (
     <button type="button" onClick={onClick} disabled={disabled} aria-label={label} title={label} aria-pressed={active}
       className={cn(
-        "grid size-9 shrink-0 place-items-center rounded-lg text-stone-600 transition hover:bg-sand-100 hover:text-ink-900 disabled:opacity-35",
-        active && "bg-amber-400/25 text-ink-900",
+        "grid size-9 shrink-0 place-items-center rounded-lg text-fg-muted transition hover:bg-fg/[0.07] hover:text-fg disabled:opacity-35",
+        active && "bg-accent-soft text-accent-ink ring-1 ring-accent/40",
       )}>
       {children}
     </button>
@@ -36,7 +39,7 @@ function IconButton({ label, onClick, active, disabled, children }: {
 
 const Dot = ({ className }: { className: string }) => <span className={cn("block size-3 rounded-full border-2", className)} />;
 
-export function RouteBuilder({ state, dispatch, bias, picking, onPick, onLocate, locating }: Props) {
+export function RouteBuilder({ index, state, dispatch, bias, picking, onPick, onLocate, locating }: Props) {
   const pickButton = (slot: SlotRef) => (
     <IconButton label={sameSlot(picking, slot) ? t.maps.cancelPick : t.maps.pickOnMap}
       active={sameSlot(picking, slot)} onClick={() => onPick(sameSlot(picking, slot) ? null : slot)}>
@@ -46,12 +49,13 @@ export function RouteBuilder({ state, dispatch, bias, picking, onPick, onLocate,
 
   return (
     <section aria-label={t.maps.route} className="space-y-2">
+      <SectionEyebrow index={index} className="mb-3">{t.maps.route}</SectionEyebrow>
       <PlaceSearch
         label={t.maps.origin}
         value={state.origin.stop}
         bias={bias}
         onSelect={(stop) => dispatch({ type: "set", slot: { kind: "origin" }, stop })}
-        marker={<Dot className="border-paper bg-ink-900 ring-2 ring-ink-900" />}
+        marker={<Dot className="border-surface bg-fg ring-2 ring-fg" />}
         actions={
           <>
             <IconButton label={t.maps.myLocation} onClick={onLocate} disabled={locating}>
@@ -70,7 +74,7 @@ export function RouteBuilder({ state, dispatch, bias, picking, onPick, onLocate,
           bias={bias}
           autoFocus={!w.stop}
           onSelect={(stop) => dispatch({ type: "set", slot: { kind: "waypoint", key: w.key }, stop })}
-          marker={<span className="text-[0.7rem] font-extrabold text-ink-800">{i + 1}</span>}
+          marker={<span className="text-[0.7rem] font-extrabold text-fg">{i + 1}</span>}
           actions={
             <>
               <IconButton label={t.maps.moveUp} disabled={i === 0} onClick={() => dispatch({ type: "moveWaypoint", key: w.key, delta: -1 })}>
@@ -94,7 +98,7 @@ export function RouteBuilder({ state, dispatch, bias, picking, onPick, onLocate,
         value={state.destination.stop}
         bias={bias}
         onSelect={(stop) => dispatch({ type: "set", slot: { kind: "destination" }, stop })}
-        marker={<Dot className="border-ink-900 bg-amber-500" />}
+        marker={<Dot className="border-fg bg-accent" />}
         actions={
           <>
             <IconButton label={t.maps.swap} onClick={() => dispatch({ type: "swapEnds" })}
@@ -111,14 +115,14 @@ export function RouteBuilder({ state, dispatch, bias, picking, onPick, onLocate,
           type="button"
           onClick={() => dispatch({ type: "addWaypoint", key: newKey() })}
           disabled={state.waypoints.length >= MAX_WAYPOINTS}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-ink-800 hover:bg-sand-100 disabled:opacity-40"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-accent-ink hover:bg-accent-soft disabled:opacity-40"
         >
           <Plus className="size-4" aria-hidden /> {t.maps.addStop}
         </button>
       </div>
       {state.waypoints.length >= MAX_WAYPOINTS && <p className="pl-8 text-xs text-danger">{t.maps.tooManyStops}</p>}
       {picking && (
-        <p className="rounded-lg bg-amber-400/20 px-3 py-2 text-sm font-semibold text-ink-900" role="status">
+        <p className="rounded-lg border border-accent/30 bg-accent-soft px-3 py-2 text-sm font-semibold text-fg" role="status">
           {t.maps.pickingHint}
         </p>
       )}

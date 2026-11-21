@@ -18,7 +18,7 @@ export function LoginForm({ next }: { next?: string }) {
       <Field label={t.auth.password} name="password" type="password" autoComplete="current-password" required
         error={state.fieldErrors?.password} />
       <div className="flex justify-end">
-        <Link href="/sifremi-unuttum" className="text-sm font-semibold text-amber-700 hover:underline">
+        <Link href="/sifremi-unuttum" className="text-sm font-semibold text-accent-ink hover:underline">
           {t.auth.forgot}
         </Link>
       </div>

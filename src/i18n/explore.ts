@@ -1,6 +1,7 @@
 /** Keşfet (/kesfet) ve "Yolculuğa ekle" metinleri. */
 export const explore = {
   title: "Keşfet",
+  accent: "yol üstünde.",
   subtitle: "Güzergâhına ve haritadaki alana yakın ilgi çekici yerleri keşfet.",
   categoriesLabel: "Keşif kategorisi",
   categories: {

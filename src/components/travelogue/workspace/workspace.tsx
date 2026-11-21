@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { SectionEyebrow } from "@/components/ui/section-eyebrow";
 import { MapFrame, isMobileViewport, useMapExpand } from "@/components/map/map-frame";
 import { ShareButton } from "@/components/share/share-button";
 import { SaveStatus } from "@/components/travelogue/save-status";
@@ -97,18 +98,18 @@ function WorkspaceInner({ travelogue: tv, userId, styleUrl, onReload }: Props & 
   const ctx = { media: tv.media, userId, tripId: tv.trip?.id ?? null, onReload, onMediaUploaded: () => router.refresh() };
 
   return (
-    <div className="relative flex flex-col lg:grid lg:h-dvh lg:overflow-hidden lg:grid-cols-[minmax(0,1fr)_minmax(22rem,42%)] lg:grid-rows-[auto_minmax(0,1fr)]" data-testid="travelogue-workspace" data-ready={hydrated || undefined}>
-      <header className="space-y-2 border-b border-sand-200 bg-paper px-4 py-4 sm:px-6 lg:col-start-1 lg:row-start-1">
+    <div data-themed className="relative flex flex-col lg:grid lg:h-dvh lg:overflow-hidden lg:grid-cols-[minmax(0,1fr)_minmax(22rem,42%)] lg:grid-rows-[auto_minmax(0,1fr)]" data-testid="travelogue-workspace" data-ready={hydrated || undefined}>
+      <header className="space-y-3 border-b border-line bg-surface px-4 py-4 sm:px-6 lg:col-start-1 lg:row-start-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Link href="/seyahatnameler" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 hover:text-ink-900">
+          <Link href="/seyahatnameler" className="inline-flex items-center gap-1 text-sm font-semibold text-fg-muted hover:text-fg">
             <ArrowLeft className="size-4" aria-hidden /> {T.back}
           </Link>
           <SaveStatus autosave={view} onReload={onReload} />
         </div>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="min-w-0">
-            <p className="eyebrow">{t.nav.travelogues}</p>
-            <h1 className="truncate font-serif text-2xl font-bold" data-testid="workspace-title">{tv.title}</h1>
+            <SectionEyebrow>{t.nav.travelogues}</SectionEyebrow>
+            <h1 className="mt-2 truncate font-serif text-[clamp(1.6rem,5vw,2.25rem)] leading-tight font-light tracking-[-0.02em] text-fg" data-testid="workspace-title">{tv.title}</h1>
           </div>
           <div className="flex flex-wrap gap-2">
             <ShareButton kind="travelogue" targetId={tv.id} />
@@ -118,28 +119,28 @@ function WorkspaceInner({ travelogue: tv, userId, styleUrl, onReload }: Props & 
           </div>
         </div>
         <button type="button" onClick={() => setMapOpen((v) => !v)} aria-expanded={mapOpen} aria-controls="tl-map"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-800 underline underline-offset-2 lg:hidden">
+          className="inline-flex min-h-9 items-center gap-1.5 text-sm font-semibold text-accent-ink underline decoration-accent/50 underline-offset-4 lg:hidden">
           <MapIcon className="size-4" aria-hidden /> {mapOpen ? T.mapHide : T.mapShow}
         </button>
       </header>
 
-      <div id="tl-map" className={cn("scroll-mt-[var(--mobile-header)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:block lg:h-full lg:border-l lg:border-sand-200",
+      <div id="tl-map" className={cn("scroll-mt-[var(--mobile-header)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:block lg:h-full lg:border-l lg:border-line",
         mapOpen ? "block" : "hidden")}>
         <MapFrame expanded={mapView.expanded} onExpand={mapView.expand} onCollapse={mapView.collapse} className="h-[38vh] w-full lg:h-full">
           <TravelogueMap styleUrl={styleUrl} polyline={tv.trip?.polyline ?? null} points={points} focus={focus}
             highlightedId={highlighted} onSelect={selectFromMap} className="h-full w-full" />
           {points.length === 0 && (
-            <p className="pointer-events-none absolute inset-x-3 bottom-8 z-10 rounded-xl bg-paper/90 px-3 py-2 text-center text-xs text-stone-700 shadow">{T.mapEmpty}</p>
+            <p className="pointer-events-none absolute inset-x-3 bottom-8 z-10 rounded-xl border border-line bg-overlay/90 px-3 py-2 text-center text-xs text-fg-muted shadow-[var(--shadow-overlay)] backdrop-blur">{T.mapEmpty}</p>
           )}
         </MapFrame>
       </div>
 
-      <div className="relative space-y-8 bg-paper px-4 py-6 sm:px-6 lg:col-start-1 lg:row-start-2 lg:overflow-y-auto">
+      <div className="relative space-y-8 bg-surface px-4 py-6 sm:px-6 lg:col-start-1 lg:row-start-2 lg:overflow-y-auto">
         <section aria-labelledby="cover-title" className="space-y-3">
-          <h2 id="cover-title" className="text-lg font-extrabold tracking-tight">{T.cover}</h2>
+          <SectionEyebrow as="h2" id="cover-title" index={1}>{T.cover}</SectionEyebrow>
           {tv.trip && (
-            <p className="flex items-center gap-1.5 text-sm text-stone-700">
-              <Route className="size-4 text-amber-600" aria-hidden /> {T.trip}:
+            <p className="flex items-center gap-1.5 text-sm text-fg-muted">
+              <Route className="size-4 text-accent-ink" aria-hidden /> {T.trip}:
               <Link href={`/yolculuklar/${tv.trip.id}`} className="font-semibold underline-offset-2 hover:underline" title={T.tripLink}>{tv.trip.title}</Link>
             </p>
           )}
@@ -152,12 +153,12 @@ function WorkspaceInner({ travelogue: tv, userId, styleUrl, onReload }: Props & 
           highlightedId={highlighted} onFocusMap={focusEntry} />
         {orderingBusy && <p className="sr-only" role="status">{t.common.saving}</p>}
 
-        <section className="space-y-2 border-t border-sand-200 pt-6">
+        <section className="space-y-2 border-t border-line pt-6">
           {error && <Alert tone="error">{error}</Alert>}
           {confirming ? (
             <div className="card space-y-3 p-4" role="alertdialog" aria-labelledby="tl-del">
               <p id="tl-del" className="text-sm font-semibold">{T.deleteConfirm}</p>
-              <p className="text-sm text-stone-600">{T.deleteNote}</p>
+              <p className="text-sm text-fg-muted">{T.deleteNote}</p>
               <div className="flex justify-end gap-2">
                 <Button type="button" size="sm" variant="ghost" disabled={deleting} onClick={() => setConfirming(false)}>{t.common.cancel}</Button>
                 <Button type="button" size="sm" variant="danger" disabled={deleting} data-testid="travelogue-delete-confirm"

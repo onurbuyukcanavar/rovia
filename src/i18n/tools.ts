@@ -31,6 +31,7 @@ export const tools = {
     metaTitle: "GPX / KML içe aktar",
     eyebrow: "Yolculuklar",
     title: "GPX / KML içe aktar",
+    accent: "izini taşı.",
     subtitle: "Başka bir uygulamada kaydettiğin izi ya da planladığın rotayı ROVIA'ya taşı.",
     link: "GPX / KML içe aktar",
     back: "Yolculuklara dön",

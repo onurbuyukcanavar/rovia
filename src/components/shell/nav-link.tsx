@@ -20,11 +20,11 @@ function SidebarLink({ itemKey, pathname }: { itemKey: string; pathname: string 
       <span
         aria-disabled="true"
         title={`${t.common.soon} · ${t.common.phase(item.phase)}`}
-        className="flex h-10 cursor-not-allowed items-center gap-3 rounded-xl px-3 text-sm font-medium text-paper/35"
+        className="flex h-10 cursor-not-allowed items-center gap-3 rounded-xl px-3 text-sm font-medium text-fg-subtle opacity-60"
       >
         <Icon className="size-[18px]" aria-hidden />
         <span className="flex-1 truncate">{item.label}</span>
-        <span className="rounded-full border border-paper/15 px-1.5 py-px text-[0.6rem] font-semibold tracking-wide">
+        <span className="rounded-full border border-line-strong px-1.5 py-px text-[0.6rem] font-semibold tracking-wide">
           {t.common.phase(item.phase)}
         </span>
       </span>
@@ -38,10 +38,10 @@ function SidebarLink({ itemKey, pathname }: { itemKey: string; pathname: string 
       aria-current={active ? "page" : undefined}
       className={cn(
         "flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition",
-        active ? "bg-paper/10 text-paper" : "text-paper/70 hover:bg-paper/5 hover:text-paper",
+        active ? "bg-fg/[0.08] text-fg" : "text-fg-muted hover:bg-fg/[0.05] hover:text-fg",
       )}
     >
-      <Icon className={cn("size-[18px]", active && "text-amber-400")} aria-hidden />
+      <Icon className={cn("size-[18px]", active && "text-accent-ink")} aria-hidden />
       <span className="truncate">{item.label}</span>
     </Link>
   );
@@ -57,8 +57,8 @@ function MobileTab({ itemKey, pathname, emphasized = false }: { itemKey: string;
   const content = emphasized ? (
     <span className="flex flex-col items-center gap-1">
       <span className={cn(
-        "-mt-6 grid size-14 place-items-center rounded-full shadow-lg ring-4 ring-paper",
-        available ? "bg-amber-500 text-ink-950" : "bg-sand-200 text-stone-500",
+        "-mt-6 grid size-14 place-items-center rounded-full ring-4 ring-surface",
+        available ? "bg-accent text-accent-fg shadow-[0_8px_24px_-6px_rgb(232_145_45/0.6)]" : "bg-sunken text-fg-subtle",
       )}>
         <Icon className="size-6" aria-hidden />
       </span>
@@ -66,14 +66,14 @@ function MobileTab({ itemKey, pathname, emphasized = false }: { itemKey: string;
     </span>
   ) : (
     <span className="flex flex-col items-center gap-1">
-      <Icon className={cn("size-[22px]", active && "text-amber-600")} aria-hidden />
+      <Icon className={cn("size-[22px]", active && "text-accent-ink")} aria-hidden />
       <span className="text-[0.68rem] font-semibold">{label}</span>
     </span>
   );
 
   const cls = cn(
     "flex h-14 flex-1 items-center justify-center",
-    active ? "text-ink-900" : available ? "text-stone-600" : "text-stone-500/60",
+    active ? "text-fg" : available ? "text-fg-muted" : "text-fg-subtle opacity-60",
   );
 
   if (!available) {
@@ -94,9 +94,9 @@ function MoreTab({ pathname }: { pathname: string | null }) {
   const active = isActive(pathname, "/diger") || isActive(pathname, "/ayarlar");
   return (
     <Link href="/diger" aria-current={active ? "page" : undefined}
-      className={cn("flex h-14 flex-1 items-center justify-center", active ? "text-ink-900" : "text-stone-600")}>
+      className={cn("flex h-14 flex-1 items-center justify-center", active ? "text-fg" : "text-fg-muted")}>
       <span className="flex flex-col items-center gap-1">
-        <svg viewBox="0 0 24 24" className={cn("size-[22px]", active && "text-amber-600")} aria-hidden fill="currentColor">
+        <svg viewBox="0 0 24 24" className={cn("size-[22px]", active && "text-accent-ink")} aria-hidden fill="currentColor">
           <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
         </svg>
         <span className="text-[0.68rem] font-semibold">{t.nav.more}</span>

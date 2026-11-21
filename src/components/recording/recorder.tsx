@@ -7,7 +7,8 @@ import {
 import { TrackMap } from "./track-map";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
+import { Field, inputClass, labelClass } from "@/components/ui/field";
+import { PanelHeading } from "@/components/map/road-motif";
 import { useRecorder } from "@/lib/gps/use-recorder";
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import { mapsApi } from "@/lib/maps/client";
@@ -78,7 +79,7 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
   const showRemote = rec.phase === "idle" && !!serverActive && !rec.session && handledRemote !== serverActive.recordingId;
 
   return (
-    <div className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
+    <div data-themed className="flex h-app-mobile flex-col lg:grid lg:h-dvh lg:grid-cols-[26rem_1fr]">
       <div className="relative order-1 h-[42%] shrink-0 lg:order-2 lg:h-full">
         <TrackMap styleUrl={styleUrl} paths={rec.stats.paths} position={position}
           plannedPolyline={planned?.routePolyline ?? null} className="relative h-full w-full" />
@@ -89,29 +90,26 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
         )}
       </div>
 
-      <aside className="order-2 min-h-0 flex-1 space-y-5 overflow-y-auto border-t border-sand-200 bg-paper px-4 py-4 lg:order-1 lg:border-t-0 lg:border-r lg:px-5 lg:py-6">
-        <header className="hidden lg:block">
-          <h1 className="text-2xl font-extrabold tracking-tight">{t.recording.title}</h1>
-          <p className="text-sm text-stone-600">{t.recording.subtitle}</p>
-        </header>
+      <aside className="order-2 min-h-0 flex-1 space-y-5 overflow-y-auto border-t border-line bg-surface px-4 py-4 lg:order-1 lg:border-t-0 lg:border-r lg:px-6 lg:py-7">
+        <PanelHeading className="hidden lg:block" eyebrow={t.nav.recordShort} title={t.recording.title} description={t.recording.subtitle} />
 
         {rec.error && <Alert tone="error">{rec.error}</Alert>}
         {rec.notice && (
           <div className="flex items-start gap-2">
             <Alert className="flex-1">{rec.notice}</Alert>
-            <button type="button" onClick={rec.dismissNotice} aria-label={t.common.close} className="mt-2 text-stone-500 hover:text-ink-900">
+            <button type="button" onClick={rec.dismissNotice} aria-label={t.common.close} className="mt-1 grid size-9 shrink-0 place-items-center rounded-full text-fg-subtle hover:bg-fg/[0.07] hover:text-fg">
               <X className="size-4" aria-hidden />
             </button>
           </div>
         )}
 
-        {rec.phase === "loading" && <div className="h-40 animate-pulse rounded-2xl bg-sand-100" aria-label={t.common.loading} />}
+        {rec.phase === "loading" && <div className="h-40 animate-pulse rounded-[var(--radius-card)] bg-sunken" aria-label={t.common.loading} />}
 
         {showRemote && serverActive && (
           <section className="card space-y-3 p-4" data-testid="remote-active">
-            <h2 className="font-bold">{t.recording.remoteActive.title}</h2>
-            <p className="text-sm text-stone-600">
-              <strong>{serverActive.title}</strong> — {t.recording.remoteActive.body(`${formatDate(serverActive.startedAt)} ${formatTime(serverActive.startedAt)}`)}
+            <h2 className="text-lg font-light tracking-tight text-fg">{t.recording.remoteActive.title}</h2>
+            <p className="text-sm text-fg-muted">
+              <strong className="text-fg">{serverActive.title}</strong> — {t.recording.remoteActive.body(`${formatDate(serverActive.startedAt)} ${formatTime(serverActive.startedAt)}`)}
             </p>
             <div className="flex flex-wrap gap-2">
               {(["adopt", "finish", "cancel"] as const).map((action) => (
@@ -133,9 +131,9 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
         {(rec.phase === "idle" || rec.phase === "starting") && !showRemote && (
           <section className="space-y-4" data-testid="recorder-idle">
             <div className="space-y-1.5">
-              <label htmlFor="trip-choice" className="block text-sm font-semibold text-ink-800">{t.recording.tripChoice}</label>
+              <label htmlFor="trip-choice" className={labelClass}>{t.recording.tripChoice}</label>
               <select id="trip-choice" value={tripChoice} onChange={(e) => setTripChoice(e.target.value)}
-                className="h-12 w-full rounded-xl border border-sand-300 bg-white px-3 text-[0.95rem] outline-none focus:border-ink-700 focus:ring-4 focus:ring-amber-400/25">
+                className={inputClass(false, "h-12 px-3")}>
                 <option value="">{t.recording.unplanned}</option>
                 {plannedTrips.map((p) => <option key={p.id} value={p.id}>{t.recording.plannedOption(p.title)}</option>)}
               </select>
@@ -144,7 +142,7 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
               <Field label={t.recording.titleLabel} name="recordingTitle" value={title} maxLength={160} placeholder={defaultTitle}
                 onChange={(e) => setTitle(e.target.value)} autoComplete="off" />
             )}
-            <p className="text-sm text-stone-600">{t.recording.permission.prompt}</p>
+            <p className="text-sm leading-relaxed text-fg-muted">{t.recording.permission.prompt}</p>
             <Button type="button" variant="accent" size="lg" className="w-full" disabled={rec.phase === "starting"}
               onClick={() => rec.start({ plannedTripId: tripChoice || null, title: tripChoice ? (planned?.title ?? defaultTitle) : title.trim() || defaultTitle })}>
               {rec.phase === "starting" ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <CircleDot className="size-5" aria-hidden />}
@@ -157,8 +155,8 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
         {active && rec.session && (
           <section className="space-y-5" data-testid="recorder-active">
             <div>
-              <p className="eyebrow">{rec.session.title}</p>
-              <p className="mt-1 font-mono text-5xl font-extrabold tracking-tight tabular-nums" data-testid="rec-elapsed" aria-label={t.recording.elapsed}>
+              <p className="eyebrow-accent min-w-0 break-words">{rec.session.title}</p>
+              <p className="mt-3 text-[clamp(2.75rem,13vw,3.75rem)] leading-none font-extralight tracking-[-0.04em] text-accent-glow tabular-nums" data-testid="rec-elapsed" aria-label={t.recording.elapsed}>
                 {formatClock(elapsedS)}
               </p>
             </div>
@@ -168,21 +166,21 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
               <Stat label={t.recording.startedAt} value={formatTime(rec.session.startedAt)} />
             </dl>
 
-            <div className="rounded-xl bg-sand-50 p-3 text-sm" data-testid="rec-location">
-              <p className="flex items-center gap-1.5 font-semibold"><MapPin className="size-4 text-amber-600" aria-hidden /> {t.recording.currentLocation}</p>
+            <div className="card p-3.5 text-sm" data-testid="rec-location">
+              <p className="flex items-center gap-1.5 font-semibold text-fg"><MapPin className="size-4 text-accent-ink" aria-hidden /> {t.recording.currentLocation}</p>
               {fix ? (
-                <p className="mt-1 text-stone-700">
+                <p className="mt-1 break-words text-fg-muted">
                   {place.data?.label ?? `${fix.lat.toFixed(5)}, ${fix.lng.toFixed(5)}`}
-                  {fix.acc !== null && <span className="ml-1.5 text-stone-500">({t.recording.accuracy(fix.acc)})</span>}
+                  {fix.acc !== null && <span className="ml-1.5 text-fg-subtle">({t.recording.accuracy(fix.acc)})</span>}
                 </p>
               ) : (
-                <p className="mt-1 text-stone-500">{rec.phase === "recording" ? t.recording.locating : t.recording.noFix}</p>
+                <p className="mt-1 text-fg-subtle">{rec.phase === "recording" ? t.recording.locating : t.recording.noFix}</p>
               )}
             </div>
 
             {confirming ? (
               <div className="card space-y-3 p-4" role="alertdialog" aria-labelledby="rec-confirm">
-                <p id="rec-confirm" className="text-sm font-semibold">
+                <p id="rec-confirm" className="text-sm font-semibold text-fg">
                   {confirming === "finish" ? t.recording.finishConfirm : t.recording.cancelConfirm}
                 </p>
                 <div className="flex justify-end gap-2">
@@ -219,10 +217,10 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
               </div>
             )}
 
-            <div className="space-y-1.5 text-xs text-stone-600">
+            <div className="space-y-1.5 text-xs text-fg-muted">
               <SyncLine sync={rec.sync} />
               {rec.phase === "recording" && (
-                <p className={cn("flex items-center gap-1.5", !rec.wakeLock && "text-amber-700")} data-testid="rec-wakelock">
+                <p className={cn("flex items-center gap-1.5", !rec.wakeLock && "text-accent-ink")} data-testid="rec-wakelock">
                   {rec.wakeLock ? <ScreenShare className="size-3.5" aria-hidden /> : <ScreenShareOff className="size-3.5" aria-hidden />}
                   {rec.wakeLock ? t.recording.wakeLock.on : t.recording.wakeLock.off}
                 </p>
@@ -234,7 +232,7 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
 
         {rec.phase === "finished" && (
           <section className="card space-y-3 p-5" data-testid="recorder-finished">
-            <p className="flex items-center gap-2 font-semibold">
+            <p className="flex items-center gap-2 font-semibold text-fg">
               <LoaderCircle className="size-5 animate-spin" aria-hidden />
               {rec.sync.pending > 0 && rec.sync.problem ? t.recording.finishedOffline : t.recording.finishedRedirect}
             </p>
@@ -248,9 +246,9 @@ export function Recorder({ userId, styleUrl, plannedTrips, serverActive, presele
 
 function Stat({ label, value, testId }: { label: string; value: string; testId?: string }) {
   return (
-    <div className="rounded-xl border border-sand-200 bg-white p-3">
-      <dt className="text-[0.7rem] font-semibold tracking-wide text-stone-500 uppercase">{label}</dt>
-      <dd className="mt-1 text-lg font-extrabold tabular-nums" data-testid={testId}>{value}</dd>
+    <div className="card min-w-0 p-3">
+      <dt className="text-[0.65rem] font-semibold tracking-[0.14em] break-words text-fg-subtle uppercase">{label}</dt>
+      <dd className="mt-1.5 text-xl leading-tight font-light tracking-tight break-words text-fg tabular-nums" data-testid={testId}>{value}</dd>
     </div>
   );
 }
@@ -258,9 +256,9 @@ function Stat({ label, value, testId }: { label: string; value: string; testId?:
 function StatusPill({ phase }: { phase: string }) {
   const recording = phase === "recording";
   return (
-    <span className={cn("inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold shadow-md", recording ? "bg-danger text-white" : "bg-ink-900 text-paper")}
+    <span className={cn("inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold shadow-md", recording ? "bg-danger text-surface" : "border border-line-strong bg-overlay text-fg")}
       data-testid="rec-status">
-      <span className={cn("size-2.5 rounded-full", recording ? "animate-pulse bg-white" : "bg-amber-400")} aria-hidden />
+      <span className={cn("size-2.5 rounded-full", recording ? "animate-pulse bg-surface motion-reduce:animate-none" : "bg-accent")} aria-hidden />
       {t.recording.status[phase]}
     </span>
   );
@@ -269,7 +267,7 @@ function StatusPill({ phase }: { phase: string }) {
 function SyncLine({ sync }: { sync: { pending: number; problem: string | null; online: boolean } }) {
   const offline = !sync.online || sync.problem === "offline";
   return (
-    <p className={cn("flex items-center gap-1.5", offline && "text-amber-700")} data-testid="rec-sync" aria-live="polite">
+    <p className={cn("flex items-center gap-1.5", offline && "text-accent-ink")} data-testid="rec-sync" aria-live="polite">
       {offline ? <CloudOff className="size-3.5" aria-hidden /> : sync.pending > 0 ? <RefreshCw className="size-3.5" aria-hidden /> : <CircleCheck className="size-3.5 text-success" aria-hidden />}
       {offline ? t.recording.sync.offline : sync.pending > 0 ? (sync.problem ? t.recording.sync.error : t.recording.sync.pending(sync.pending)) : t.recording.sync.synced}
     </p>
@@ -278,9 +276,9 @@ function SyncLine({ sync }: { sync: { pending: number; problem: string | null; o
 
 function LimitsNote() {
   return (
-    <details className="rounded-xl border border-sand-200 bg-white p-3 text-sm">
-      <summary className="cursor-pointer font-semibold">{t.recording.limits.title}</summary>
-      <p className="mt-2 leading-relaxed text-stone-600">{t.recording.limits.body}</p>
+    <details className="card p-3.5 text-sm">
+      <summary className="cursor-pointer font-semibold text-fg">{t.recording.limits.title}</summary>
+      <p className="mt-2 leading-relaxed text-fg-muted">{t.recording.limits.body}</p>
     </details>
   );
 }
