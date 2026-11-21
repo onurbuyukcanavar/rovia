@@ -1,0 +1,14 @@
+{
+  "userId": "98a51109-0f25-47f3-9e82-59013f5b6eef",
+  "plannedTripId": "a8b39783-c3e4-4649-8987-d6325b8f9604",
+  "completedTripId": "3453cf5b-14a0-40b8-b878-a0db67d6dd6e",
+  "secondTripId": "75ac30d7-6c93-4bc2-9cf8-671071fece4c",
+  "travelogueId": "1d52ee95-033e-4bce-936a-bb9f1060c575",
+  "entryIds": [
+    "ff0f625a-dcdf-4607-9d1a-5fa3c84ce648",
+    "e83367b4-cd6b-4cf3-a424-0e437273585e",
+    "8687abb4-e0a6-45fa-8bca-08bb355a51f3",
+    "100a55e0-81f1-4501-88cd-a167d123c2c8"
+  ],
+  "createdAt": "2026-11-21T13:52:26.015Z"
+}
