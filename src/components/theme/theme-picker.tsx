@@ -1,7 +1,8 @@
 "use client";
 import { MonitorSmartphone, Moon, Sun } from "lucide-react";
 import { useId } from "react";
-import { setThemePreference, THEME_PREFERENCES, type ThemePreference } from "@/lib/theme/theme";
+import { THEME_PREFERENCES, type ThemePreference } from "@/lib/theme/theme";
+import { chooseTheme } from "./choose-theme";
 import { cn } from "@/lib/cn";
 import { t } from "@/i18n";
 import { useResolvedTheme, useThemePreference } from "./use-theme";
@@ -37,7 +38,7 @@ export function ThemePicker({ compact = false, className }: { compact?: boolean;
                     : "text-fg-muted hover:bg-fg/[0.05] hover:text-fg",
                 )}>
                 <input type="radio" name={name} value={p} checked={active} className="sr-only"
-                  onChange={() => setThemePreference(p)} />
+                  onChange={() => chooseTheme(p)} />
                 <span className="flex items-center gap-1.5">
                   <Icon className={cn("size-4 shrink-0", active && "text-accent-ink")} aria-hidden />
                   <span className="text-sm font-semibold">{T.options[p].label}</span>

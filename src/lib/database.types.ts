@@ -936,6 +936,7 @@ export type Database = {
           default_visibility: string;
           gps_raw_retention_days: number | null;
           share_privacy_radius_m: number;
+          theme: string | null;
           created_at: string;
           updated_at: string;
           cost_defaults: Json | null;
@@ -947,6 +948,7 @@ export type Database = {
           default_visibility?: string;
           gps_raw_retention_days?: number | null;
           share_privacy_radius_m?: number;
+          theme?: string | null;
           created_at?: string;
           updated_at?: string;
           cost_defaults?: Json | null;
@@ -958,6 +960,7 @@ export type Database = {
           default_visibility?: string;
           gps_raw_retention_days?: number | null;
           share_privacy_radius_m?: number;
+          theme?: string | null;
           created_at?: string;
           updated_at?: string;
           cost_defaults?: Json | null;

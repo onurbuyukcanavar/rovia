@@ -1,7 +1,7 @@
 /** Görünüm (tema) ayarı metinleri. */
 export const theme = {
   title: "Görünüm",
-  body: "ROVIA'nın renk teması. Seçimin bu cihazda hatırlanır ve hemen uygulanır.",
+  body: "ROVIA'nın renk teması. Seçimin hesabına kaydedilir; tüm cihazlarında aynı tema açılır.",
   label: "Tema",
   options: {
     dark: { label: "Koyu", hint: "Gece laciverti" },

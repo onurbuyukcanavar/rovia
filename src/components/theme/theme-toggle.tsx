@@ -1,6 +1,6 @@
 "use client";
 import { Moon, Sun } from "lucide-react";
-import { setThemePreference } from "@/lib/theme/theme";
+import { chooseTheme } from "./choose-theme";
 import { t } from "@/i18n";
 import { useResolvedTheme } from "./use-theme";
 
@@ -15,7 +15,7 @@ export function ThemeToggle() {
   const toLight = resolved === "dark";
   const label = toLight ? T.toLight : T.toDark;
   return (
-    <button type="button" onClick={() => setThemePreference(toLight ? "light" : "dark")}
+    <button type="button" onClick={() => chooseTheme(toLight ? "light" : "dark")}
       aria-label={label} title={label} data-testid="theme-toggle"
       className="group grid size-9 shrink-0 place-items-center rounded-full border border-line bg-sunken text-fg-muted transition-colors hover:border-line-strong hover:text-accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
       {toLight

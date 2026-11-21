@@ -6,10 +6,15 @@ import { MobileHeaderAvatar, SidebarUser } from "./user-menu";
 import { t } from "@/i18n";
 import { InstallHeaderButton } from "@/components/install/install-trigger";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { AccountTheme } from "@/components/theme/account-theme";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[17rem_1fr]">
+      {/* Hesaptaki tema tercihi (her cihazda aynı tema): dinamik delik, kabuğun statik kısmını bekletmez */}
+      <Suspense fallback={null}>
+        <AccountTheme />
+      </Suspense>
       {/* Masaüstü: sol navigasyon */}
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-chrome px-4 py-6 lg:flex">
         <div className="flex items-center justify-between gap-2 pr-1">
