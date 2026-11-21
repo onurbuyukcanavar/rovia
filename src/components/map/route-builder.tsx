@@ -1,5 +1,6 @@
 "use client";
-import { ArrowDown, ArrowUp, ArrowUpDown, Crosshair, LocateFixed, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ClipboardPaste, Crosshair, LocateFixed, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
 import type { Dispatch } from "react";
 import type { LatLng } from "@/lib/geo";
 import { MAX_WAYPOINTS, newKey, type ExplorerAction, type ExplorerState, type SlotRef } from "@/lib/maps/explorer-state";
@@ -119,6 +120,10 @@ export function RouteBuilder({ index, state, dispatch, bias, picking, onPick, on
         >
           <Plus className="size-4" aria-hidden /> {t.maps.addStop}
         </button>
+        <Link href="/konum" title={t.sharedLocation.entryHint} data-testid="open-shared-location"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-fg-muted hover:bg-fg/[0.05] hover:text-fg">
+          <ClipboardPaste className="size-4" aria-hidden /> {t.sharedLocation.entry}
+        </Link>
       </div>
       {state.waypoints.length >= MAX_WAYPOINTS && <p className="pl-8 text-xs text-danger">{t.maps.tooManyStops}</p>}
       {picking && (

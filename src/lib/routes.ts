@@ -1,7 +1,7 @@
 /** Oturum gerektiren uygulama bölümleri. */
 const PROTECTED_PREFIXES = [
   "/panel", "/ayarlar", "/diger", "/harita", "/kesfet", "/yolculuklar", "/planla",
-  "/kayit-modu", "/favoriler", "/gunluk", "/seyahatnameler", "/garaj",
+  "/kayit-modu", "/favoriler", "/gunluk", "/seyahatnameler", "/garaj", "/konum",
 ];
 
 /** Oturum açıkken gösterilmesi anlamsız sayfalar (oturum varsa panele yönlendirilir). */

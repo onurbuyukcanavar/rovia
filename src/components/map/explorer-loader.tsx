@@ -3,7 +3,7 @@ import { favoriteToStopServer } from "@/lib/favorites/stop";
 import { requireUser } from "@/lib/dal";
 import { mapStyleUrl } from "@/lib/env";
 import { listFavoriteStops } from "@/lib/queries/favorites";
-import { stopFromSearchParams } from "@/lib/explore/place-param";
+import { stopFromSearchParams, wantsCurrentOrigin } from "@/lib/explore/place-param";
 import { t } from "@/i18n";
 
 /** Haritayı Keşfet / Yeni yolculuk: kullanıcının kayıtlı yerleriyle birlikte yüklenir. */
@@ -13,12 +13,12 @@ export async function ExplorerLoader({ mode, searchParams }: { mode: "explore" |
   const [, favorites, params] = await Promise.all([requireUser(), listFavoriteStops(), searchParams ?? Promise.resolve({} as Params)]);
   const hedef = typeof params.hedef === "string" ? params.hedef : null;
   const target = hedef ? favorites.find((f) => f.id === hedef) : undefined;
-  // Keşfet → "Bu yere yeni rota planla": ?yer=<osm>&ad=…&konum=lat,lng
+  // Keşfet → "Bu yere yeni rota planla": ?yer=<osm>&ad=…&konum=lat,lng · Paylaşılan konum (/konum) → …&baslangic=konum
   const place = target ? null : stopFromSearchParams(params);
   const destination = target ? favoriteToStopServer(target) : place;
   return (
     <MapExplorer key={hedef ?? place?.id ?? mode} styleUrl={mapStyleUrl()} mode={mode} favorites={favorites}
-      initialDestination={destination} />
+      initialDestination={destination} locateOrigin={!!destination && wantsCurrentOrigin(params)} />
   );
 }
 

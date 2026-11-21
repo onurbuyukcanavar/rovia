@@ -1,13 +1,28 @@
 "use client";
-import { Building2, Home, LoaderCircle, MapPin, X } from "lucide-react";
-import { useId, useState, type ReactNode } from "react";
+import { Building2, Home, Link2, LoaderCircle, MapPin, X } from "lucide-react";
+import { useId, useMemo, useState, type ReactNode } from "react";
 import type { LatLng } from "@/lib/geo";
 import { mapsApi } from "@/lib/maps/client";
 import { useKeyedRequest } from "@/lib/maps/use-keyed-request";
 import type { Stop, Suggestion } from "@/lib/maps/types";
 import { inputClass } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
+import { formatCoords, parseSharedLocation, type ParsedLocation } from "@/lib/shared-location/parse";
+import { locationToStop, resolveLocation } from "@/lib/shared-location/client";
 import { t } from "@/i18n";
+
+/** Yapıştırılan harita bağlantısı / koordinat için listenin başındaki öneri. */
+type SharedItem = { id: string; kind: "shared"; name: string; secondary: string | null; parsed: ParsedLocation };
+type Item = Suggestion | SharedItem;
+
+function sharedItem(parsed: ParsedLocation | null): SharedItem | null {
+  if (!parsed) return null;
+  if (parsed.kind === "point") {
+    return { id: "shared", kind: "shared", name: parsed.label ?? t.sharedLocation.search.shared, secondary: formatCoords(parsed), parsed };
+  }
+  const secondary = parsed.kind === "resolve" ? new URL(parsed.url).hostname : parsed.query;
+  return { id: "shared", kind: "shared", name: t.sharedLocation.search.openLink, secondary, parsed };
+}
 
 type Props = {
   label: string;
@@ -38,18 +53,51 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
   }
 
   const query = text.trim();
+  // Harita bağlantısı, geo: adresi ya da koordinat yapıştırıldıysa yer araması yapılmaz: ilk öneri o konumdur
+  const shared = useMemo(() => (editing && query.length >= 3 ? sharedItem(parseSharedLocation(query)) : null), [editing, query]);
   const suggest = useKeyedRequest<Suggestion[]>(
-    editing && query.length >= 2 ? query : null,
+    editing && !shared && query.length >= 2 && query.length <= 120 ? query : null,
     (signal) => mapsApi.autocomplete(query, bias, signal),
     { delayMs: 250 },
   );
-  const items = suggest.data ?? [];
-  const loading = suggest.loading;
-  const error = suggest.error ?? null;
+  const [resolving, setResolving] = useState(false);
+  const [sharedError, setSharedError] = useState<string | null>(null);
+  const items: Item[] = shared ? [shared] : (suggest.data ?? []);
+  const loading = suggest.loading || resolving;
+  const error = sharedError ?? suggest.error ?? null;
   const listOpen = open && editing && items.length > 0;
   const activeIndex = Math.min(active, Math.max(0, items.length - 1));
 
-  function choose(s: Suggestion) {
+  async function chooseShared(s: SharedItem) {
+    setOpen(false);
+    setSharedError(null);
+    const p = s.parsed;
+    if (p.kind === "point" && p.label) {
+      setEditing(false);
+      setText(p.label);
+      onSelect(locationToStop({ lat: p.lat, lng: p.lng, label: p.label, address: null }));
+      return;
+    }
+    // Kısa bağlantı, yalnızca yer adı ya da adsız koordinat: sunucuda çözülür (ad için ters arama dahil)
+    setResolving(true);
+    try {
+      const loc = await resolveLocation(query);
+      const stop = locationToStop(loc);
+      setEditing(false);
+      setText(stop.label);
+      onSelect(stop);
+    } catch (e) {
+      setSharedError(e instanceof Error ? e.message : t.sharedLocation.errors.unresolved);
+    } finally {
+      setResolving(false);
+    }
+  }
+
+  function choose(s: Item) {
+    if (s.kind === "shared") {
+      void chooseShared(s);
+      return;
+    }
     setOpen(false);
     setEditing(false);
     setText(s.name);
@@ -100,6 +148,7 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
               setEditing(true);
               setOpen(true);
               setActive(0);
+              setSharedError(null);
               setText(e.target.value);
             }}
             onFocus={() => setOpen(true)}
@@ -145,7 +194,9 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
               onMouseEnter={() => setActive(i)}
               className={cn("flex cursor-pointer items-start gap-2.5 px-3 py-2.5 text-sm", i === activeIndex && "bg-fg/[0.07]")}
             >
-              {s.kind === "settlement" ? (
+              {s.kind === "shared" ? (
+                <Link2 className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
+              ) : s.kind === "settlement" ? (
                 <Building2 className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
               ) : s.kind === "address" ? (
                 <Home className="mt-0.5 size-4 shrink-0 text-accent-ink" aria-hidden />
@@ -158,7 +209,7 @@ export function PlaceSearch({ label, value, onSelect, bias, marker, actions, aut
               </span>
             </li>
           ))}
-          <li className="border-t border-line px-3 py-1.5 text-right text-[0.65rem] text-fg-subtle" aria-hidden>© OpenStreetMap</li>
+          {!shared && <li className="border-t border-line px-3 py-1.5 text-right text-[0.65rem] text-fg-subtle" aria-hidden>© OpenStreetMap</li>}
         </ul>
       )}
     </div>

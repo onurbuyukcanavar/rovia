@@ -5,10 +5,11 @@ import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t.maps.title };
 
-export default function MapPage() {
+/** /harita?ad=…&konum=lat,lng: paylaşılan konumdan "Haritada göster" (nokta varış olarak işaretlenir). */
+export default function MapPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   return (
     <Suspense fallback={<ExplorerSkeleton />}>
-      <ExplorerLoader mode="explore" />
+      <ExplorerLoader mode="explore" searchParams={searchParams} />
     </Suspense>
   );
 }

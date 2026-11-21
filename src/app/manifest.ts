@@ -14,6 +14,12 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#f7f5f0",
     theme_color: "#0e1726",
     categories: ["travel", "navigation", "lifestyle"],
+    // Ana ekrana eklenen ROVIA (Android Chrome) paylaşım menüsünde görünür: WhatsApp/Haritalar'dan konum paylaşımı → /konum
+    share_target: {
+      action: "/konum",
+      method: "GET",
+      params: { title: "title", text: "text", url: "url" },
+    },
     icons: [
       { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
       { src: "/icons/192", sizes: "192x192", type: "image/png", purpose: "any" },

@@ -4,7 +4,7 @@ import { bottomGapReport, hasCredentials, login } from "./helpers";
 /** Telefon ekranı: iPhone 13/14 boyutu */
 test.use({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
 
-const PAGES = ["/panel", "/harita", "/yolculuklar", "/planla", "/kayit-modu", "/favoriler", "/favoriler/ice-aktar", "/kesfet", "/gunluk", "/seyahatnameler", "/ayarlar", "/garaj", "/diger"];
+const PAGES = ["/panel", "/harita", "/yolculuklar", "/planla", "/kayit-modu", "/favoriler", "/favoriler/ice-aktar", "/kesfet", "/gunluk", "/seyahatnameler", "/ayarlar", "/garaj", "/diger", "/konum", "/konum?text=41.0256%2C28.9741"];
 
 /** Ekran genişliğini aşan en derin öğeler (yatay kaydırmanın kaynağı). */
 async function overflowReport(page: Page) {
