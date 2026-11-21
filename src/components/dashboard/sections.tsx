@@ -11,6 +11,7 @@ import { t } from "@/i18n";
 
 const QUICK_ACTIONS = [
   { key: "plan", label: t.dashboard.actions.plan, accent: true },
+  { key: "explore", label: t.dashboard.actions.explore, accent: false },
   { key: "record", label: t.dashboard.actions.record, accent: false },
   { key: "map", label: t.dashboard.actions.map, accent: false },
   { key: "favorites", label: t.dashboard.actions.favorites, accent: false },
@@ -21,13 +22,13 @@ export function QuickActions() {
   return (
     <section aria-labelledby="qa-title">
       <h2 id="qa-title" className="eyebrow">{t.dashboard.quickActions}</h2>
-      <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+      <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {QUICK_ACTIONS.map(({ key, label, accent }, i) => {
           const item = navItem(key);
           const Icon = item.icon;
           const available = item.phase <= CURRENT_PHASE;
           return (
-            <li key={key} className={cn(i === 0 && "col-span-2 sm:col-span-1")}>
+            <li key={key} className={cn(i < 2 && "col-span-2 sm:col-span-1")}>
               {/* Etkin modüller bağlantıdır; henüz etkin olmayanlar tıklanamaz ve açıkça "Yakında" etiketlidir */}
               <QuickActionShell
                 href={available ? item.href : null}

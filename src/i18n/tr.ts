@@ -128,6 +128,7 @@ export const tr = {
     quickActions: "Hızlı işlemler",
     actions: {
       plan: "Yeni Yolculuk Planla",
+      explore: "ROVIA Explore",
       record: "Yolculuğu Başlat",
       map: "Haritayı Keşfet",
       favorites: "Favorilerim",
