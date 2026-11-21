@@ -45,7 +45,7 @@ test.describe("Paylaşılan konum (/konum)", () => {
     test("konum bulunamazsa hata + yapıştırma kutusu; koordinat yapıştırınca açılır", async ({ page }) => {
       await login(page, "alice");
       await page.goto(`/konum?text=${encodeURIComponent("merhaba, nasılsın?\nyarın görüşürüz")}`);
-      await expect(page.getByRole("alert")).toContainText("konum bulamadık");
+      await expect(page.getByRole("alert").filter({ hasText: "konum bulamadık" })).toBeVisible();
       const box = page.getByRole("textbox", { name: "Konum bağlantısı, mesaj ya da koordinat" });
       await box.fill("38.643100, 34.828900");
       await page.getByRole("button", { name: "Konumu aç" }).click();
