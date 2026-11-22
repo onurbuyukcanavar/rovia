@@ -103,6 +103,8 @@ export const tr = {
     googleTokenRejected: "Google oturum bilgisi doğrulanamadı ya da süresi doldu. Lütfen tekrar dene.",
     googleSignupDisabled: "Şu anda yeni hesap oluşturulamıyor. Mevcut hesabınla giriş yapabilirsin.",
     googleLoading: "Google ile giriş yapılıyor…",
+    googleNativeCanceled: "Google hesap seçici kapandı, giriş tamamlanmadı. Tekrar deneyebilir ya da tarayıcıyla devam edebilirsin.",
+    googleContinueInBrowser: "Tarayıcıyla devam et",
     legal: "Devam ederek Kullanım Şartları'nı ve Gizlilik Politikası'nı kabul etmiş olursun.",
     locationNote: "ROVIA konumunu yalnızca sen kayıt başlattığında ve açıkça izin verdiğinde kullanır.",
   },
