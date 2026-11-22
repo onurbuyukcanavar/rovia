@@ -117,6 +117,7 @@ export const tr = {
     recordShort: "Kayıt",
     tripsShort: "Yolculuklar",
     mapShort: "Harita",
+    exploreShort: "Explore",
     overviewShort: "Panel",
     signOut: "Oturumu kapat",
   },

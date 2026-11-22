@@ -20,7 +20,7 @@ export const CURRENT_PHASE = 9;
 export const NAV_ITEMS: NavItem[] = [
   { key: "overview", label: t.nav.overview, shortLabel: t.nav.overviewShort, href: "/panel", icon: LayoutDashboard, phase: 1 },
   { key: "map", label: t.nav.map, shortLabel: t.nav.mapShort, href: "/harita", icon: Map, phase: 2 },
-  { key: "explore", label: t.nav.explore, href: "/kesfet", icon: Compass, phase: 8 },
+  { key: "explore", label: t.nav.explore, shortLabel: t.nav.exploreShort, href: "/kesfet", icon: Compass, phase: 8 },
   { key: "trips", label: t.nav.trips, shortLabel: t.nav.tripsShort, href: "/yolculuklar", icon: Route, phase: 3 },
   { key: "plan", label: t.nav.plan, href: "/planla", icon: Signpost, phase: 3 },
   { key: "record", label: t.nav.record, shortLabel: t.nav.recordShort, href: "/kayit-modu", icon: Radio, phase: 4 },
