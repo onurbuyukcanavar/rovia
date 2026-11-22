@@ -17,11 +17,21 @@ describe("CSP", () => {
     expect(csp).toContain("upgrade-insecure-requests");
   });
 
-  it("betik: dış kaynak ve eval yok (yalnızca WebAssembly)", () => {
+  it("betik: eval yok (yalnızca WebAssembly); tek dış betik GIS istemcisi", () => {
     const s = directive(csp, "script-src");
     expect(s).not.toContain("'unsafe-eval'");
-    expect(s).not.toMatch(/https?:/);
+    expect(s.match(/https?:\/\/\S+/g)).toEqual(["https://accounts.google.com/gsi/client"]);
     expect(s).toContain("'wasm-unsafe-eval'");
+  });
+
+  it("Google Identity Services: yalnızca /gsi/ yolları", () => {
+    expect(directive(csp, "style-src")).toBe("style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style");
+    expect(directive(csp, "frame-src")).toBe("frame-src https://accounts.google.com/gsi/");
+    expect(directive(csp, "connect-src")).toContain("https://accounts.google.com/gsi/");
+    for (const d of ["script-src", "style-src", "frame-src", "connect-src"]) {
+      expect(directive(csp, d), d).not.toMatch(/accounts\.google\.com(?!\/gsi\/)/);
+    }
+    expect(directive(csp, "frame-ancestors")).toBe("frame-ancestors 'none'");
   });
 
   it("Supabase (https+wss) ve harita kaynakları izinli, joker yok", () => {
@@ -60,6 +70,8 @@ describe("CSP", () => {
     expect(h["Strict-Transport-Security"]).toMatch(/max-age=\d{8}/);
     expect(h["X-Frame-Options"]).toBe("DENY");
     expect(h["Cross-Origin-Resource-Policy"]).toBe("same-origin");
+    // GIS açılır penceresi window.opener ile döner: same-origin olmamalı
+    expect(h["Cross-Origin-Opener-Policy"]).toBe("same-origin-allow-popups");
     expect(h["X-DNS-Prefetch-Control"]).toBe("off");
   });
 });

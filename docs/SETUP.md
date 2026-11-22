@@ -46,6 +46,16 @@ npm run db:types   # src/lib/database.types.ts yeniden üretilir
    - Authorized JavaScript origins: `http://localhost:3000`, `https://<alan-adı>`
    - Authorized redirect URI: `https://lbocidoprcqiuxtqhoye.supabase.co/auth/v1/callback`
 4. Client ID ve Secret → Supabase → Auth → Providers → Google.
+5. **Google hesap seçicide "roviaroad.com" görünsün diye (kimlik belirteciyle giriş):**
+   - Vercel'de `NEXT_PUBLIC_GOOGLE_CLIENT_ID` = 3. adımdaki Web istemci kimliği (tüm ortamlar; derleme gerektirir).
+     Tanımsızsa her şey eski OAuth yönlendirmesiyle çalışır.
+   - Web istemcisinin Authorized JavaScript origins listesinde `https://www.roviaroad.com` (ve önizleme/yerel kökenler) olmalı.
+     Google düğmesi (GIS) yalnızca bu kökenlerde çalışır.
+   - Android: Credentials → Create OAuth client ID → **Android**, paket `com.onurbuyukcanavar.rovia`, imza SHA-1
+     `04:22:23:32:03:01:77:4F:91:CE:B9:AA:98:F7:BE:D5:18:2D:D2:3C`. Kodda kullanılmaz (uygulama Web istemci kimliğini
+     `serverClientId` olarak gönderir), ancak Google'da kayıtlı olmalıdır.
+   - Supabase → Auth → Providers → Google: Client ID alanında Web istemci kimliği zaten olduğu için belirteç kabul edilir
+     (başka istemci kimliği eklemek gerekmez). **"Skip nonce check" kapalı kalmalı**: web ve Android nonce gönderir.
 
 ## 5. Harita altyapısı (açık kaynak — anahtar gerekmez)
 
@@ -57,6 +67,7 @@ Varsayılan ayarlarla ek kurulum gerekmez: harita OpenFreeMap'ten, rotalar FOSSG
 | `NEXT_PUBLIC_MAP_STYLE_URL` | `https://tiles.openfreemap.org/styles/liberty` | Kendi karo sunucusu veya farklı stil |
 | `VALHALLA_URL` | `https://valhalla1.openstreetmap.de` | Kendi Valhalla sunucumuza geçişte (canlı trafik arttığında) |
 | `PHOTON_URL` | `https://photon.komoot.io` | Kendi Photon sunucusu; `""` → adres yedeği kapalı |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | (boş: OAuth yönlendirmesi) | Google girişi GIS + Android Credential Manager ile (§4.5) |
 
 **Kendi Valhalla sunucusu (canlıya geçerken):** 8 GB RAM'li bir VPS'te resmî imajla:
 ```bash

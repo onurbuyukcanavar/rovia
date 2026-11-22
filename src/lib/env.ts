@@ -52,3 +52,19 @@ export const REQUIRED_ENV_VARS = [
  * Koyu temada istemci tarafında koyu karşılığa geçilir: src/lib/maps/style.ts, <ThemedMapStyle>.
  */
 export const mapStyleUrl = () => publicEnv.mapStyleUrl ?? DEFAULT_MAP_STYLE_LIGHT;
+
+/** Google OAuth "Web application" istemci kimliği biçimi (gizli değildir; tarayıcıya gömülür). */
+export const GOOGLE_CLIENT_ID_RE = /^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$/;
+
+/**
+ * İsteğe bağlı: NEXT_PUBLIC_GOOGLE_CLIENT_ID. Tanımlıysa Google girişi Google Identity Services (web) ve
+ * Android Credential Manager ile kimlik belirteci (ID token) üzerinden yapılır; Google'ın hesap seçicisi
+ * "roviaroad.com" gösterir. Tanımsız ya da biçimsizse eski Supabase OAuth yönlendirmesi kullanılır.
+ * Biçimsiz değer Supabase yapılandırmasını geçersiz kılmaz; yalnızca yok sayılır.
+ */
+const rawGoogleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || undefined;
+if (rawGoogleClientId && !GOOGLE_CLIENT_ID_RE.test(rawGoogleClientId)) {
+  console.error("[rovia] Geçersiz ortam değişkeni: NEXT_PUBLIC_GOOGLE_CLIENT_ID (…apps.googleusercontent.com bekleniyor); yok sayıldı.");
+}
+export const googleClientId: string | null =
+  rawGoogleClientId && GOOGLE_CLIENT_ID_RE.test(rawGoogleClientId) ? rawGoogleClientId : null;

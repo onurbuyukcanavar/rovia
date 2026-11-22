@@ -72,7 +72,14 @@ yayımlamaz.
   Türkçe hata ve "Ayarları aç" önerisi gösterilir. `android.useLegacyBridge` açık (eklentinin 5 dk
   sonra durma sorunu için). Tarayıcıdaki web yolu değişmedi; eklenti kodu tarayıcı paketine girmez
   (dinamik içe aktarma).
-- **Google ile giriş:** Google, WebView içinde OAuth'u engeller (`disallowed_useragent`). Uygulamada
+- **Google ile giriş (yerel; bu eklentiyle derlenen APK'lar):** `NEXT_PUBLIC_GOOGLE_CLIENT_ID` tanımlıysa düğme `RoviaGoogleAuth`
+  eklentisini (`RoviaGoogleAuthPlugin.java`, androidx.credentials + googleid `GetSignInWithGoogleOption`) çağırır:
+  Android'in kendi hesap seçicisi açılır, eklenti Google kimlik belirtecini döndürür (`serverClientId` = Web istemci
+  kimliği, `nonce` = ham nonce'un SHA-256 özeti) ve web katmanı `supabase.auth.signInWithIdToken` ile oturumu
+  WebView'da açar. Eklenti yalnızca `APP_HOSTS` sitelerinden çağrılabilir. Kullanıcı kapatırsa sessiz kalınır; diğer
+  her hata (hesap yok, Google'da Android istemcisi kayıtlı değil, eski APK'da eklenti yok) aşağıdaki Custom Tab
+  akışına düşer.
+- **Google ile giriş (yedek / eski APK'lar):** Google, WebView içinde OAuth'u engeller (`disallowed_useragent`). Uygulamada
   Google düğmesi (`src/lib/native/google-sign-in-form.tsx`) sunucu eyleminden OAuth adresini alır
   (`googleSignInUrlForNative`; PKCE çerezi bu sırada WebView'a yazılır) ve adresi sistem tarayıcısında
   (Custom Tab, `@capacitor/browser`) açar. Google'dan dönüş

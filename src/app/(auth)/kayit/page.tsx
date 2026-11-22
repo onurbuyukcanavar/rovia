@@ -15,7 +15,7 @@ export default function SignupPage() {
       <h1 className="text-[2.4rem] leading-[1.05] font-extralight tracking-[-0.03em] text-fg">{t.auth.signupTitle}</h1>
       <p className="mt-2 text-fg-muted">{t.auth.signupSubtitle}</p>
       <div className="mt-8">
-        <GoogleButton />
+        <GoogleButton context="signup" />
         <OrDivider />
         <SignupForm />
       </div>

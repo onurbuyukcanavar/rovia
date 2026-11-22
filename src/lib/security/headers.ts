@@ -6,7 +6,7 @@
  * Partial Prerendering (cacheComponents) ile uyumsuzdur (node_modules/next/dist/docs/01-app/02-guides/
  * content-security-policy.md, "Static vs Dynamic Rendering with CSP"). Next.js RSC verisini satır içi
  * <script> ile aktardığı için nonce olmadan script-src 'unsafe-inline' gerekir. Bunu dengeleyen ölçüler:
- * dış betik kaynağı yok (yalnızca 'self'), object-src 'none', base-uri 'self', frame-ancestors 'none',
+ * tek dış betik Google Identity Services (yalnızca https://accounts.google.com/gsi/client yolu), object-src 'none', base-uri 'self', frame-ancestors 'none',
  * kullanıcı içeriği React ile kaçışlanarak çiziliyor ve dangerouslySetInnerHTML yalnızca tek bir sabit dizge için
  * kullanılıyor: kök düzendeki tema betiği (src/lib/theme/theme.ts → THEME_SCRIPT; kullanıcı girdisi içermez).
  * Not: script-src'ye bu betiğin sha256 özeti EKLENMEZ — özet/nonce bulunan bir politikada tarayıcılar
@@ -27,6 +27,14 @@ export const DEFAULT_MAP_HOST = "https://tiles.openfreemap.org";
 const GOOGLE_AVATAR_HOST = "https://*.googleusercontent.com";
 /** Google OAuth: JS'siz form gönderiminde yönlendirme zinciri form-action ile denetlenir */
 const GOOGLE_ACCOUNTS = "https://accounts.google.com";
+/**
+ * Google Identity Services (giriş/kayıt sayfasındaki resmî Google düğmesi; src/lib/auth/gis.ts).
+ * Google'ın CSP yönergesindeki asgari kaynaklar, yalnızca /gsi/ yolları:
+ * https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid#content_security_policy
+ */
+const GIS_SCRIPT = "https://accounts.google.com/gsi/client";
+const GIS_STYLE = "https://accounts.google.com/gsi/style";
+const GIS_PATH = "https://accounts.google.com/gsi/";
 /** Yer panelindeki Vikipedi küçük resimleri (yalnızca bu alan adı; sunucu başka görsel URL'si döndürmez) */
 const WIKIMEDIA_UPLOAD = "https://upload.wikimedia.org";
 
@@ -51,16 +59,17 @@ export function buildCsp({ supabaseUrl, mapStyleUrl, isDev = false }: CspInput):
     "default-src": ["'self'"],
     // 'unsafe-inline': Next.js satır içi RSC betikleri (yukarıdaki açıklama).
     // 'wasm-unsafe-eval': PDF dizgisi (@react-pdf → yoga-layout WebAssembly). Genel eval'e izin VERMEZ.
-    "script-src": ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", ...(isDev ? ["'unsafe-eval'"] : [])],
+    "script-src": ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", GIS_SCRIPT, ...(isDev ? ["'unsafe-eval'"] : [])],
     // MapLibre ve React satır içi style öznitelikleri kullanır
-    "style-src": ["'self'", "'unsafe-inline'"],
+    "style-src": ["'self'", "'unsafe-inline'", GIS_STYLE],
     "img-src": ["'self'", "data:", "blob:", supabaseHttp, ...mapHosts, GOOGLE_AVATAR_HOST, WIKIMEDIA_UPLOAD],
     "font-src": ["'self'", "data:"],
-    "connect-src": ["'self'", supabaseHttp, supabaseWs, ...mapHosts, ...(isDev ? ["ws:"] : [])],
+    "connect-src": ["'self'", supabaseHttp, supabaseWs, ...mapHosts, GIS_PATH, ...(isDev ? ["ws:"] : [])],
     // MapLibre çalışanı /maplibre/ altından; bazı sürümler blob: çalışan da kurar
     "worker-src": ["'self'", "blob:"],
     "child-src": ["'self'", "blob:"],
-    "frame-src": ["'none'"],
+    // Yalnızca Google düğmesi / One Tap iframe'i (GIS)
+    "frame-src": [GIS_PATH],
     "media-src": ["'self'", "blob:"],
     "manifest-src": ["'self'"],
     "object-src": ["'none'"],
@@ -87,7 +96,7 @@ export function securityHeaders(input: CspInput): Header[] {
       key: "Permissions-Policy",
       value: "geolocation=(self), camera=(), microphone=(), payment=(), usb=(), serial=(), hid=(), browsing-topics=()",
     },
-    // Google OAuth açılır pencere akışı için allow-popups
+    // Google girişi açılır penceresi (GIS ux_mode "popup" ve OAuth) için allow-popups; same-origin GIS'i bozar
     { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
     { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
     { key: "X-DNS-Prefetch-Control", value: "off" },
