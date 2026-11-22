@@ -22,6 +22,11 @@ test.describe("mobil", () => {
     await expect(menu.getByRole("link", { name: "Haritayı Keşfet" })).toBeVisible();
     await expect(menu.getByRole("link", { name: "Yolculuk Planla" })).toBeVisible();
 
+    // Alt menüde harita yerine ROVIA Explore sekmesi var (Harita "Diğer"de)
+    await expect(nav.getByRole("link", { name: "Harita", exact: true })).toHaveCount(0);
+    await nav.getByRole("link", { name: "Explore", exact: true }).click();
+    await expect(page).toHaveURL(/\/kesfet$/);
+
     // Alt menüdeki "Yolculuklar" sekmesi yolculuk listesini açar
     await nav.getByRole("link", { name: "Yolculuklar" }).click();
     await expect(page).toHaveURL(/\/yolculuklar$/);

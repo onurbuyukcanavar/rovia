@@ -120,7 +120,7 @@ export function MobileNav({ pathname }: { pathname: string | null }) {
   return (
     <>
       <MobileTab itemKey="overview" pathname={pathname} />
-      <MobileTab itemKey="map" pathname={pathname} />
+      <MobileTab itemKey="explore" pathname={pathname} />
       <MobileTab itemKey="record" pathname={pathname} emphasized />
       <MobileTab itemKey="trips" pathname={pathname} />
       <MoreTab pathname={pathname} />
