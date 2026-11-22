@@ -33,6 +33,27 @@
                 <data android:path="/auth/callback" />
             </intent-filter>
 
+            <!-- Paylaşılan konum: geo: bağlantıları (WhatsApp vb. konuma dokununca harita uygulaması seçicisinde ROVIA) → /konum -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="geo" />
+            </intent-filter>
+            <!-- Navigasyon isteği (google.navigation:q=…) gönderen uygulamalar için -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="google.navigation" />
+            </intent-filter>
+            <!-- Paylaş menüsü: konum bağlantısı/metni (WhatsApp, Google Haritalar, Yandex …) → /konum.
+                 https://maps.google.com gibi doğrulanmamış web bağlantıları Android 12+ seçicide gösterilmediği için eklenmez. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -55,4 +76,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Uygulama içi güncelleme: indirilen (imzası doğrulanmış) APK için Android paket yükleyicisini açmak -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 </manifest>

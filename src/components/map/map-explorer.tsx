@@ -2,7 +2,7 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import { NavigationControl, ScaleControl, type MapLayerMouseEvent } from "react-map-gl/maplibre";
 import { MapView } from "@/lib/maps/maplibre-setup";
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, BookmarkPlus, Compass } from "lucide-react";
 import { decodePolyline, type LatLng } from "@/lib/geo";
@@ -52,13 +52,15 @@ type Props = {
   initialDestination?: Stop | null;
   /** /planla/<id>?yer=…: Keşfet'ten "Yolculuğa ekle" ile gelen durak (kayıtlı plana eklenir, kaydetmek kullanıcıda) */
   insertStop?: Stop | null;
+  /** ?baslangic=konum: açılışta başlangıç noktası olarak cihaz konumu istenir (izin reddedilmediyse) */
+  locateOrigin?: boolean;
 };
 
 /**
  * Haritayı Keşfet ve Yolculuk Planla — tamamen açık kaynak altyapı:
  * MapLibre GL JS (çizim) + OpenFreeMap (karolar, OSM) + Valhalla (rota) + ROVIA PostGIS (arama).
  */
-export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites = [], initialDestination = null, insertStop = null }: Props) {
+export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites = [], initialDestination = null, insertStop = null, locateOrigin = false }: Props) {
   // Kayıtlı planın kendisi (kaydedilmemiş değişiklik ve kayıtlı rota karşılaştırmaları bununla yapılır)
   const [savedState] = useState(() => (trip ? stateFromStops(trip.stops, trip.routeOptions) : null));
   const [insertResult] = useState(() =>
@@ -188,6 +190,23 @@ export function MapExplorer({ styleUrl, mode = "explore", trip = null, favorites
     const stop = await stopFromPoint(pos, t.maps.myLocation);
     dispatch({ type: "set", slot: { kind: "origin" }, stop: { ...stop, label: `${t.maps.myLocation} · ${stop.label}` } });
   }, [geo, stopFromPoint]);
+
+  // Paylaşılan konumdan "Buraya rota oluştur": başlangıç = cihaz konumu. İzin daha önce reddedildiyse sorulmaz.
+  const autoLocate = useEffectEvent(() => {
+    if (!state.origin.stop) void onLocate();
+  });
+  useEffect(() => {
+    if (!locateOrigin) return;
+    let cancelled = false;
+    const perms = typeof navigator !== "undefined" ? navigator.permissions : undefined;
+    const check = perms?.query({ name: "geolocation" as PermissionName }).then((p) => p.state !== "denied").catch(() => true) ?? Promise.resolve(true);
+    void check.then((ok) => {
+      if (ok && !cancelled) autoLocate();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [locateOrigin]);
 
   // ---------------------------------------------------------------- Yolculuk planı (kaydetme)
   const [planOpen, setPlanOpen] = useState(mode === "plan" || !!trip);

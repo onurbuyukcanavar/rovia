@@ -2,6 +2,8 @@ name: Android APK
 
 # ROVIA Android uygulamasını (Capacitor) derler, sürüm anahtarıyla imzalar ve GitHub Release olarak yayımlar.
 # Sabit indirme adresi: https://github.com/onurbuyukcanavar/rovia/releases/latest/download/rovia.apk
+# Sürüm: versionCode = run_number, versionName = 1.0.<run_number>, etiket android-v1.0.<run_number>; notlarda
+# "versionCode: N" yazar (uygulama içi güncelleme /api/app/latest bunu okur, src/lib/app-update).
 # Ayrıntılar ve tek elle yapılacak adım (ANDROID_KEYSTORE_PASSWORD gizli değişkeni): docs/ANDROID.md
 
 on:
@@ -15,10 +17,19 @@ on:
       - "android-signing/**"
       - ".github/workflows/android.yml"
       - "package.json"
+  # PR'larda yalnızca derleme + imza doğrulaması (yayımlama yok): yerel kod birleşmeden önce derlenir
+  pull_request:
+    paths:
+      - "android/**"
+      - "capacitor.config.ts"
+      - "mobile/**"
+      - "android-signing/**"
+      - ".github/workflows/android.yml"
+      - "package.json"
 
 concurrency:
-  group: android-release
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('android-pr-{0}', github.ref) || 'android-release' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: write
@@ -119,6 +130,8 @@ jobs:
           if-no-files-found: error
 
       - name: GitHub Release yayımla
+        # PR derlemeleri asla yayımlanmaz
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -127,7 +140,7 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "ROVIA Android $VERSION_NAME" \
-            --notes "ROVIA Android uygulaması $VERSION_NAME (commit ${GITHUB_SHA::7}). Kurulum: https://github.com/$GITHUB_REPOSITORY/releases/latest/download/rovia.apk — ayrıntılar docs/ANDROID.md." \
+            --notes "ROVIA Android uygulaması $VERSION_NAME (commit ${GITHUB_SHA::7}). versionCode: ${{ github.run_number }}. Kurulum: https://github.com/$GITHUB_REPOSITORY/releases/latest/download/rovia.apk — ayrıntılar docs/ANDROID.md." \
             --latest
 
       - name: Çözülmüş anahtarı sil

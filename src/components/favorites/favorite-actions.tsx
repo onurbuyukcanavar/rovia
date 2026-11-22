@@ -15,7 +15,11 @@ import { t } from "@/i18n";
 const OSM_REF = /^[nwr][0-9]{1,19}$/;
 
 /** Haritadaki yer ayrıntısında: "Favorilere ekle" ve "Daha sonra git". */
-export function FavoriteActions({ place, saved, onSaved }: { place: FoundPlace; saved: ListType | null; onSaved: (list: ListType) => void }) {
+export function FavoriteActions({ place, saved, onSaved, primary = "accent" }: {
+  place: FoundPlace; saved: ListType | null; onSaved: (list: ListType) => void;
+  /** Ekranda başka bir amber ana çağrı varsa "secondary" (ekran başına tek amber düğme) */
+  primary?: "accent" | "secondary";
+}) {
   const [pending, start] = useTransition();
   const [message, setMessage] = useState<{ tone: "success" | "error" | "info"; text: string } | null>(null);
 
@@ -53,7 +57,7 @@ export function FavoriteActions({ place, saved, onSaved }: { place: FoundPlace; 
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-2">
-          <Button type="button" variant="accent" size="sm" disabled={pending} onClick={() => save("favorite")}>
+          <Button type="button" variant={primary} size="sm" disabled={pending} onClick={() => save("favorite")}>
             {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <Heart className="size-4" aria-hidden />} {t.favorites.addToFavorites}
           </Button>
           <Button type="button" variant="secondary" size="sm" disabled={pending} onClick={() => save("want_to_go")}>

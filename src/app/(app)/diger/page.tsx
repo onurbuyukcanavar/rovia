@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ClipboardPaste } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { NAV_ITEMS, isAvailable } from "@/config/navigation";
@@ -38,6 +38,13 @@ export default function MorePage() {
             </li>
           );
         })}
+        <li>
+          <Link href="/konum" className="flex min-h-14 items-center gap-4 px-4 hover:bg-fg/[0.04]">
+            <ClipboardPaste className="size-5 text-accent-ink" aria-hidden />
+            <span className="flex-1 font-semibold">{t.sharedLocation.entry}</span>
+            <ChevronRight className="size-4 text-fg-subtle" aria-hidden />
+          </Link>
+        </li>
         <InstallListRow />
       </ul>
       <section aria-labelledby="diger-gorunum" className="space-y-3">

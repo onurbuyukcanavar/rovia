@@ -6,15 +6,18 @@ import { GeoError } from "@/lib/geo-services/errors";
 import { isSameOriginRequest, PRIVATE_NO_STORE, readJsonBody } from "./request-guard";
 
 /** Kova adları ve limitleri veritabanında sabittir (migration 20261116000300, 20261120000100). */
-type Bucket = "autocomplete" | "route" | "search" | "geocode" | "gps" | "wiki" | "weather";
+type Bucket = "autocomplete" | "route" | "search" | "geocode" | "gps" | "wiki" | "weather" | "location";
 
 /**
  * Yeni kova veritabanına henüz eklenmemişse (migration uygulanmadan yayına çıkıldıysa) kullanılacak eski kova.
  * "place" (60/dk, 1000/gün) artık başka bir uç noktada kullanılmıyor.
  */
 const FALLBACK_BUCKET: Partial<Record<Bucket, string>> = { wiki: "place" };
-/** Veritabanında ayrı kovası olmayan uç noktalar: "weather" panel açılışında bir kez çağrılır, "wiki" kotasını paylaşır. */
-const BUCKET_ALIAS: Partial<Record<Bucket, Bucket>> = { weather: "wiki" };
+/**
+ * Veritabanında ayrı kovası olmayan uç noktalar: "weather" panel açılışında bir kez çağrılır, "wiki" kotasını paylaşır;
+ * "location" (paylaşılan konumu çözme: kısa bağlantı + adres/ters adres araması) "geocode" kotasını paylaşır.
+ */
+const BUCKET_ALIAS: Partial<Record<Bucket, Bucket>> = { weather: "wiki", location: "geocode" };
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 /**

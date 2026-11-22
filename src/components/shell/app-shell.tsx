@@ -7,6 +7,7 @@ import { t } from "@/i18n";
 import { InstallHeaderButton } from "@/components/install/install-trigger";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { AccountTheme } from "@/components/theme/account-theme";
+import { AppUpdateMount } from "@/components/app-update/app-update-mount";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -56,6 +57,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <MobileNavLive />
         </Suspense>
       </nav>
+      {/* Android uygulamasında yeni APK sürümü bildirimi (tarayıcıda hiçbir şey çizmez) */}
+      <AppUpdateMount />
       <span className="sr-only">{t.brand.slogan}</span>
     </div>
   );

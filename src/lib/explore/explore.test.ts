@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CATEGORY_COLORS, DEFAULT_CATEGORY, EXPLORE_CATEGORY_KEYS, isExploreCategory, maxAreaFor } from "./categories";
 import { bboxAround, bboxArea, isValidBbox, normalizeBbox, osmUrl, parseKonum, safeUrl, wikidataUrl, wikipediaUrl } from "./geo";
-import { placeToSearchParams, stopFromSearchParams } from "./place-param";
+import { placeToSearchParams, stopFromSearchParams, wantsCurrentOrigin } from "./place-param";
 import { stateFromStops, withInsertedStop } from "@/lib/maps/trip-draft";
 import { encodePolyline } from "@/lib/geo";
 import { explore } from "@/i18n/explore";
@@ -76,6 +76,17 @@ describe("yer parametresi (Keşfet → planlayıcı)", () => {
     expect(stopFromSearchParams({ ad: "X" })).toBeNull();
     expect(stopFromSearchParams({ ad: "X", konum: "99,1" })).toBeNull();
     expect(stopFromSearchParams({ ad: "X", konum: "1,1", yer: "bad" })?.ref).toBeNull();
+  });
+  it("paylaşılan konum: OSM kaydı olmayan nokta + başlangıç = cihaz konumu", () => {
+    const q = new URLSearchParams(placeToSearchParams({ ref: null, name: "Galata Kulesi", lat: 41.0256, lng: 28.974117, address: null }, { fromCurrentLocation: true }));
+    expect(q.get("konum")).toBe("41.025600,28.974117");
+    expect(q.get("baslangic")).toBe("konum");
+    expect(q.has("yer")).toBe(false);
+    const params = Object.fromEntries(q);
+    expect(stopFromSearchParams(params)).toMatchObject({ id: "p41.02560,28.97412", ref: null, label: "Galata Kulesi", location: { lat: 41.0256, lng: 28.974117 } });
+    expect(wantsCurrentOrigin(params)).toBe(true);
+    expect(wantsCurrentOrigin({ baslangic: ["konum", "x"] })).toBe(false);
+    expect(wantsCurrentOrigin({})).toBe(false);
   });
 });
 
