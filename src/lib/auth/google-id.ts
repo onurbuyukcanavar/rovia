@@ -94,8 +94,12 @@ export function gisButtonConfig(opts: { theme: "dark" | "light"; width: number; 
  * Diğerleri (hesap yok, yapılandırma/Play Hizmetleri sorunu…) → Custom Tab OAuth akışına düşülür.
  */
 export type NativeGoogleOutcome = "silent" | "fallback";
-export function nativeGoogleErrorOutcome(code: string | undefined | null): NativeGoogleOutcome {
-  return code === "canceled" ? "silent" : "fallback";
+/** Bu süreden kısa "canceled" kullanıcıdan değil yapılandırmadan gelir (ör. Android istemcisi/SHA-1 henüz tanınmıyor). */
+export const NATIVE_QUICK_CANCEL_MS = 2500;
+export function nativeGoogleErrorOutcome(code: string | undefined | null, elapsedMs = Infinity): NativeGoogleOutcome {
+  if (code !== "canceled") return "fallback";
+  // Hesap seçici gerçekten açılıp kullanıcı kapattıysa sessiz kal; anında gelen iptal → tarayıcı akışına geç
+  return elapsedMs < NATIVE_QUICK_CANCEL_MS ? "fallback" : "silent";
 }
 
 /**
