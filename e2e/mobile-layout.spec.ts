@@ -49,7 +49,7 @@ test.describe("mobil yerleşim", () => {
       const rep = await overflowReport(page);
       // html/body overflow-x: clip olduğundan scrollWidth taşmayı göstermez; taşan öğeler tek tek sayılır
       if (rep.items.length) problems.push(`${path}: ekran ${rep.clientWidth}px\n    ${rep.items.join("\n    ")}`);
-      await page.screenshot({ path: `test-results/screens/buyuk-yazi${path.replace(/\//g, "_")}.png` });
+      await page.screenshot({ path: `test-results/screens/buyuk-yazi${path.replace(/[^A-Za-z0-9-]/g, "_")}.png` });
     }
     console.log("\nSORUNLAR:\n" + problems.join("\n"));
     expect(problems).toEqual([]);
@@ -73,7 +73,7 @@ test.describe("mobil yerleşim", () => {
       // Alt menü (sabit) payı ~ 4.5rem; bundan fazla boşluk kalmamalı
       if (gap.doc > gap.innerHeight && gap.doc - gap.contentBottom > 140) problems.push(`${path}: altta ${gap.doc - gap.contentBottom}px boşluk`);
 
-      const name = path.replace(/\//g, "_");
+      const name = path.replace(/[^A-Za-z0-9-]/g, "_");
       await page.screenshot({ path: `test-results/screens/mobil${name}.png` });
 
       // Kaydırınca üst çubuk ve alt menü ekranda kalmalı
