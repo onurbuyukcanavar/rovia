@@ -29,6 +29,8 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         // Uygulama içi güncelleme eklentisi (Capacitor yerel eklentileri bridge kurulmadan kaydedilmeli)
         registerPlugin(RoviaUpdaterPlugin.class);
+        // Yerel Google girişi (Credential Manager); web katmanı yoksa Custom Tab OAuth'a düşer
+        registerPlugin(RoviaGoogleAuthPlugin.class);
         super.onCreate(savedInstanceState);
         appendVersionToUserAgent();
     }

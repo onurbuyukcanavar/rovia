@@ -13,9 +13,13 @@ function GoogleG() {
   );
 }
 
-export function GoogleButton({ next }: { next?: string }) {
+/**
+ * Google ile giriş/kayıt. NEXT_PUBLIC_GOOGLE_CLIENT_ID varsa tarayıcıda Google'ın resmî düğmesi (GIS),
+ * Android uygulamasında yerel hesap seçici kullanılır; aşağıdaki düğme her durumda çalışan yedektir.
+ */
+export function GoogleButton({ next, context = "signin" }: { next?: string; context?: "signin" | "signup" }) {
   return (
-    <GoogleSignInForm next={next}>
+    <GoogleSignInForm next={next} context={context}>
       <SubmitButton variant="secondary" size="lg" className="w-full">
         <GoogleG />
         {t.auth.google}
