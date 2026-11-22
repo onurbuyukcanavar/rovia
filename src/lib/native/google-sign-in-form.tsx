@@ -174,11 +174,12 @@ export function GoogleSignInForm({ next, context = "signin", oneTap = false, chi
       if (method === "native" && googleClientId) {
         const nonce = await createGoogleNonce();
         let idToken: string | null = null;
+        const started = Date.now();
         try {
           ({ idToken } = await (await nativeGoogleAuth()).signIn({ serverClientId: googleClientId, nonce: nonce.hashed }));
         } catch (err) {
           const code = nativeErrorCode(err);
-          if (nativeGoogleErrorOutcome(code) === "silent") return;
+          if (nativeGoogleErrorOutcome(code, Date.now() - started) === "silent") return;
           console.warn("[rovia:uyarı] Yerel Google girişi kullanılamadı, tarayıcı akışına geçiliyor:", code);
         }
         if (idToken) {

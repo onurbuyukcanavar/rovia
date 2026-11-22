@@ -49,6 +49,9 @@ describe("giriş yolu seçimi (yedek akış)", () => {
 
   it("yerel hata: iptal sessiz, diğer her şey Custom Tab'a düşer", () => {
     expect(nativeGoogleErrorOutcome("canceled")).toBe("silent");
+    expect(nativeGoogleErrorOutcome("canceled", 8000)).toBe("silent");
+    // Hesap seçici hiç açılmadan gelen iptal (yapılandırma sorunu) → tarayıcı akışı
+    expect(nativeGoogleErrorOutcome("canceled", 300)).toBe("fallback");
     for (const c of ["no_credential", "failed", "forbidden_origin", "interrupted", null, undefined]) {
       expect(nativeGoogleErrorOutcome(c)).toBe("fallback");
     }
