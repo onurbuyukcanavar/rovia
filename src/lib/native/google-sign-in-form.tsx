@@ -13,6 +13,7 @@ import { hasNativeGoogleAuth, nativeErrorCode, nativeGoogleAuth } from "@/lib/na
 import { isNativeApp } from "@/lib/platform";
 import { safeNextPath } from "@/lib/routes";
 import { readResolvedTheme, subscribeTheme } from "@/lib/theme/theme";
+import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { t } from "@/i18n";
 
@@ -150,6 +151,32 @@ export function GoogleSignInForm({ next, context = "signin", oneTap = false, chi
     };
   }, [gis, gisFailed, context, oneTap]);
 
+  const lastForm = useRef<FormData | null>(null);
+  const [nativeRetry, setNativeRetry] = useState(false);
+
+  function diag(step: string, code: string | null, ms: number) {
+    // Tanı kaydı: başarısızlığın nedeni sunucu günlüğünde görünsün (kişisel veri yok)
+    void fetch("/api/app/diag", {
+      method: "POST", headers: { "content-type": "application/json" }, keepalive: true,
+      body: JSON.stringify({ step, code: code ?? "none", ms }),
+    }).catch(() => {});
+  }
+
+  async function continueInBrowser() {
+    const fd = lastForm.current;
+    if (!fd || busy) return;
+    setBusy(true);
+    setError(null);
+    setNativeRetry(false);
+    try {
+      await openCustomTab(fd);
+    } catch {
+      router.push("/giris?error=oauth");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function openCustomTab(fd: FormData) {
     const { url, external } = await googleSignInUrlForNative(fd);
     if (!external) {
@@ -165,8 +192,10 @@ export function GoogleSignInForm({ next, context = "signin", oneTap = false, chi
     e.preventDefault();
     if (busy) return;
     const fd = new FormData(e.currentTarget);
+    lastForm.current = fd;
     setBusy(true);
     setError(null);
+    setNativeRetry(false);
     try {
       const method = chooseGoogleSignInMethod({
         clientId: googleClientId, nativeApp: true, nativePlugin: hasNativeGoogleAuth(), gis: "failed",
@@ -179,9 +208,17 @@ export function GoogleSignInForm({ next, context = "signin", oneTap = false, chi
           ({ idToken } = await (await nativeGoogleAuth()).signIn({ serverClientId: googleClientId, nonce: nonce.hashed }));
         } catch (err) {
           const code = nativeErrorCode(err);
-          if (nativeGoogleErrorOutcome(code, Date.now() - started) === "silent") return;
+          const ms = Date.now() - started;
+          diag("signin_error", code, ms);
+          if (nativeGoogleErrorOutcome(code, ms) === "silent") {
+            // Hesap seçici kapandı: sessiz kalmak yerine açıkla ve tarayıcıyla devam etmeyi öner
+            setError(t.auth.googleNativeCanceled);
+            setNativeRetry(true);
+            return;
+          }
           console.warn("[rovia:uyarı] Yerel Google girişi kullanılamadı, tarayıcı akışına geçiliyor:", code);
         }
+        if (idToken) diag("signin_ok", null, Date.now() - started);
         if (idToken) {
           const result = await completeWithIdToken(idToken, nonce.raw);
           if (result !== "fallback") return;
@@ -216,6 +253,11 @@ export function GoogleSignInForm({ next, context = "signin", oneTap = false, chi
       )}
       {busy && gisActive && <p className="mt-2 text-center text-xs text-fg-muted" role="status">{t.auth.googleLoading}</p>}
       {error && <Alert tone="error" className="mt-3">{error}</Alert>}
+      {nativeRetry && (
+        <Button type="button" variant="secondary" className="mt-3 w-full" onClick={continueInBrowser} disabled={busy}>
+          {t.auth.googleContinueInBrowser}
+        </Button>
+      )}
     </div>
   );
 }
